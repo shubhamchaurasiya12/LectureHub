@@ -3,6 +3,7 @@
 {% block title %}{{ ev.calendar_title }} – IITM Lecture Tracker{% endblock %}
 
 {% block extra_styles %}
+/* ── Header ───────────────────────────────────── */
 .event-header {
   display: flex;
   align-items: flex-start;
@@ -16,13 +17,20 @@
   color: var(--muted);
   margin-bottom: 6px;
 }
-.event-breadcrumb a { color: var(--muted); text-decoration: none; }
-.event-breadcrumb a:hover { color: var(--accent); }
+.event-breadcrumb a {
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.event-breadcrumb a:hover {
+  color: var(--accent);
+}
 .event-title {
-  font-size: 20px;
+  font-size: clamp(18px, 4vw, 24px);
   font-weight: 700;
   letter-spacing: -0.4px;
   margin-bottom: 6px;
+  color: var(--text);
 }
 .event-meta {
   font-size: 12px;
@@ -37,6 +45,8 @@
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
+  flex-wrap: wrap;
+  margin-top: 4px;
 }
 .watch-toggle-btn {
   display: inline-flex;
@@ -46,58 +56,112 @@
   border-radius: 20px;
   border: 1px solid var(--border);
   background: var(--surface2);
-  color: var(--text);
+  color: var(--text-soft);
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
   font-family: inherit;
-  transition: border-color .15s, background .15s;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
 }
 .watch-toggle-btn.done {
   border-color: var(--green);
-  background: #1a3a2c;
+  background: rgba(52, 199, 89, 0.12);
   color: var(--green);
 }
+.watch-toggle-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.watch-toggle-btn.done:hover {
+  border-color: var(--red);
+  color: var(--red);
+  background: rgba(255, 59, 48, 0.08);
+}
 
-/* LAYOUT */
+/* ── Event Links ──────────────────────────────── */
+.event-links {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.link-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: opacity 0.15s;
+}
+.link-badge:hover { opacity: 0.8; }
+.link-meet {
+  background: var(--accent-dim);
+  color: var(--accent2);
+  border: 1px solid var(--accent2);
+}
+.link-drive {
+  background: rgba(52, 199, 89, 0.12);
+  color: var(--green);
+  border: 1px solid var(--green);
+}
+
+/* ── Layout ───────────────────────────────────── */
 .event-layout {
   display: flex;
   gap: 20px;
   align-items: flex-start;
 }
-.video-pane { flex: 1 1 62%; min-width: 0; }
-.notes-pane { flex: 1 1 38%; min-width: 280px; }
-
-@media (max-width: 900px) {
-  .event-layout { flex-direction: column; }
-  .video-pane, .notes-pane { flex: 1 1 auto; width: 100%; }
+.video-pane {
+  flex: 1 1 62%;
+  min-width: 0;
+}
+.notes-pane {
+  flex: 1 1 38%;
+  min-width: 260px;
 }
 
-/* VIDEO */
-.video-frame-wrap {
+/* ── Video Container ───────────────────────────── */
+.video-container {
   position: relative;
-  width: 100%;
-  padding-top: 56.25%; /* 16:9 */
   background: #000;
   border-radius: var(--radius);
   overflow: hidden;
   border: 1px solid var(--border);
+  aspect-ratio: 16 / 9;
+  width: 100%;
 }
-.video-frame-wrap iframe {
+.video-container iframe {
   position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   border: 0;
 }
 .video-empty {
-  padding: 60px 24px;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
   text-align: center;
   color: var(--muted);
+  background: var(--bg);
 }
-.video-empty .icon { font-size: 34px; margin-bottom: 10px; }
-.video-empty a.btn { margin-top: 14px; }
+.video-empty .icon {
+  font-size: 34px;
+  margin-bottom: 10px;
+}
+.video-empty .btn {
+  margin-top: 14px;
+}
 
-/* NOTES */
+/* ── Notes ────────────────────────────────────── */
 .notes-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -111,7 +175,7 @@
   font-weight: 600;
   color: var(--muted);
   text-transform: uppercase;
-  letter-spacing: .5px;
+  letter-spacing: 0.5px;
   margin-bottom: 10px;
 }
 #notes-textarea {
@@ -119,7 +183,7 @@
   min-height: 280px;
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 7px;
+  border-radius: var(--radius-sm);
   color: var(--text);
   padding: 12px;
   font-size: 14px;
@@ -127,42 +191,79 @@
   line-height: 1.6;
   resize: vertical;
   outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
-#notes-textarea:focus { border-color: var(--accent); }
+#notes-textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
 .notes-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-top: 10px;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 #notes-status {
   font-size: 11px;
   color: var(--muted);
 }
-
-/* EXTRA LINKS */
-.event-links { margin-top: 14px; display: flex; gap: 8px; flex-wrap: wrap; }
-.link-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 500;
-  text-decoration: none;
+.notes-footer .btn-primary {
+  background: var(--accent);
+  color: #0B0B0E;
 }
-.link-meet { background: #1a3a5c; color: #5eb0f5; border: 1px solid #2a5a8c; }
-.link-drive { background: #1a3a2c; color: #3ecf8e; border: 1px solid #2a6a4a; }
+.notes-footer .btn-primary:hover {
+  box-shadow: 0 0 18px var(--accent-glow);
+}
+
+/* ── Responsive ────────────────────────────────── */
+@media (max-width: 900px) {
+  .event-layout {
+    flex-direction: column;
+  }
+  .video-pane,
+  .notes-pane {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+  .notes-card {
+    position: static;
+  }
+  #notes-textarea {
+    min-height: 180px;
+  }
+}
+@media (max-width: 600px) {
+  .event-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .event-header-actions {
+    justify-content: flex-start;
+    width: 100%;
+  }
+  .watch-toggle-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  .event-meta {
+    font-size: 11px;
+    gap: 8px;
+  }
+  .video-container {
+    aspect-ratio: 16 / 9;
+  }
+}
 {% endblock %}
 
 {% block content %}
 <div class="event-breadcrumb">
-  <a href="{{ url_for('dashboard', tab=subject.id) }}">← {{ subject.name }}</a>
+  <a href="{{ url_for('main.dashboard', tab=subject.id) }}">← {{ subject.name }}</a>
 </div>
 
 <div class="event-header">
-  <div>
+  <div style="flex:1; min-width:0;">
     <div class="event-title">{{ ev.calendar_title }}</div>
     <div class="event-meta">
       {% if ev.date %}
@@ -188,15 +289,13 @@
 </div>
 
 <div class="event-layout">
-  <!-- VIDEO -->
+  <!-- Video Pane -->
   <div class="video-pane">
-    {% if embed_url %}
-      <div class="video-frame-wrap">
+    <div class="video-container">
+      {% if embed_url %}
         <iframe src="{{ embed_url }}" allow="autoplay; fullscreen" allowfullscreen></iframe>
-      </div>
-    {% else %}
-      <div class="video-frame-wrap">
-        <div class="video-empty" style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+      {% else %}
+        <div class="video-empty">
           <div class="icon">🎬</div>
           <div>
             {% if ev.drive_link %}
@@ -211,15 +310,15 @@
             <a class="btn btn-ghost btn-sm" href="{{ ev.meet_link }}" target="_blank" rel="noopener">Join Meet instead</a>
           {% endif %}
         </div>
-      </div>
-    {% endif %}
+      {% endif %}
+    </div>
   </div>
 
-  <!-- NOTES -->
+  <!-- Notes Pane -->
   <div class="notes-pane">
     <div class="notes-card">
       <h3>Your Notes</h3>
-      <textarea id="notes-textarea" placeholder="Take notes while you watch...">{{ ev.user_description or '' }}</textarea>
+      <textarea id="notes-textarea" placeholder="Take notes while you watch…">{{ ev.user_description or '' }}</textarea>
       <div class="notes-footer">
         <span id="notes-status"></span>
         <button class="btn btn-primary btn-sm" onclick="saveNotes()">Save</button>

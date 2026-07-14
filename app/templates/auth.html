@@ -1,4 +1,4 @@
-<!--D:\iitm_scheduler\templates\base.html -->
+<!-- D:\iitm_scheduler\templates\auth.html -->
 {% extends "base.html" %}
 {% block title %}{% if mode == 'login' %}Sign In{% else %}Register{% endif %} – IITM Lecture Tracker{% endblock %}
 
@@ -8,14 +8,20 @@
   align-items: center;
   justify-content: center;
   min-height: calc(100vh - 120px);
+  padding: 20px;
 }
 .auth-card {
   width: 100%;
   max-width: 420px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 40px;
+  border-radius: var(--radius);
+  padding: 40px 36px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  transition: box-shadow 0.2s;
+}
+.auth-card:hover {
+  box-shadow: 0 8px 40px rgba(90, 200, 250, 0.06);
 }
 .auth-logo {
   text-align: center;
@@ -25,6 +31,7 @@
   font-size: 22px;
   font-weight: 700;
   letter-spacing: -0.5px;
+  color: var(--text);
 }
 .auth-logo p {
   color: var(--muted);
@@ -33,22 +40,72 @@
 }
 .auth-switch {
   text-align: center;
-  margin-top: 20px;
+  margin-top: 24px;
   font-size: 13px;
   color: var(--muted);
 }
-.auth-switch a { color: var(--accent); text-decoration: none; }
+.auth-switch a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s;
+}
+.auth-switch a:hover {
+  color: var(--accent2);
+  text-decoration: underline;
+}
 .iitm-badge {
   display: inline-block;
   background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: 20px;
-  padding: 3px 12px;
+  padding: 3px 14px;
   font-size: 11px;
   color: var(--muted);
   margin-bottom: 12px;
   font-family: var(--mono);
+  letter-spacing: 0.3px;
 }
+/* Override base input styles for a more compact auth form */
+.auth-card .form-group {
+  margin-bottom: 18px;
+}
+.auth-card label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 5px;
+}
+.auth-card input {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: var(--text);
+  width: 100%;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.auth-card input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+.auth-card input::placeholder {
+  color: var(--muted);
+  opacity: 0.7;
+}
+/* Full-width button */
+.auth-card .btn {
+  width: 100%;
+  justify-content: center;
+  margin-top: 6px;
+  padding: 11px;
+  font-size: 14px;
+  font-weight: 600;
+}
+/* Error messages can be displayed via flash – they already inherit styling */
 {% endblock %}
 
 {% block content %}
@@ -75,16 +132,16 @@
         <input type="password" name="confirm_password" placeholder="••••••••" required />
       </div>
       {% endif %}
-      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px;">
+      <button type="submit" class="btn btn-primary">
         {% if mode == 'login' %}Sign In{% else %}Create Account{% endif %}
       </button>
     </form>
 
     <div class="auth-switch">
       {% if mode == 'login' %}
-        Don't have an account? <a href="{{ url_for('register') }}">Register</a>
+        Don't have an account? <a href="{{ url_for('auth.register') }}">Register</a>
       {% else %}
-        Already have an account? <a href="{{ url_for('login') }}">Sign in</a>
+        Already have an account? <a href="{{ 	url_for('auth.login') }}">Sign in</a>
       {% endif %}
     </div>
   </div>

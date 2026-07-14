@@ -3,13 +3,23 @@
 {% block title %}Set Up Subjects – IITM Lecture Tracker{% endblock %}
 
 {% block extra_styles %}
-.setup-header { margin-bottom: 28px; }
-.setup-header h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
-.setup-header p { color: var(--muted); margin-top: 6px; }
+.setup-header {
+  margin-bottom: 28px;
+}
+.setup-header h1 {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--text);
+}
+.setup-header p {
+  color: var(--muted);
+  margin-top: 6px;
+}
 
 .subject-row {
   display: grid;
-  grid-template-columns: 1fr 2fr 1fr 1fr auto;  /* widened for date fields */
+  grid-template-columns: 1fr 2fr 1fr 1fr auto;
   gap: 12px;
   align-items: end;
   margin-bottom: 12px;
@@ -17,6 +27,11 @@
   background: var(--surface2);
   border-radius: var(--radius);
   border: 1px solid var(--border);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.subject-row:hover {
+  border-color: var(--accent-dim);
+  box-shadow: 0 0 0 1px var(--accent-dim);
 }
 .subject-row.header-row {
   background: none;
@@ -31,48 +46,139 @@
   text-transform: uppercase;
   letter-spacing: .5px;
 }
+.subject-row input,
+.subject-row select {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-size: 13px;
+  color: var(--text);
+  width: 100%;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.subject-row input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+.subject-row input::placeholder {
+  color: var(--muted);
+  opacity: 0.7;
+}
+
 .remove-btn {
   background: none;
   border: 1px solid var(--border);
   color: var(--muted);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   padding: 8px 10px;
   cursor: pointer;
   font-size: 14px;
-  transition: color .15s, border-color .15s;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
   line-height: 1;
   height: 38px;
+  width: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.remove-btn:hover { color: var(--red); border-color: var(--red); }
+.remove-btn:hover {
+  color: var(--red);
+  border-color: var(--red);
+  background: rgba(255, 59, 48, 0.06);
+}
 
 .hint {
   background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 14px 16px;
+  padding: 16px 18px;
   font-size: 13px;
   color: var(--muted);
   margin-bottom: 24px;
+  line-height: 1.6;
 }
-.hint strong { color: var(--text); }
+.hint strong {
+  color: var(--text);
+}
 .hint code {
   font-family: var(--mono);
   font-size: 11px;
   background: var(--bg);
-  padding: 1px 5px;
+  padding: 2px 6px;
   border-radius: 4px;
   color: var(--accent);
   word-break: break-all;
 }
-/* Make date inputs compact */
+
+/* Override base input for date – keep consistent */
 input[type="date"] {
-  padding: 8px;
-  font-size: 14px;
+  padding: 8px 10px;
+  font-size: 13px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  appearance: none;
+  -webkit-appearance: none;
+}
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.8);
+  cursor: pointer;
+}
+input[type="date"]:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+/* Buttons at the bottom */
+.setup-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+.setup-actions .btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-soft);
+}
+.setup-actions .btn-ghost:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.setup-actions .btn-primary {
+  background: var(--accent);
+  color: #0B0B0E;
+}
+.setup-actions .btn-primary:hover {
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+
+/* Responsive tweaks */
+@media (max-width: 700px) {
+  .subject-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 12px;
+  }
+  .subject-row.header-row {
+    display: none;
+  }
+  .subject-row .remove-btn {
+    grid-column: span 2;
+    width: 100%;
+    height: 36px;
+  }
+  .subject-row input[type="date"] {
+    width: 100%;
+  }
 }
 {% endblock %}
 
 {% block content %}
-<div style="max-width:860px">  <!-- slightly wider for extra columns -->
+<div style="max-width:860px">
   <div class="setup-header">
     <h1>Set up your subjects</h1>
     <p>Add the Google Calendar links for each of your IITM courses. You can limit which events are fetched by setting a date range.</p>
@@ -105,7 +211,7 @@ input[type="date"] {
       </div>
     </div>
 
-    <div style="display:flex; gap:12px; align-items:center; margin-top:16px; flex-wrap:wrap;">
+    <div class="setup-actions">
       <button type="button" class="btn btn-ghost" onclick="addRow()">+ Add another subject</button>
       <button type="submit" class="btn btn-primary" id="submit-btn">
         Save &amp; sync calendars

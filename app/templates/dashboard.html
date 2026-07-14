@@ -11,7 +11,12 @@
   flex-wrap: wrap;
   gap: 12px;
 }
-.dash-title { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
+.dash-title {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  color: var(--text);
+}
 .dash-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
 /* TABS */
@@ -36,14 +41,18 @@
   white-space: nowrap;
   transition: color .15s, border-color .15s;
 }
-.tab-btn:hover { color: var(--text); }
-.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab-btn:hover { color: var(--text-soft); }
+.tab-btn.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
 .tab-count {
   background: var(--surface2);
   border-radius: 10px;
   padding: 1px 6px;
   font-size: 11px;
   margin-left: 4px;
+  color: var(--muted);
 }
 
 /* SUBJECT META */
@@ -86,8 +95,17 @@
 .stat-chip strong { color: var(--text); }
 
 /* TABLE */
-.table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
-table { width: 100%; border-collapse: collapse; min-width: 700px; }
+.table-wrap {
+  overflow-x: auto;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 700px;
+}
 thead { background: var(--surface2); }
 th {
   padding: 11px 14px;
@@ -99,8 +117,12 @@ th {
   letter-spacing: .5px;
   white-space: nowrap;
 }
-td { padding: 12px 14px; border-top: 1px solid var(--border); vertical-align: top; }
-tr:hover td { background: rgba(79,125,240,.04); }
+td {
+  padding: 12px 14px;
+  border-top: 1px solid var(--border);
+  vertical-align: top;
+}
+tr:hover td { background: var(--accent-dim); }
 tr.watched-row td { opacity: .55; }
 
 /* DATE CELL */
@@ -110,7 +132,11 @@ tr.watched-row td { opacity: .55; }
   color: var(--muted);
   white-space: nowrap;
 }
-.date-cell .day { color: var(--text); font-weight: 500; display: block; }
+.date-cell .day {
+  color: var(--text);
+  font-weight: 500;
+  display: block;
+}
 
 /* TITLE CELL */
 .cal-title {
@@ -123,14 +149,17 @@ tr.watched-row td { opacity: .55; }
   gap: 6px;
 }
 .cal-title:hover { color: var(--accent); }
-.cal-title .play-icon { font-size: 11px; color: var(--muted); }
+.cal-title .play-icon {
+  font-size: 11px;
+  color: var(--muted);
+}
 .cal-title:hover .play-icon { color: var(--accent); }
 
 /* DESCRIPTION */
 .desc-cell { min-width: 180px; max-width: 260px; }
 .desc-display {
   font-size: 13px;
-  color: var(--muted);
+  color: var(--text-soft);
   cursor: pointer;
   padding: 4px 6px;
   border-radius: 5px;
@@ -138,14 +167,26 @@ tr.watched-row td { opacity: .55; }
   border: 1px solid transparent;
   transition: border-color .15s, background .15s;
 }
-.desc-display:hover { border-color: var(--border); background: var(--surface2); }
-.desc-display.empty::before { content: 'Add note...'; color: #555; font-style: italic; }
+.desc-display:hover {
+  border-color: var(--border);
+  background: var(--surface2);
+}
+.desc-display.empty::before {
+  content: 'Add note…';
+  color: var(--muted);
+  font-style: italic;
+}
 .desc-edit { display: none; }
 .desc-edit textarea {
   font-size: 13px;
   min-height: 60px;
-  background: var(--surface2);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
   padding: 6px 8px;
+  width: 100%;
+  font-family: inherit;
 }
 .desc-edit .save-desc-btn { margin-top: 6px; }
 
@@ -162,25 +203,55 @@ tr.watched-row td { opacity: .55; }
   text-decoration: none;
   transition: opacity .15s;
 }
-.link-badge:hover { opacity: .8; }
-.link-meet { background: #1a3a5c; color: #5eb0f5; border: 1px solid #2a5a8c; }
-.link-drive { background: #1a3a2c; color: #3ecf8e; border: 1px solid #2a6a4a; }
-.link-none { color: var(--border); font-size: 12px; }
+.link-badge:hover { opacity: .85; }
+
+/* Meet link – uses secondary blue */
+.link-meet {
+  background: var(--accent-dim);
+  color: var(--accent2);
+  border: 1px solid var(--accent2);
+}
+/* Recording link – uses green */
+.link-drive {
+  background: rgba(52, 199, 89, 0.12);
+  color: var(--green);
+  border: 1px solid var(--green);
+}
+.link-none {
+  color: var(--muted);
+  font-size: 12px;
+}
 
 /* WATCHED TOGGLE */
 .watch-btn {
-  width: 28px; height: 28px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   border: 2px solid var(--border);
   background: none;
   cursor: pointer;
   font-size: 14px;
   line-height: 1;
-  display: flex; align-items: center; justify-content: center;
-  transition: border-color .15s, background .15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color .15s, background .15s, color .15s;
+  color: var(--muted);
 }
-.watch-btn.done { border-color: var(--green); background: #1a3a2c; }
-.watch-btn:hover { border-color: var(--accent); }
+.watch-btn.done {
+  border-color: var(--green);
+  background: rgba(52, 199, 89, 0.15);
+  color: var(--green);
+}
+.watch-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.watch-btn.done:hover {
+  border-color: var(--red);
+  color: var(--red);
+  background: rgba(255, 59, 48, 0.1);
+}
 
 /* EMPTY STATE */
 .empty-state {
@@ -189,7 +260,12 @@ tr.watched-row td { opacity: .55; }
   color: var(--muted);
 }
 .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
-.empty-state h3 { font-size: 16px; color: var(--text); margin-bottom: 6px; }
+.empty-state h3 {
+  font-size: 16px;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.empty-state p { color: var(--muted); }
 
 /* SYNC STATUS */
 #sync-status {
@@ -198,7 +274,7 @@ tr.watched-row td { opacity: .55; }
   padding: 4px 0;
 }
 
-/* FILTER PERIOD STYLING (added) */
+/* FILTER PERIOD (already defined above, but kept for clarity) */
 .filter-period {
   font-size: 11px;
   color: var(--muted);
@@ -207,6 +283,18 @@ tr.watched-row td { opacity: .55; }
   border-radius: 12px;
   white-space: nowrap;
 }
+
+/* Buttons inside actions – ensure they use palette */
+.dash-actions .btn {
+  background: var(--surface2);
+  color: var(--text-soft);
+  border: 1px solid var(--border);
+}
+.dash-actions .btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.dash-actions .btn-ghost { background: transparent; }
 {% endblock %}
 
 {% block content %}
@@ -217,7 +305,7 @@ tr.watched-row td { opacity: .55; }
     <button class="btn btn-ghost btn-sm" onclick="syncAll(this)">
       ↻ Sync All
     </button>
-    <a href="{{ url_for('add_subject') }}" class="btn btn-ghost btn-sm">+ Subject</a>
+    <a href="{{ url_for('main.add_subject') }}" class="btn btn-ghost btn-sm">+ Subject</a>
   </div>
 </div>
 
@@ -270,7 +358,7 @@ tr.watched-row td { opacity: .55; }
       <button class="btn btn-ghost btn-sm" onclick="syncSubject({{ subj.id }}, this)">
         ↻ Sync
       </button>
-      <form action="{{ url_for('delete_subject', subject_id=subj.id) }}" method="POST"
+      <form action="{{ url_for('main.delete_subject', subject_id=subj.id) }}" method="POST"
             onsubmit="return confirm('Remove {{ subj.name }}? All events will be deleted.')">
         <button class="btn btn-danger btn-sm" type="submit">Remove</button>
       </form>
@@ -312,9 +400,9 @@ tr.watched-row td { opacity: .55; }
             {% endif %}
           </td>
 
-          <!-- CALENDAR TITLE (now links to the event detail page) -->
+          <!-- CALENDAR TITLE (links to event detail) -->
           <td>
-            <a class="cal-title" href="{{ url_for('event_detail', event_id=ev.id) }}">
+            <a class="cal-title" href="{{ url_for('main.event_detail', event_id=ev.id) }}">
               <span class="play-icon">▶</span> {{ ev.calendar_title }}
             </a>
           </td>
@@ -327,8 +415,8 @@ tr.watched-row td { opacity: .55; }
               {{ ev.user_description or '' }}
             </div>
             <div class="desc-edit" id="desc-edit-{{ ev.id }}">
-              <textarea id="desc-ta-{{ ev.id }}" placeholder="Add your notes here...">{{ ev.user_description or '' }}</textarea>
-              <div style="display:flex; gap:6px;">
+              <textarea id="desc-ta-{{ ev.id }}" placeholder="Add your notes here…">{{ ev.user_description or '' }}</textarea>
+              <div style="display:flex; gap:6px; margin-top:6px;">
                 <button class="btn btn-primary btn-sm save-desc-btn" onclick="saveDesc({{ ev.id }})">Save</button>
                 <button class="btn btn-ghost btn-sm" onclick="cancelDesc({{ ev.id }})">Cancel</button>
               </div>

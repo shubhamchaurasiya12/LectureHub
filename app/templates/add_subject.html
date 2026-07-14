@@ -1,0 +1,186 @@
+<!-- D:\iitm_scheduler\templates\add_subject.html -->
+{% extends "base.html" %}
+{% block title %}Add Subject – IITM Lecture Tracker{% endblock %}
+
+{% block extra_styles %}
+.page-header {
+  margin-bottom: 24px;
+}
+.page-header h1 {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  color: var(--text);
+}
+.page-header p {
+  color: var(--muted);
+  margin-top: 5px;
+  font-size: 13px;
+}
+.back-link {
+  font-size: 12px;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.back-link:hover {
+  color: var(--accent);
+}
+.hint {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+.hint strong {
+  color: var(--text);
+}
+.hint code {
+  font-family: var(--mono);
+  font-size: 11px;
+  background: var(--bg);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--accent);
+  word-break: break-all;
+}
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+.card .form-group {
+  margin-bottom: 18px;
+}
+.card label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-bottom: 5px;
+}
+.card input {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 14px;
+  color: var(--text);
+  width: 100%;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.card input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+.card input::placeholder {
+  color: var(--muted);
+  opacity: 0.7;
+}
+.card .date-group {
+  display: flex;
+  gap: 12px;
+}
+.card .date-group .form-group {
+  flex: 1;
+}
+.card .form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+.card .form-actions .btn-primary {
+  background: var(--accent);
+  color: #0B0B0E;
+}
+.card .form-actions .btn-primary:hover {
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+.card .form-actions .btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-soft);
+}
+.card .form-actions .btn-ghost:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+/* Date picker tweaks */
+input[type="date"] {
+  appearance: none;
+  -webkit-appearance: none;
+}
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.8);
+  cursor: pointer;
+}
+{% endblock %}
+
+{% block content %}
+<div style="max-width:640px">
+  <div class="page-header">
+    <a href="{{ url_for('main.dashboard') }}" class="back-link">← Back to dashboard</a>
+    <h1 style="margin-top:12px;">Add a subject</h1>
+    <p>Paste in the Google Calendar embed link and give the subject a short name. Optionally, restrict the events to a specific time window.</p>
+  </div>
+
+  <div class="hint">
+    <strong>Supported URL format:</strong><br/>
+    <code>https://calendar.google.com/calendar/embed?src=c_xxxxx%40group.calendar.google.com&amp;ctz=Asia%2FKolkata</code><br/>
+    The calendar must be set to <strong>Public</strong> for syncing to work.<br/><br/>
+    <strong>Time period (optional):</strong> Leave the date fields blank to sync all events, or choose a start and end date to only fetch lectures within that range.
+  </div>
+
+  <div class="card">
+    <form method="POST" id="add-form">
+      <div class="form-group">
+        <label>Subject Name</label>
+        <input type="text" name="subject_name" placeholder="e.g. DSA, DBMS, Maths-2" required autofocus />
+      </div>
+      <div class="form-group">
+        <label>Google Calendar Link</label>
+        <input type="url" name="calendar_url"
+               placeholder="https://calendar.google.com/calendar/embed?src=..."
+               required />
+      </div>
+
+      <!-- Date fields -->
+      <div class="date-group">
+        <div class="form-group">
+          <label>From (start)</label>
+          <input type="date" name="filter_start" />
+        </div>
+        <div class="form-group">
+          <label>Until (end)</label>
+          <input type="date" name="filter_end" />
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" id="add-btn">
+          Add &amp; Sync Calendar
+        </button>
+        <a href="{{ url_for('main.dashboard') }}" class="btn btn-ghost">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('add-form').addEventListener('submit', function() {
+  const btn = document.getElementById('add-btn');
+  btn.innerHTML = '<span class="spinner"></span> Syncing…';
+  btn.disabled = true;
+});
+</script>
+{% endblock %}

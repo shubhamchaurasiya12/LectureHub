@@ -1,0 +1,422 @@
+<!-- D:\iitm_scheduler\templates\base.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}LH LectureHUB{% endblock %}</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      /* ── Palette (from finance app design) ───────── */
+      --bg:          #0B0B0E;      /* deep near‑black          */
+      --surface:     #1C1C1E;      /* cards / navigation       */
+      --surface2:    #2C2C2E;      /* hover / subtle elevation */
+      --border:      #3A3A3C;      /* subtle dividers          */
+      --border-dim:  #2A2A2C;      /* inner separators         */
+
+      --accent:      #5AC8FA;      /* cyan – primary accent    */
+      --accent-dim:  rgba(90, 200, 250, 0.11);
+      --accent-glow: rgba(90, 200, 250, 0.22);
+      --accent2:     #007AFF;      /* blue – secondary action  */
+
+      --green:       #34C759;      /* income / deposit         */
+      --amber:       #FF9500;      /* travelling / warnings    */
+      --red:         #FF3B30;      /* expense / withdraw       */
+
+      --text:        #FFFFFF;      /* primary text             */
+      --text-soft:   #8E8E93;      /* secondary text           */
+      --muted:       #AEAEB2;      /* tertiary / labels        */
+
+      --radius:      9px;
+      --radius-sm:   6px;
+      --mono:        'JetBrains Mono', monospace;
+      --nav-h:       60px;
+    }
+
+    /* ── Base ─────────────────────────────────────── */
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      font-size: 14px;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Nav ──────────────────────────────────────── */
+    nav {
+      background: var(--surface);
+      padding: 0 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: var(--nav-h);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    /* Signature accent line */
+    nav::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 8%;
+      right: 8%;
+      height: 1px;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        var(--accent) 40%,
+        var(--accent) 60%,
+        transparent
+      );
+      opacity: 0.4;
+    }
+
+    .nav-brand {
+      font-weight: 800;
+      font-size: 15px;
+      letter-spacing: -0.5px;
+      color: var(--text);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      flex-shrink: 0;
+    }
+
+    .nav-brand-icon {
+      width: 30px;
+      height: 30px;
+      background: var(--accent-dim);
+      border: 1px solid rgba(90, 200, 250, 0.22);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--accent);
+      letter-spacing: -0.5px;
+      flex-shrink: 0;
+    }
+
+    .nav-brand-label {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+    .nav-brand-label .top {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.3px;
+    }
+    .nav-brand-label .sub {
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .nav-links a,
+    .nav-links button {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: none;
+      cursor: pointer;
+      transition: color .15s, background .15s;
+      font-family: inherit;
+      letter-spacing: 0.1px;
+    }
+
+    .nav-links a:hover,
+    .nav-links button:hover {
+      color: var(--text-soft);
+      background: var(--surface2);
+    }
+
+    /* Highlighted nav action (accent) */
+    .nav-links .nav-highlight {
+      background: var(--accent-dim);
+      border: 1px solid rgba(90, 200, 250, 0.2);
+      color: var(--accent);
+    }
+    .nav-links .nav-highlight:hover {
+      background: var(--accent-glow);
+      color: var(--accent);
+    }
+
+    /* ── Container ────────────────────────────────── */
+    .container {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 40px 24px;
+    }
+
+    /* ── Flash Messages ───────────────────────────── */
+    .flash-list { list-style: none; margin-bottom: 28px; }
+
+    .flash-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 16px;
+      border-radius: var(--radius);
+      margin-bottom: 8px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .flash-item::before {
+      content: '';
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .flash-success {
+      background: rgba(52, 199, 89, 0.07);
+      border: 1px solid rgba(52, 199, 89, 0.2);
+      color: var(--green);
+    }
+    .flash-success::before { background: var(--green); }
+
+    .flash-error {
+      background: rgba(255, 59, 48, 0.07);
+      border: 1px solid rgba(255, 59, 48, 0.2);
+      color: var(--red);
+    }
+    .flash-error::before { background: var(--red); }
+
+    .flash-warning {
+      background: rgba(255, 149, 0, 0.07);
+      border: 1px solid rgba(255, 149, 0, 0.2);
+      color: var(--amber);
+    }
+    .flash-warning::before { background: var(--amber); }
+
+    /* ── Cards ────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+    .card + .card { margin-top: 16px; }
+
+    /* ── Buttons ──────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 18px;
+      border-radius: 7px;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      transition: opacity .15s, transform .1s, box-shadow .15s;
+      text-decoration: none;
+      letter-spacing: 0.1px;
+      white-space: nowrap;
+    }
+    .btn:active { transform: scale(.97); }
+
+    /* Cyan primary – dark text for contrast */
+    .btn-primary {
+      background: var(--accent);
+      color: #0B0B0E;
+    }
+    .btn-primary:hover {
+      opacity: .88;
+      box-shadow: 0 0 18px var(--accent-glow);
+    }
+
+    .btn-ghost {
+      background: var(--surface2);
+      color: var(--text-soft);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover {
+      border-color: rgba(90, 200, 250, 0.35);
+      color: var(--accent);
+    }
+
+    .btn-danger {
+      background: transparent;
+      color: var(--red);
+      border: 1px solid rgba(255, 59, 48, 0.28);
+    }
+    .btn-danger:hover {
+      background: rgba(255, 59, 48, 0.07);
+      border-color: var(--red);
+    }
+
+    .btn-sm { padding: 5px 12px; font-size: 12px; }
+    .btn-lg { padding: 11px 24px; font-size: 14px; }
+
+    /* ── Forms ────────────────────────────────────── */
+    .form-group { margin-bottom: 20px; }
+
+    label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 7px;
+      letter-spacing: .7px;
+      text-transform: uppercase;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="url"],
+    input[type="number"],
+    select,
+    textarea {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      color: var(--text);
+      padding: 10px 14px;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+      appearance: none;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-dim);
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: var(--muted);
+      opacity: 1;
+    }
+
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23AEAEB2' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 36px;
+      cursor: pointer;
+    }
+
+    textarea { resize: vertical; min-height: 80px; }
+
+    /* ── Spinner ──────────────────────────────────── */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .65s linear infinite;
+      display: inline-block;
+    }
+
+    /* ── Utility ──────────────────────────────────── */
+    .text-muted   { color: var(--muted); }
+    .text-soft    { color: var(--text-soft); }
+    .text-accent  { color: var(--accent); }
+    .text-green   { color: var(--green); }
+    .text-red     { color: var(--red); }
+    .text-mono    { font-family: var(--mono); }
+    .divider      { border: none; border-top: 1px solid var(--border-dim); margin: 24px 0; }
+
+    /* ── Responsive ───────────────────────────────── */
+    @media (max-width: 640px) {
+      nav { padding: 0 16px; }
+
+      .container { padding: 24px 16px; }
+
+      .nav-brand-label .top { font-size: 12px; }
+      .nav-brand-label .sub { display: none; }
+
+      .nav-links a,
+      .nav-links button { padding: 6px 10px; font-size: 12px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+
+    {% block extra_styles %}{% endblock %}
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a
+      class="nav-brand"
+      href="{% if current_user.is_authenticated %}{{ url_for('main.dashboard') }}{% else %}{{ 	url_for('auth.login') }}{% endif %}"
+    >
+      <div class="nav-brand-icon">LH</div>
+      <div class="nav-brand-label">
+        <span class="top">LectureHUB</span>
+        <span class="sub">IIT Madras · BS</span>
+      </div>
+    </a>
+
+    <div class="nav-links">
+      {% if current_user.is_authenticated %}
+        <a href="{{ url_for('main.add_subject') }}" class="nav-highlight">+ Subject</a>
+        <form action="{{ url_for('auth.logout') }}" method="get" style="display:inline">
+          <button type="submit">Sign out</button>
+        </form>
+      {% else %}
+        <a href="{{ url_for('auth.login') }}">Sign in</a>
+        <a href="{{ url_for('auth.register') }}" class="nav-highlight">Register</a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul class="flash-list">
+          {% for cat, msg in messages %}
+            <li class="flash-item flash-{{ cat }}">{{ msg }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </div>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>
