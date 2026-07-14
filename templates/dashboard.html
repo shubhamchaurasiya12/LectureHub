@@ -1,0 +1,476 @@
+{% extends "base.html" %}
+{% block title %}Dashboard – IITM Lecture Tracker{% endblock %}
+
+{% block extra_styles %}
+/* HEADER */
+.dash-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.dash-title { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
+.dash-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* TABS */
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 24px;
+  overflow-x: auto;
+}
+.tab-btn {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 10px 16px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  white-space: nowrap;
+  transition: color .15s, border-color .15s;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab-count {
+  background: var(--surface2);
+  border-radius: 10px;
+  padding: 1px 6px;
+  font-size: 11px;
+  margin-left: 4px;
+}
+
+/* SUBJECT META */
+.subject-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.subject-meta .last-sync {
+  font-size: 11px;
+  color: var(--muted);
+  font-family: var(--mono);
+}
+.subject-meta .filter-period {
+  font-size: 11px;
+  color: var(--muted);
+  background: var(--surface2);
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+/* STATS ROW */
+.stats-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.stat-chip {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.stat-chip strong { color: var(--text); }
+
+/* TABLE */
+.table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; min-width: 700px; }
+thead { background: var(--surface2); }
+th {
+  padding: 11px 14px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  white-space: nowrap;
+}
+td { padding: 12px 14px; border-top: 1px solid var(--border); vertical-align: top; }
+tr:hover td { background: rgba(79,125,240,.04); }
+tr.watched-row td { opacity: .55; }
+
+/* DATE CELL */
+.date-cell {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.date-cell .day { color: var(--text); font-weight: 500; display: block; }
+
+/* TITLE CELL */
+.cal-title {
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--text);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.cal-title:hover { color: var(--accent); }
+.cal-title .play-icon { font-size: 11px; color: var(--muted); }
+.cal-title:hover .play-icon { color: var(--accent); }
+
+/* DESCRIPTION */
+.desc-cell { min-width: 180px; max-width: 260px; }
+.desc-display {
+  font-size: 13px;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 5px;
+  min-height: 28px;
+  border: 1px solid transparent;
+  transition: border-color .15s, background .15s;
+}
+.desc-display:hover { border-color: var(--border); background: var(--surface2); }
+.desc-display.empty::before { content: 'Add note...'; color: #555; font-style: italic; }
+.desc-edit { display: none; }
+.desc-edit textarea {
+  font-size: 13px;
+  min-height: 60px;
+  background: var(--surface2);
+  padding: 6px 8px;
+}
+.desc-edit .save-desc-btn { margin-top: 6px; }
+
+/* LINK CELL */
+.link-cell { white-space: nowrap; }
+.link-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: opacity .15s;
+}
+.link-badge:hover { opacity: .8; }
+.link-meet { background: #1a3a5c; color: #5eb0f5; border: 1px solid #2a5a8c; }
+.link-drive { background: #1a3a2c; color: #3ecf8e; border: 1px solid #2a6a4a; }
+.link-none { color: var(--border); font-size: 12px; }
+
+/* WATCHED TOGGLE */
+.watch-btn {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: none;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color .15s, background .15s;
+}
+.watch-btn.done { border-color: var(--green); background: #1a3a2c; }
+.watch-btn:hover { border-color: var(--accent); }
+
+/* EMPTY STATE */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--muted);
+}
+.empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+.empty-state h3 { font-size: 16px; color: var(--text); margin-bottom: 6px; }
+
+/* SYNC STATUS */
+#sync-status {
+  font-size: 12px;
+  color: var(--muted);
+  padding: 4px 0;
+}
+
+/* FILTER PERIOD STYLING (added) */
+.filter-period {
+  font-size: 11px;
+  color: var(--muted);
+  background: var(--surface2);
+  padding: 2px 8px;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+{% endblock %}
+
+{% block content %}
+<div class="dash-header">
+  <div class="dash-title">My Lectures</div>
+  <div class="dash-actions">
+    <span id="sync-status"></span>
+    <button class="btn btn-ghost btn-sm" onclick="syncAll(this)">
+      ↻ Sync All
+    </button>
+    <a href="{{ url_for('add_subject') }}" class="btn btn-ghost btn-sm">+ Subject</a>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  {% for subj in subjects %}
+    <button class="tab-btn {% if active_tab == subj.id|string %}active{% endif %}"
+            data-subject="{{ subj.id }}"
+            onclick="switchTab('{{ subj.id }}')">
+      {{ subj.name }}
+      <span class="tab-count">{{ events_by_subject[subj.id]|length }}</span>
+    </button>
+  {% endfor %}
+</div>
+
+<!-- PANELS -->
+{% for subj in subjects %}
+<div class="tab-panel" id="panel-{{ subj.id }}"
+     style="display: {% if active_tab == subj.id|string %}block{% else %}none{% endif %}">
+
+  <div class="subject-meta">
+    <div>
+      <span class="last-sync">
+        Last synced:
+        {% if subj.last_synced %}
+          {{ subj.last_synced.strftime('%d %b %Y, %H:%M UTC') }}
+        {% else %}
+          never
+        {% endif %}
+      </span>
+
+      {% if subj.filter_start or subj.filter_end %}
+        <span class="filter-period" style="margin-left: 8px;">
+          📅
+          {% if subj.filter_start %}
+            {{ subj.filter_start.strftime('%d %b %Y') }}
+          {% else %}
+            start
+          {% endif %}
+          –
+          {% if subj.filter_end %}
+            {{ subj.filter_end.strftime('%d %b %Y') }}
+          {% else %}
+            now
+          {% endif %}
+        </span>
+      {% endif %}
+    </div>
+    <div style="display:flex; gap:8px;">
+      <button class="btn btn-ghost btn-sm" onclick="syncSubject({{ subj.id }}, this)">
+        ↻ Sync
+      </button>
+      <form action="{{ url_for('delete_subject', subject_id=subj.id) }}" method="POST"
+            onsubmit="return confirm('Remove {{ subj.name }}? All events will be deleted.')">
+        <button class="btn btn-danger btn-sm" type="submit">Remove</button>
+      </form>
+    </div>
+  </div>
+
+  {% set evs = events_by_subject[subj.id] %}
+  {% set watched_count = evs | selectattr('watched') | list | length %}
+
+  <div class="stats-row">
+    <div class="stat-chip">Total <strong>{{ evs|length }}</strong></div>
+    <div class="stat-chip">Watched <strong>{{ watched_count }}</strong></div>
+    <div class="stat-chip">Remaining <strong>{{ evs|length - watched_count }}</strong></div>
+  </div>
+
+  {% if evs %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Calendar Title</th>
+          <th>Your Notes</th>
+          <th>Link</th>
+          <th style="text-align:center">Watched</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ev in evs %}
+        <tr id="row-{{ ev.id }}" class="{% if ev.watched %}watched-row{% endif %}">
+          <!-- DATE -->
+          <td class="date-cell">
+            {% if ev.date %}
+              <span class="day">{{ ev.date.strftime('%a') }}</span>
+              {{ ev.date.strftime('%d %b %Y') }}<br/>
+              {{ ev.date.strftime('%I:%M %p') }} IST
+            {% else %}
+              <span style="color:var(--border)">—</span>
+            {% endif %}
+          </td>
+
+          <!-- CALENDAR TITLE (now links to the event detail page) -->
+          <td>
+            <a class="cal-title" href="{{ url_for('event_detail', event_id=ev.id) }}">
+              <span class="play-icon">▶</span> {{ ev.calendar_title }}
+            </a>
+          </td>
+
+          <!-- USER NOTES -->
+          <td class="desc-cell">
+            <div class="desc-display {% if not ev.user_description %}empty{% endif %}"
+                 id="desc-display-{{ ev.id }}"
+                 onclick="editDesc({{ ev.id }})">
+              {{ ev.user_description or '' }}
+            </div>
+            <div class="desc-edit" id="desc-edit-{{ ev.id }}">
+              <textarea id="desc-ta-{{ ev.id }}" placeholder="Add your notes here...">{{ ev.user_description or '' }}</textarea>
+              <div style="display:flex; gap:6px;">
+                <button class="btn btn-primary btn-sm save-desc-btn" onclick="saveDesc({{ ev.id }})">Save</button>
+                <button class="btn btn-ghost btn-sm" onclick="cancelDesc({{ ev.id }})">Cancel</button>
+              </div>
+            </div>
+          </td>
+
+          <!-- LINK -->
+          <td class="link-cell">
+            {% set show_meet = (ev.meet_link and (not ev.end_datetime or now < ev.end_datetime)) %}
+            {% set show_drive = ev.drive_link %}
+
+            {% if show_drive %}
+              <a class="link-badge link-drive" href="{{ ev.drive_link }}" target="_blank" rel="noopener">
+                🎬 Recording
+              </a>
+            {% elif show_meet %}
+              <a class="link-badge link-meet" href="{{ ev.meet_link }}" target="_blank" rel="noopener">
+                📹 Join Live
+              </a>
+            {% else %}
+              <span class="link-none">—</span>
+            {% endif %}
+          </td>
+
+          <!-- WATCHED -->
+          <td style="text-align:center">
+            <button class="watch-btn {% if ev.watched %}done{% endif %}"
+                    id="watch-{{ ev.id }}"
+                    onclick="toggleWatch({{ ev.id }})"
+                    title="{% if ev.watched %}Mark as unwatched{% else %}Mark as watched{% endif %}">
+              {% if ev.watched %}✓{% else %}○{% endif %}
+            </button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% else %}
+  <div class="empty-state">
+    <div class="icon">📅</div>
+    <h3>No events found</h3>
+    <p>Click <strong>Sync</strong> to fetch events from this calendar, or check that the calendar URL is public.</p>
+  </div>
+  {% endif %}
+</div>
+{% endfor %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ── TAB SWITCHING ─────────────────────────────
+function switchTab(id) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + id).style.display = 'block';
+  document.querySelector(`[data-subject="${id}"]`).classList.add('active');
+  history.replaceState(null, '', '?tab=' + id);
+}
+
+// ── DESCRIPTION EDITING ───────────────────────
+function editDesc(id) {
+  document.getElementById('desc-display-' + id).style.display = 'none';
+  document.getElementById('desc-edit-' + id).style.display = 'block';
+  document.getElementById('desc-ta-' + id).focus();
+}
+function cancelDesc(id) {
+  document.getElementById('desc-display-' + id).style.display = 'block';
+  document.getElementById('desc-edit-' + id).style.display = 'none';
+}
+async function saveDesc(id) {
+  const text = document.getElementById('desc-ta-' + id).value;
+  await fetch(`/event/${id}/description`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ description: text })
+  });
+  const display = document.getElementById('desc-display-' + id);
+  display.textContent = text;
+  display.classList.toggle('empty', !text);
+  cancelDesc(id);
+}
+
+// ── WATCHED TOGGLE ────────────────────────────
+async function toggleWatch(id) {
+  const res = await fetch(`/event/${id}/watched`, { method: 'POST' });
+  const data = await res.json();
+  const btn = document.getElementById('watch-' + id);
+  const row = document.getElementById('row-' + id);
+  if (data.watched) {
+    btn.textContent = '✓';
+    btn.classList.add('done');
+    btn.title = 'Mark as unwatched';
+    row.classList.add('watched-row');
+  } else {
+    btn.textContent = '○';
+    btn.classList.remove('done');
+    btn.title = 'Mark as watched';
+    row.classList.remove('watched-row');
+  }
+}
+
+// ── SYNC ──────────────────────────────────────
+function setStatus(msg) {
+  document.getElementById('sync-status').textContent = msg;
+}
+
+async function syncSubject(subjectId, btn) {
+  const orig = btn.innerHTML;
+  btn.innerHTML = '<span class="spinner"></span>';
+  btn.disabled = true;
+  setStatus('Syncing…');
+  try {
+    const res = await fetch(`/sync/${subjectId}`, { method: 'POST' });
+    const data = await res.json();
+    setStatus(data.msg);
+    setTimeout(() => { setStatus(''); location.reload(); }, 1200);
+  } catch {
+    setStatus('Sync failed');
+    btn.innerHTML = orig;
+    btn.disabled = false;
+  }
+}
+
+async function syncAll(btn) {
+  const orig = btn.innerHTML;
+  btn.innerHTML = '<span class="spinner"></span> Syncing…';
+  btn.disabled = true;
+  setStatus('Syncing all subjects…');
+  try {
+    const res = await fetch('/sync_all', { method: 'POST' });
+    const data = await res.json();
+    const ok = data.results.filter(r => r.ok).length;
+    setStatus(`Synced ${ok}/${data.results.length} subjects`);
+    setTimeout(() => { setStatus(''); location.reload(); }, 1200);
+  } catch {
+    setStatus('Sync failed');
+    btn.innerHTML = orig;
+    btn.disabled = false;
+  }
+}
+</script>
+{% endblock %}

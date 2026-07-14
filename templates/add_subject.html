@@ -1,0 +1,88 @@
+<!-- D:\iitm_scheduler\templates\add_subject.html -->
+{% extends "base.html" %}
+{% block title %}Add Subject – IITM Lecture Tracker{% endblock %}
+
+{% block extra_styles %}
+.page-header { margin-bottom: 24px; }
+.page-header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.4px; }
+.page-header p { color: var(--muted); margin-top: 5px; font-size: 13px; }
+.hint {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 24px;
+}
+.hint code {
+  font-family: var(--mono);
+  font-size: 11px;
+  background: var(--bg);
+  padding: 1px 5px;
+  border-radius: 4px;
+  color: var(--accent);
+  word-break: break-all;
+}
+{% endblock %}
+
+{% block content %}
+<div style="max-width:640px">
+  <div class="page-header">
+    <a href="{{ url_for('dashboard') }}" style="font-size:12px;color:var(--muted);text-decoration:none;">← Back to dashboard</a>
+    <h1 style="margin-top:12px;">Add a subject</h1>
+    <p>Paste in the Google Calendar embed link and give the subject a short name. Optionally, restrict the events to a specific time window.</p>
+  </div>
+
+  <div class="hint">
+    <strong style="color:var(--text)">Supported URL format:</strong><br/>
+    <code>https://calendar.google.com/calendar/embed?src=c_xxxxx%40group.calendar.google.com&amp;ctz=Asia%2FKolkata</code><br/>
+    The calendar must be set to <strong style="color:var(--text)">Public</strong> for syncing to work.<br/><br/>
+    <strong style="color:var(--text)">Time period (optional):</strong> Leave the date fields blank to sync all events, or choose a start and end date to only fetch lectures within that range.
+  </div>
+
+  <div class="card">
+    <form method="POST" id="add-form">
+      <div class="form-group">
+        <label>Subject Name</label>
+        <input type="text" name="subject_name" placeholder="e.g. DSA, DBMS, Maths-2" required autofocus />
+      </div>
+      <div class="form-group">
+        <label>Google Calendar Link</label>
+        <input type="url" name="calendar_url"
+               placeholder="https://calendar.google.com/calendar/embed?src=..."
+               required />
+      </div>
+
+      <!-- New date fields -->
+      <div style="display:flex; gap:12px;">
+        <div class="form-group" style="flex:1;">
+          <label>From (start)</label>
+          <input type="date" name="filter_start" />
+        </div>
+        <div class="form-group" style="flex:1;">
+          <label>Until (end)</label>
+          <input type="date" name="filter_end" />
+        </div>
+      </div>
+
+      <div style="display:flex; gap:10px; margin-top:16px;">
+        <button type="submit" class="btn btn-primary" id="add-btn">
+          Add &amp; Sync Calendar
+        </button>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-ghost">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('add-form').addEventListener('submit', function() {
+  const btn = document.getElementById('add-btn');
+  btn.innerHTML = '<span class="spinner"></span> Syncing…';
+  btn.disabled = true;
+});
+</script>
+{% endblock %}

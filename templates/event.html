@@ -1,0 +1,280 @@
+<!-- D:\iitm_scheduler\templates\event.html -->
+{% extends "base.html" %}
+{% block title %}{{ ev.calendar_title }} – IITM Lecture Tracker{% endblock %}
+
+{% block extra_styles %}
+.event-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.event-breadcrumb {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.event-breadcrumb a { color: var(--muted); text-decoration: none; }
+.event-breadcrumb a:hover { color: var(--accent); }
+.event-title {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  margin-bottom: 6px;
+}
+.event-meta {
+  font-size: 12px;
+  color: var(--muted);
+  font-family: var(--mono);
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.event-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.watch-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color .15s, background .15s;
+}
+.watch-toggle-btn.done {
+  border-color: var(--green);
+  background: #1a3a2c;
+  color: var(--green);
+}
+
+/* LAYOUT */
+.event-layout {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+.video-pane { flex: 1 1 62%; min-width: 0; }
+.notes-pane { flex: 1 1 38%; min-width: 280px; }
+
+@media (max-width: 900px) {
+  .event-layout { flex-direction: column; }
+  .video-pane, .notes-pane { flex: 1 1 auto; width: 100%; }
+}
+
+/* VIDEO */
+.video-frame-wrap {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%; /* 16:9 */
+  background: #000;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.video-frame-wrap iframe {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  border: 0;
+}
+.video-empty {
+  padding: 60px 24px;
+  text-align: center;
+  color: var(--muted);
+}
+.video-empty .icon { font-size: 34px; margin-bottom: 10px; }
+.video-empty a.btn { margin-top: 14px; }
+
+/* NOTES */
+.notes-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  position: sticky;
+  top: 72px;
+}
+.notes-card h3 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  margin-bottom: 10px;
+}
+#notes-textarea {
+  width: 100%;
+  min-height: 280px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  color: var(--text);
+  padding: 12px;
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.6;
+  resize: vertical;
+  outline: none;
+}
+#notes-textarea:focus { border-color: var(--accent); }
+.notes-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+#notes-status {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* EXTRA LINKS */
+.event-links { margin-top: 14px; display: flex; gap: 8px; flex-wrap: wrap; }
+.link-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+}
+.link-meet { background: #1a3a5c; color: #5eb0f5; border: 1px solid #2a5a8c; }
+.link-drive { background: #1a3a2c; color: #3ecf8e; border: 1px solid #2a6a4a; }
+{% endblock %}
+
+{% block content %}
+<div class="event-breadcrumb">
+  <a href="{{ url_for('dashboard', tab=subject.id) }}">← {{ subject.name }}</a>
+</div>
+
+<div class="event-header">
+  <div>
+    <div class="event-title">{{ ev.calendar_title }}</div>
+    <div class="event-meta">
+      {% if ev.date %}
+        <span>📅 {{ ev.date.strftime('%a, %d %b %Y') }}</span>
+        <span>🕐 {{ ev.date.strftime('%I:%M %p') }} IST{% if ev.end_datetime %} – {{ ev.end_datetime.strftime('%I:%M %p') }} IST{% endif %}</span>
+      {% endif %}
+    </div>
+    <div class="event-links">
+      {% if ev.drive_link %}
+        <a class="link-badge link-drive" href="{{ ev.drive_link }}" target="_blank" rel="noopener">🎬 Open in Drive</a>
+      {% endif %}
+      {% if ev.meet_link and (not ev.end_datetime or now < ev.end_datetime) %}
+        <a class="link-badge link-meet" href="{{ ev.meet_link }}" target="_blank" rel="noopener">📹 Join Live</a>
+      {% endif %}
+    </div>
+  </div>
+  <div class="event-header-actions">
+    <button class="watch-toggle-btn {% if ev.watched %}done{% endif %}" id="watch-toggle" onclick="toggleWatch()">
+      <span id="watch-icon">{% if ev.watched %}✓{% else %}○{% endif %}</span>
+      <span id="watch-label">{% if ev.watched %}Watched{% else %}Mark as watched{% endif %}</span>
+    </button>
+  </div>
+</div>
+
+<div class="event-layout">
+  <!-- VIDEO -->
+  <div class="video-pane">
+    {% if embed_url %}
+      <div class="video-frame-wrap">
+        <iframe src="{{ embed_url }}" allow="autoplay; fullscreen" allowfullscreen></iframe>
+      </div>
+    {% else %}
+      <div class="video-frame-wrap">
+        <div class="video-empty" style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+          <div class="icon">🎬</div>
+          <div>
+            {% if ev.drive_link %}
+              This recording can't be embedded directly — it's a Docs/Slides link, not a video file.
+            {% else %}
+              No recording has been linked to this session yet.
+            {% endif %}
+          </div>
+          {% if ev.drive_link %}
+            <a class="btn btn-ghost btn-sm" href="{{ ev.drive_link }}" target="_blank" rel="noopener">Open link instead</a>
+          {% elif ev.meet_link %}
+            <a class="btn btn-ghost btn-sm" href="{{ ev.meet_link }}" target="_blank" rel="noopener">Join Meet instead</a>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- NOTES -->
+  <div class="notes-pane">
+    <div class="notes-card">
+      <h3>Your Notes</h3>
+      <textarea id="notes-textarea" placeholder="Take notes while you watch...">{{ ev.user_description or '' }}</textarea>
+      <div class="notes-footer">
+        <span id="notes-status"></span>
+        <button class="btn btn-primary btn-sm" onclick="saveNotes()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const EVENT_ID = {{ ev.id }};
+let saveTimer = null;
+
+function setNotesStatus(msg) {
+  document.getElementById('notes-status').textContent = msg;
+}
+
+async function saveNotes() {
+  const text = document.getElementById('notes-textarea').value;
+  setNotesStatus('Saving…');
+  try {
+    await fetch(`/event/${EVENT_ID}/description`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ description: text })
+    });
+    setNotesStatus('Saved ' + new Date().toLocaleTimeString());
+  } catch {
+    setNotesStatus('Could not save — retry?');
+  }
+}
+
+// Autosave 1.2s after the user stops typing
+document.getElementById('notes-textarea').addEventListener('input', () => {
+  clearTimeout(saveTimer);
+  setNotesStatus('Typing…');
+  saveTimer = setTimeout(saveNotes, 1200);
+});
+
+async function toggleWatch() {
+  const res = await fetch(`/event/${EVENT_ID}/watched`, { method: 'POST' });
+  const data = await res.json();
+  const btn = document.getElementById('watch-toggle');
+  const icon = document.getElementById('watch-icon');
+  const label = document.getElementById('watch-label');
+  if (data.watched) {
+    btn.classList.add('done');
+    icon.textContent = '✓';
+    label.textContent = 'Watched';
+  } else {
+    btn.classList.remove('done');
+    icon.textContent = '○';
+    label.textContent = 'Mark as watched';
+  }
+}
+</script>
+{% endblock %}

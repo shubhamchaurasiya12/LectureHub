@@ -1,0 +1,147 @@
+<!-- D:\iitm_scheduler\templates\setup.html -->
+{% extends "base.html" %}
+{% block title %}Set Up Subjects – IITM Lecture Tracker{% endblock %}
+
+{% block extra_styles %}
+.setup-header { margin-bottom: 28px; }
+.setup-header h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
+.setup-header p { color: var(--muted); margin-top: 6px; }
+
+.subject-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr 1fr auto;  /* widened for date fields */
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 12px;
+  padding: 16px;
+  background: var(--surface2);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+.subject-row.header-row {
+  background: none;
+  border: none;
+  padding: 0 0 4px 0;
+  margin-bottom: 0;
+}
+.subject-row.header-row span {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+.remove-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  border-radius: 6px;
+  padding: 8px 10px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: color .15s, border-color .15s;
+  line-height: 1;
+  height: 38px;
+}
+.remove-btn:hover { color: var(--red); border-color: var(--red); }
+
+.hint {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 24px;
+}
+.hint strong { color: var(--text); }
+.hint code {
+  font-family: var(--mono);
+  font-size: 11px;
+  background: var(--bg);
+  padding: 1px 5px;
+  border-radius: 4px;
+  color: var(--accent);
+  word-break: break-all;
+}
+/* Make date inputs compact */
+input[type="date"] {
+  padding: 8px;
+  font-size: 14px;
+}
+{% endblock %}
+
+{% block content %}
+<div style="max-width:860px">  <!-- slightly wider for extra columns -->
+  <div class="setup-header">
+    <h1>Set up your subjects</h1>
+    <p>Add the Google Calendar links for each of your IITM courses. You can limit which events are fetched by setting a date range.</p>
+  </div>
+
+  <div class="hint">
+    <strong>Where to find the calendar link:</strong><br/>
+    Go to your IITM course portal → find the session calendar → click the embed link or share URL.<br/>
+    It usually looks like:<br/>
+    <code>https://calendar.google.com/calendar/embed?src=c_xxxxx%40group.calendar.google.com&amp;ctz=Asia%2FKolkata</code><br/><br/>
+    <strong>Time period (optional):</strong> Leave blank to fetch all events, or set a start and end date to only see lectures within that window.
+  </div>
+
+  <form method="POST" id="setup-form">
+    <div class="subject-row header-row">
+      <span>Subject Name</span>
+      <span>Google Calendar Link</span>
+      <span>From (start)</span>
+      <span>Until (end)</span>
+      <span></span>
+    </div>
+
+    <div id="subjects-container">
+      <div class="subject-row">
+        <input type="text" name="subject_name" placeholder="e.g. DSA" required />
+        <input type="url" name="calendar_url" placeholder="https://calendar.google.com/calendar/embed?src=..." required />
+        <input type="date" name="filter_start" />
+        <input type="date" name="filter_end" />
+        <button type="button" class="remove-btn" onclick="removeRow(this)" title="Remove">✕</button>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:12px; align-items:center; margin-top:16px; flex-wrap:wrap;">
+      <button type="button" class="btn btn-ghost" onclick="addRow()">+ Add another subject</button>
+      <button type="submit" class="btn btn-primary" id="submit-btn">
+        Save &amp; sync calendars
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function addRow() {
+  const container = document.getElementById('subjects-container');
+  const div = document.createElement('div');
+  div.className = 'subject-row';
+  div.innerHTML = `
+    <input type="text"  name="subject_name" placeholder="e.g. Maths" />
+    <input type="url"   name="calendar_url" placeholder="https://calendar.google.com/..." />
+    <input type="date"  name="filter_start" />
+    <input type="date"  name="filter_end" />
+    <button type="button" class="remove-btn" onclick="removeRow(this)" title="Remove">✕</button>
+  `;
+  container.appendChild(div);
+}
+
+function removeRow(btn) {
+  const rows = document.querySelectorAll('#subjects-container .subject-row');
+  if (rows.length > 1) {
+    btn.closest('.subject-row').remove();
+  }
+}
+
+document.getElementById('setup-form').addEventListener('submit', function(e) {
+  const btn = document.getElementById('submit-btn');
+  btn.innerHTML = '<span class="spinner"></span> Syncing...';
+  btn.disabled = true;
+});
+</script>
+{% endblock %}
