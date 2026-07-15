@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{% block title %}LH LectureHUB{% endblock %}</title>
+  <title>{% block title %}LF LECFLOW{% endblock %}</title>
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
     rel="stylesheet"
@@ -13,33 +13,35 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      /* ── Palette (from finance app design) ───────── */
-      --bg:          #0B0B0E;      /* deep near‑black          */
-      --surface:     #1C1C1E;      /* cards / navigation       */
-      --surface2:    #2C2C2E;      /* hover / subtle elevation */
-      --border:      #3A3A3C;      /* subtle dividers          */
-      --border-dim:  #2A2A2C;      /* inner separators         */
+      --bg:           #FFFFFF;
+      --surface:      #F9FAFB;
+      --surface2:     #F3F4F6;
+      --border:       #E5E7EB;
+      --border-dim:   #F0F0F0;
 
-      --accent:      #5AC8FA;      /* cyan – primary accent    */
-      --accent-dim:  rgba(90, 200, 250, 0.11);
-      --accent-glow: rgba(90, 200, 250, 0.22);
-      --accent2:     #007AFF;      /* blue – secondary action  */
+      --accent:       #F97316;
+      --accent-dim:   rgba(249, 115, 22, 0.08);
+      --accent-hover: #EA6C10;
 
-      --green:       #34C759;      /* income / deposit         */
-      --amber:       #FF9500;      /* travelling / warnings    */
-      --red:         #FF3B30;      /* expense / withdraw       */
+      --green:        #16A34A;
+      --green-light:  #DCFCE7;
+      --green-border: #86EFAC;
+      --green-desc:   #F0FDF4;
 
-      --text:        #FFFFFF;      /* primary text             */
-      --text-soft:   #8E8E93;      /* secondary text           */
-      --muted:       #AEAEB2;      /* tertiary / labels        */
+      --amber:        #D97706;
+      --red:          #DC2626;
 
-      --radius:      9px;
-      --radius-sm:   6px;
-      --mono:        'JetBrains Mono', monospace;
-      --nav-h:       60px;
+      --text:         #111827;
+      --text-soft:    #4B5563;
+      --muted:        #9CA3AF;
+
+      --radius:       10px;
+      --radius-sm:    6px;
+      --mono:         'JetBrains Mono', monospace;
+      --nav-h:        54px;
     }
 
-    /* ── Base ─────────────────────────────────────── */
+    /* ── Base ───────────────────────────── */
     body {
       font-family: 'Inter', sans-serif;
       background: var(--bg);
@@ -48,37 +50,31 @@
       font-size: 14px;
       line-height: 1.65;
       -webkit-font-smoothing: antialiased;
+      padding-top: calc(var(--nav-h) + 24px);
     }
 
-    /* ── Nav ──────────────────────────────────────── */
+    /* ── Nav — floating glass pill ──────── */
     nav {
-      background: var(--surface);
-      padding: 0 28px;
+      position: fixed;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 48px);
+      max-width: 1100px;
+      height: var(--nav-h);
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(229, 231, 235, 0.85);
+      border-radius: 100px;
+      box-shadow:
+        0 2px 16px rgba(0, 0, 0, 0.07),
+        0 1px 3px rgba(0, 0, 0, 0.04);
+      padding: 0 10px 0 18px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      height: var(--nav-h);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-
-    /* Signature accent line */
-    nav::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 8%;
-      right: 8%;
-      height: 1px;
-      background: linear-gradient(
-        90deg,
-        transparent,
-        var(--accent) 40%,
-        var(--accent) 60%,
-        transparent
-      );
-      opacity: 0.4;
+      z-index: 1000;
     }
 
     .nav-brand {
@@ -89,23 +85,22 @@
       text-decoration: none;
       display: flex;
       align-items: center;
-      gap: 11px;
+      gap: 10px;
       flex-shrink: 0;
     }
 
     .nav-brand-icon {
-      width: 30px;
-      height: 30px;
-      background: var(--accent-dim);
-      border: 1px solid rgba(90, 200, 250, 0.22);
-      border-radius: var(--radius-sm);
+      width: 32px;
+      height: 32px;
+      background: var(--accent);
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       font-family: var(--mono);
       font-size: 11px;
-      font-weight: 500;
-      color: var(--accent);
+      font-weight: 700;
+      color: #fff;
       letter-spacing: -0.5px;
       flex-shrink: 0;
     }
@@ -125,24 +120,24 @@
       font-size: 10px;
       font-weight: 500;
       color: var(--muted);
-      letter-spacing: 0.5px;
+      letter-spacing: 0.4px;
       text-transform: uppercase;
     }
 
     .nav-links {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 2px;
     }
 
     .nav-links a,
     .nav-links button {
-      color: var(--muted);
+      color: var(--text-soft);
       text-decoration: none;
       font-size: 13px;
       font-weight: 500;
-      padding: 6px 14px;
-      border-radius: var(--radius-sm);
+      padding: 7px 14px;
+      border-radius: 100px;
       border: none;
       background: none;
       cursor: pointer;
@@ -153,30 +148,30 @@
 
     .nav-links a:hover,
     .nav-links button:hover {
-      color: var(--text-soft);
+      color: var(--text);
       background: var(--surface2);
     }
 
-    /* Highlighted nav action (accent) */
-    .nav-links .nav-highlight {
-      background: var(--accent-dim);
-      border: 1px solid rgba(90, 200, 250, 0.2);
-      color: var(--accent);
+    .nav-links .nav-cta {
+      background: var(--accent);
+      color: #fff;
+      font-weight: 600;
+      padding: 7px 18px;
     }
-    .nav-links .nav-highlight:hover {
-      background: var(--accent-glow);
-      color: var(--accent);
+    .nav-links .nav-cta:hover {
+      background: var(--accent-hover);
+      color: #fff;
     }
 
-    /* ── Container ────────────────────────────────── */
+    /* ── Container ──────────────────────── */
     .container {
-      max-width: 1180px;
+      max-width: 1160px;
       margin: 0 auto;
-      padding: 40px 24px;
+      padding: 32px 24px 64px;
     }
 
-    /* ── Flash Messages ───────────────────────────── */
-    .flash-list { list-style: none; margin-bottom: 28px; }
+    /* ── Flash Messages ─────────────────── */
+    .flash-list { list-style: none; margin-bottom: 24px; }
 
     .flash-item {
       display: flex;
@@ -188,98 +183,158 @@
       font-size: 13px;
       font-weight: 500;
     }
-
     .flash-item::before {
       content: '';
-      width: 5px;
-      height: 5px;
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
       flex-shrink: 0;
     }
 
     .flash-success {
-      background: rgba(52, 199, 89, 0.07);
-      border: 1px solid rgba(52, 199, 89, 0.2);
+      background: var(--green-desc);
+      border: 1px solid var(--green-border);
       color: var(--green);
     }
     .flash-success::before { background: var(--green); }
 
     .flash-error {
-      background: rgba(255, 59, 48, 0.07);
-      border: 1px solid rgba(255, 59, 48, 0.2);
+      background: #FEF2F2;
+      border: 1px solid #FECACA;
       color: var(--red);
     }
     .flash-error::before { background: var(--red); }
 
     .flash-warning {
-      background: rgba(255, 149, 0, 0.07);
-      border: 1px solid rgba(255, 149, 0, 0.2);
+      background: #FFFBEB;
+      border: 1px solid #FDE68A;
       color: var(--amber);
     }
     .flash-warning::before { background: var(--amber); }
 
-    /* ── Cards ────────────────────────────────────── */
+    /* ── Cards ──────────────────────────── */
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 24px;
     }
-    .card + .card { margin-top: 16px; }
+    .card + .card { margin-top: 14px; }
 
-    /* ── Buttons ──────────────────────────────────── */
+    /* ── Buttons ────────────────────────── */
     .btn {
       display: inline-flex;
       align-items: center;
-      gap: 7px;
-      padding: 8px 18px;
-      border-radius: 7px;
+      gap: 6px;
+      padding: 9px 18px;
+      border-radius: 100px;
       border: none;
       cursor: pointer;
       font-size: 13px;
       font-weight: 600;
       font-family: inherit;
-      transition: opacity .15s, transform .1s, box-shadow .15s;
+      transition: background .15s, transform .1s, box-shadow .15s;
       text-decoration: none;
       letter-spacing: 0.1px;
       white-space: nowrap;
     }
     .btn:active { transform: scale(.97); }
 
-    /* Cyan primary – dark text for contrast */
+    /* Orange primary */
     .btn-primary {
       background: var(--accent);
-      color: #0B0B0E;
+      color: #fff;
     }
     .btn-primary:hover {
-      opacity: .88;
-      box-shadow: 0 0 18px var(--accent-glow);
+      background: var(--accent-hover);
+      box-shadow: 0 4px 16px rgba(249, 115, 22, 0.28);
     }
 
     .btn-ghost {
-      background: var(--surface2);
+      background: #fff;
       color: var(--text-soft);
       border: 1px solid var(--border);
     }
     .btn-ghost:hover {
-      border-color: rgba(90, 200, 250, 0.35);
+      border-color: var(--accent);
       color: var(--accent);
+      background: var(--accent-dim);
     }
 
     .btn-danger {
       background: transparent;
       color: var(--red);
-      border: 1px solid rgba(255, 59, 48, 0.28);
+      border: 1px solid #FECACA;
     }
     .btn-danger:hover {
-      background: rgba(255, 59, 48, 0.07);
+      background: #FEF2F2;
       border-color: var(--red);
     }
 
-    .btn-sm { padding: 5px 12px; font-size: 12px; }
-    .btn-lg { padding: 11px 24px; font-size: 14px; }
+    .btn-sm { padding: 5px 14px; font-size: 12px; }
+    .btn-lg { padding: 12px 28px; font-size: 15px; }
 
-    /* ── Forms ────────────────────────────────────── */
+    /* ── Mark as Watched button ─────────── */
+    /* Usage: <button class="watch-btn" id="watch-{id}">
+                  <span class="watch-icon"></span>
+               </button>                                    */
+    .watch-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid #D1D5DB;
+      background: transparent;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      transition: border-color .15s, background .15s;
+      padding: 0;
+    }
+    .watch-btn:hover {
+      border-color: var(--green);
+    }
+    /* watched state — add class "done" via JS */
+    .watch-btn.done {
+      background: var(--green-light);
+      border-color: var(--green-border);
+      color: var(--green);
+    }
+
+    /* ── Description cell ───────────────── */
+    /* Very light green background, black text */
+    .desc-display {
+      background: var(--green-desc);
+      border: 1px solid var(--green-border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 13px;
+      padding: 6px 10px;
+      min-height: 32px;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    .desc-display:hover {
+      border-color: var(--green);
+    }
+    .desc-display.empty::before {
+      content: 'Add notes…';
+      color: #86EFAC;
+      font-style: italic;
+    }
+    .desc-edit textarea {
+      background: var(--green-desc);
+      border: 1px solid var(--green);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 13px;
+    }
+    .desc-edit textarea:focus {
+      box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.12);
+    }
+
+    /* ── Forms ──────────────────────────── */
     .form-group { margin-bottom: 20px; }
 
     label {
@@ -288,7 +343,7 @@
       font-weight: 600;
       color: var(--muted);
       margin-bottom: 7px;
-      letter-spacing: .7px;
+      letter-spacing: .6px;
       text-transform: uppercase;
     }
 
@@ -297,12 +352,13 @@
     input[type="password"],
     input[type="url"],
     input[type="number"],
+    input[type="date"],
     select,
     textarea {
       width: 100%;
-      background: var(--bg);
+      background: #fff;
       border: 1px solid var(--border);
-      border-radius: 7px;
+      border-radius: var(--radius-sm);
       color: var(--text);
       padding: 10px 14px;
       font-size: 14px;
@@ -311,22 +367,17 @@
       transition: border-color .15s, box-shadow .15s;
       appearance: none;
     }
-
-    input:focus,
-    select:focus,
-    textarea:focus {
+    input:focus, select:focus, textarea:focus {
       border-color: var(--accent);
       box-shadow: 0 0 0 3px var(--accent-dim);
     }
-
-    input::placeholder,
-    textarea::placeholder {
+    input::placeholder, textarea::placeholder {
       color: var(--muted);
       opacity: 1;
     }
 
     select {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23AEAEB2' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239CA3AF' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 12px center;
       padding-right: 36px;
@@ -335,7 +386,7 @@
 
     textarea { resize: vertical; min-height: 80px; }
 
-    /* ── Spinner ──────────────────────────────────── */
+    /* ── Spinner ────────────────────────── */
     @keyframes spin { to { transform: rotate(360deg); } }
     .spinner {
       width: 14px;
@@ -347,7 +398,7 @@
       display: inline-block;
     }
 
-    /* ── Utility ──────────────────────────────────── */
+    /* ── Utility ────────────────────────── */
     .text-muted   { color: var(--muted); }
     .text-soft    { color: var(--text-soft); }
     .text-accent  { color: var(--accent); }
@@ -356,21 +407,24 @@
     .text-mono    { font-family: var(--mono); }
     .divider      { border: none; border-top: 1px solid var(--border-dim); margin: 24px 0; }
 
-    /* ── Responsive ───────────────────────────────── */
+    /* ── Responsive ─────────────────────── */
     @media (max-width: 640px) {
-      nav { padding: 0 16px; }
-
-      .container { padding: 24px 16px; }
-
-      .nav-brand-label .top { font-size: 12px; }
+      nav {
+        width: calc(100% - 24px);
+        padding: 0 8px 0 14px;
+        top: 10px;
+      }
+      .container { padding: 24px 16px 48px; }
       .nav-brand-label .sub { display: none; }
-
       .nav-links a,
       .nav-links button { padding: 6px 10px; font-size: 12px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+      *, *::before, *::after {
+        animation-duration: .01ms !important;
+        transition-duration: .01ms !important;
+      }
     }
 
     {% block extra_styles %}{% endblock %}
@@ -381,24 +435,24 @@
   <nav>
     <a
       class="nav-brand"
-      href="{% if current_user.is_authenticated %}{{ url_for('main.dashboard') }}{% else %}{{ 	url_for('auth.login') }}{% endif %}"
+      href="{% if current_user.is_authenticated %}{{ url_for('main.dashboard') }}{% else %}{{ url_for('auth.login') }}{% endif %}"
     >
       <div class="nav-brand-icon">LH</div>
       <div class="nav-brand-label">
-        <span class="top">LectureHUB</span>
+        <span class="top">LECFLOW</span>
         <span class="sub">IIT Madras · BS</span>
       </div>
     </a>
 
     <div class="nav-links">
       {% if current_user.is_authenticated %}
-        <a href="{{ url_for('main.add_subject') }}" class="nav-highlight">+ Subject</a>
+        <a href="{{ url_for('main.add_subject') }}">+ Subject</a>
         <form action="{{ url_for('auth.logout') }}" method="get" style="display:inline">
           <button type="submit">Sign out</button>
         </form>
       {% else %}
         <a href="{{ url_for('auth.login') }}">Sign in</a>
-        <a href="{{ url_for('auth.register') }}" class="nav-highlight">Register</a>
+        <a href="{{ url_for('auth.register') }}" class="nav-cta">Get started</a>
       {% endif %}
     </div>
   </nav>

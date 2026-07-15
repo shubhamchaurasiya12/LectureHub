@@ -1,183 +1,362 @@
 <!-- D:\iitm_scheduler\templates\add_subject.html -->
 {% extends "base.html" %}
-{% block title %}Add Subject – IITM Lecture Tracker{% endblock %}
+{% block title %}Add Subject – LectureHUB{% endblock %}
 
 {% block extra_styles %}
-.page-header {
-  margin-bottom: 24px;
+
+/* ── Page shell ─────────────────────────────── */
+.add-page {
+  max-width: 900px;
 }
-.page-header h1 {
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--muted);
+  text-decoration: none;
+  margin-bottom: 24px;
+  transition: color .15s;
+}
+.back-link:hover { color: var(--accent); }
+
+/* ── Two-column grid ────────────────────────── */
+.add-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  align-items: start;
+}
+
+/* ── Left — how-to instructions ─────────────── */
+.howto-header {
+  margin-bottom: 20px;
+}
+.howto-header h1 {
   font-size: 22px;
   font-weight: 700;
   letter-spacing: -0.4px;
   color: var(--text);
+  margin-bottom: 5px;
 }
-.page-header p {
-  color: var(--muted);
-  margin-top: 5px;
-  font-size: 13px;
-}
-.back-link {
-  font-size: 12px;
-  color: var(--muted);
-  text-decoration: none;
-  transition: color 0.15s;
-}
-.back-link:hover {
-  color: var(--accent);
-}
-.hint {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px 16px;
+.howto-header p {
   font-size: 13px;
   color: var(--muted);
-  margin-bottom: 24px;
   line-height: 1.6;
 }
-.hint strong {
-  color: var(--text);
+
+/* Numbered steps */
+.steps { display: flex; flex-direction: column; gap: 0; }
+
+.step {
+  display: flex;
+  gap: 14px;
+  position: relative;
 }
-.hint code {
-  font-family: var(--mono);
-  font-size: 11px;
-  background: var(--bg);
-  padding: 2px 6px;
-  border-radius: 4px;
+
+/* Connector line between steps */
+.step:not(:last-child) .step-line {
+  position: absolute;
+  left: 15px;
+  top: 32px;
+  bottom: -6px;
+  width: 2px;
+  background: var(--border);
+}
+
+.step-num {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  border: 2px solid rgba(249, 115, 22, .3);
   color: var(--accent);
-  word-break: break-all;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
 }
-.card {
+
+/* Last step (paste) gets filled orange */
+.step:last-child .step-num {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.step-body {
+  padding-bottom: 22px;
+  flex: 1;
+  min-width: 0;
+}
+
+.step-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.4;
+  margin-bottom: 2px;
+}
+
+.step-desc {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+/* Inline tag pill (for "Important Links") */
+.tag-pill {
+  display: inline-block;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 7px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-soft);
+  font-family: var(--mono);
+  white-space: nowrap;
+}
+
+/* Supported URL hint box */
+.url-hint {
+  margin-top: 20px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 24px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  padding: 14px 16px;
 }
-.card .form-group {
-  margin-bottom: 18px;
-}
-.card label {
+.url-hint-label {
   font-size: 11px;
   font-weight: 600;
   color: var(--muted);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  display: block;
-  margin-bottom: 5px;
+  letter-spacing: .5px;
+  margin-bottom: 8px;
 }
-.card input {
-  background: var(--bg);
+.url-example {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--accent);
+  background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  padding: 10px 14px;
-  font-size: 14px;
-  color: var(--text);
-  width: 100%;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  padding: 8px 10px;
+  word-break: break-all;
+  line-height: 1.5;
+  margin-bottom: 6px;
 }
-.card input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-dim);
-}
-.card input::placeholder {
+.url-hint-note {
+  font-size: 11px;
   color: var(--muted);
-  opacity: 0.7;
+  line-height: 1.5;
 }
-.card .date-group {
-  display: flex;
+.url-hint-note span {
+  color: var(--green);
+  font-weight: 600;
+}
+
+/* ── Right — form card ──────────────────────── */
+.form-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 26px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, .05);
+  position: sticky;
+  top: calc(14px + 54px + 14px);  /* below floating pill nav */
+}
+.form-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+  letter-spacing: -0.3px;
+}
+.form-card-sub {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 22px;
+  line-height: 1.5;
+}
+
+/* Date row */
+.date-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 12px;
 }
-.card .date-group .form-group {
-  flex: 1;
-}
-.card .form-actions {
+
+/* Form actions */
+.form-actions {
   display: flex;
   gap: 10px;
-  margin-top: 16px;
+  margin-top: 20px;
 }
-.card .form-actions .btn-primary {
-  background: var(--accent);
-  color: #0B0B0E;
+.form-actions .btn-primary {
+  flex: 1;
+  justify-content: center;
 }
-.card .form-actions .btn-primary:hover {
-  box-shadow: 0 0 20px var(--accent-glow);
-}
-.card .form-actions .btn-ghost {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text-soft);
-}
-.card .form-actions .btn-ghost:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-}
-/* Date picker tweaks */
-input[type="date"] {
-  appearance: none;
-  -webkit-appearance: none;
-}
+
+/* Date picker icon tint to match light theme */
 input[type="date"]::-webkit-calendar-picker-indicator {
-  filter: invert(0.8);
+  opacity: .45;
   cursor: pointer;
 }
+
+/* ── Responsive ─────────────────────────────── */
+@media (max-width: 720px) {
+  .add-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .form-card { position: static; box-shadow: none; }
+}
+
+@media (max-width: 480px) {
+  .date-row { grid-template-columns: 1fr; }
+  .form-actions { flex-direction: column; }
+  .form-actions .btn { justify-content: center; }
+}
+
 {% endblock %}
 
 {% block content %}
-<div style="max-width:640px">
-  <div class="page-header">
-    <a href="{{ url_for('main.dashboard') }}" class="back-link">← Back to dashboard</a>
-    <h1 style="margin-top:12px;">Add a subject</h1>
-    <p>Paste in the Google Calendar embed link and give the subject a short name. Optionally, restrict the events to a specific time window.</p>
-  </div>
+<div class="add-page">
 
-  <div class="hint">
-    <strong>Supported URL format:</strong><br/>
-    <code>https://calendar.google.com/calendar/embed?src=c_xxxxx%40group.calendar.google.com&amp;ctz=Asia%2FKolkata</code><br/>
-    The calendar must be set to <strong>Public</strong> for syncing to work.<br/><br/>
-    <strong>Time period (optional):</strong> Leave the date fields blank to sync all events, or choose a start and end date to only fetch lectures within that range.
-  </div>
+  <a href="{{ url_for('main.dashboard') }}" class="back-link">← Back to dashboard</a>
 
-  <div class="card">
-    <form method="POST" id="add-form">
-      <div class="form-group">
-        <label>Subject Name</label>
-        <input type="text" name="subject_name" placeholder="e.g. DSA, DBMS, Maths-2" required autofocus />
-      </div>
-      <div class="form-group">
-        <label>Google Calendar Link</label>
-        <input type="url" name="calendar_url"
-               placeholder="https://calendar.google.com/calendar/embed?src=..."
-               required />
+  <div class="add-grid">
+
+    <!-- ── Left: Instructions ──────────────────── -->
+    <div class="howto-side">
+      <div class="howto-header">
+        <h1>Add a subject</h1>
+        <p>Follow the steps below to find your course calendar link from the IITM BS student dashboard.</p>
       </div>
 
-      <!-- Date fields -->
-      <div class="date-group">
-        <div class="form-group">
-          <label>From (start)</label>
-          <input type="date" name="filter_start" />
+      <div class="steps">
+
+        <div class="step">
+          <div class="step-line"></div>
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <div class="step-title">Open the IITM BS student dashboard</div>
+            <div class="step-desc">Go to <strong>study.iitm.ac.in</strong> and sign in with your student credentials.</div>
+          </div>
         </div>
-        <div class="form-group">
-          <label>Until (end)</label>
-          <input type="date" name="filter_end" />
+
+        <div class="step">
+          <div class="step-line"></div>
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <div class="step-title">Open the subject</div>
+            <div class="step-desc">Click on the course you want to track — DSA, DBMS, Maths, or any active subject.</div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-line"></div>
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <div class="step-title">Go to the <span class="tag-pill">Important Links</span> tab</div>
+            <div class="step-desc">Inside the subject page, switch to the <strong>Important Links</strong> tab in the top navigation.</div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-line"></div>
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <div class="step-title">Copy the calendar link</div>
+            <div class="step-desc">Find the Google Calendar link listed on that page. Right-click → Copy link, or click to open it and copy the URL from your browser.</div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <div class="step-title">Paste it in the form →</div>
+            <div class="step-desc">Paste the link into the <strong>Calendar Link</strong> field on the right and hit <strong>Add Subject</strong>.</div>
+          </div>
+        </div>
+
+      </div><!-- /.steps -->
+
+      <div class="url-hint">
+        <div class="url-hint-label">Both URL formats are supported</div>
+        <div class="url-example">calendar.google.com/calendar/embed?src=c_xxx%40group.calendar.google.com</div>
+        <div class="url-example">calendar.google.com/calendar/u/0/r?cid=Y18z…</div>
+        <div class="url-hint-note">
+          <span>✓</span> The app auto-converts either format — just paste whatever the dashboard gives you.
+          The calendar must be <strong>public</strong> for syncing to work.
         </div>
       </div>
 
-      <div class="form-actions">
-        <button type="submit" class="btn btn-primary" id="add-btn">
-          Add &amp; Sync Calendar
-        </button>
-        <a href="{{ url_for('main.dashboard') }}" class="btn btn-ghost">Cancel</a>
-      </div>
-    </form>
-  </div>
-</div>
+    </div><!-- /.howto-side -->
+
+    <!-- ── Right: Form ─────────────────────────── -->
+    <div>
+      <div class="form-card">
+        <div class="form-card-title">Subject details</div>
+        <div class="form-card-sub">Give it a short name and paste the calendar link. Date filters are optional — leave blank to sync everything.</div>
+
+        <form method="POST" id="add-form">
+
+          <div class="form-group">
+            <label>Subject Name</label>
+            <input
+              type="text"
+              name="subject_name"
+              placeholder="e.g. DSA, DBMS, Maths-2"
+              required
+              autofocus
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Calendar Link</label>
+            <input
+              type="url"
+              name="calendar_url"
+              placeholder="Paste the Google Calendar link here"
+              required
+            />
+          </div>
+
+          <div class="date-row">
+            <div class="form-group" style="margin-bottom:0">
+              <label>From date <span style="color:var(--border);font-weight:400">(optional)</span></label>
+              <input type="date" name="filter_start" />
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+              <label>Until date <span style="color:var(--border);font-weight:400">(optional)</span></label>
+              <input type="date" name="filter_end" />
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="add-btn">
+              Add Subject
+            </button>
+            <a href="{{ url_for('main.dashboard') }}" class="btn btn-ghost">Cancel</a>
+          </div>
+
+        </form>
+      </div><!-- /.form-card -->
+    </div>
+
+  </div><!-- /.add-grid -->
+</div><!-- /.add-page -->
 {% endblock %}
 
 {% block scripts %}
 <script>
-document.getElementById('add-form').addEventListener('submit', function() {
+document.getElementById('add-form').addEventListener('submit', function () {
   const btn = document.getElementById('add-btn');
   btn.innerHTML = '<span class="spinner"></span> Syncing…';
   btn.disabled = true;

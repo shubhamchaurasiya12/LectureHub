@@ -1,4 +1,4 @@
-# main.py
+# D:\iitm_scheduler\app\main.py
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify
 from datetime import datetime
 import pytz

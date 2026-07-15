@@ -1,4 +1,3 @@
-<!-- D:\iitm_scheduler\templates\event.html -->
 {% extends "base.html" %}
 {% block title %}{{ ev.calendar_title }} – IITM Lecture Tracker{% endblock %}
 
@@ -124,41 +123,83 @@
 }
 
 /* ── Video Container ───────────────────────────── */
-.video-container {
+/*
+ * Drive's player has a fixed internal render width (~640px).
+ * Giving the iframe exactly 640×360 and scaling it DOWN via CSS
+ * transform means Drive renders its full UI — nothing gets cropped.
+ * JS sets the scale factor and keeps wrapper height in sync on resize.
+ */
+.video-wrapper {
   position: relative;
-  background: #000;
+  width: 100%;
   border-radius: var(--radius);
   overflow: hidden;
   border: 1px solid var(--border);
+  background: #000;
+  /* height driven by JS; this fallback shows something before JS runs */
   aspect-ratio: 16 / 9;
-  width: 100%;
 }
-.video-container iframe {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+.video-wrapper iframe {
+  display: block;
+  width: 640px;      /* Drive's natural render width — do not change */
+  height: 360px;     /* 16:9 of 640px */
   border: 0;
+  transform-origin: top left;
+  /* transform: scale(N)  ← set by scaleVideo() in JS */
 }
-.video-empty {
+
+/* ── Empty / error states ─────────────────────── */
+.video-empty,
+.video-error {
   position: absolute;
   inset: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 10px;
   padding: 24px;
   text-align: center;
   color: var(--muted);
   background: var(--bg);
+  font-size: 13px;
 }
 .video-empty .icon {
   font-size: 34px;
-  margin-bottom: 10px;
+  margin-bottom: 4px;
 }
 .video-empty .btn {
-  margin-top: 14px;
+  margin-top: 10px;
+}
+
+/* ── Loading overlay ──────────────────────────── */
+.video-loader {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: #000;
+  z-index: 2;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.video-loader.hidden { opacity: 0; }
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(255,255,255,0.12);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.video-loader-text {
+  font-size: 12px;
+  color: rgba(255,255,255,0.4);
+  font-family: var(--mono);
 }
 
 /* ── Notes ────────────────────────────────────── */
@@ -192,6 +233,7 @@
   resize: vertical;
   outline: none;
   transition: border-color 0.15s, box-shadow 0.15s;
+  box-sizing: border-box;
 }
 #notes-textarea:focus {
   border-color: var(--accent);
@@ -205,55 +247,62 @@
   flex-wrap: wrap;
   gap: 6px;
 }
-#notes-status {
-  font-size: 11px;
-  color: var(--muted);
-}
-.notes-footer .btn-primary {
-  background: var(--accent);
-  color: #0B0B0E;
-}
-.notes-footer .btn-primary:hover {
-  box-shadow: 0 0 18px var(--accent-glow);
-}
+#notes-status { font-size: 11px; color: var(--muted); }
+.notes-footer .btn-primary { background: var(--accent); color: #0B0B0E; }
+.notes-footer .btn-primary:hover { box-shadow: 0 0 18px var(--accent-glow); }
 
-/* ── Responsive ────────────────────────────────── */
+/* ── Mobile: stacked with tab toggle ─────────── */
 @media (max-width: 900px) {
-  .event-layout {
-    flex-direction: column;
-  }
+  .event-layout { flex-direction: column; gap: 0; }
   .video-pane,
-  .notes-pane {
-    flex: 1 1 auto;
-    width: 100%;
-  }
+  .notes-pane   { flex: 1 1 auto; width: 100%; }
+  .notes-pane   { display: none; }
+  .notes-pane.active { display: block; }
   .notes-card {
     position: static;
+    border-radius: 0 0 var(--radius) var(--radius);
+    border-top: none;
+    padding: 16px;
   }
-  #notes-textarea {
-    min-height: 180px;
+  #notes-textarea { min-height: 160px; }
+  .mobile-tabs {
+    display: flex;
+    border: 1px solid var(--border);
+    border-top: none;
+    border-bottom: none;
+    background: var(--surface);
+  }
+  .mobile-tab {
+    flex: 1;
+    padding: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+    color: var(--muted);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-family: inherit;
+    transition: color 0.15s, border-color 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mobile-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
   }
 }
+
+/* Tab bar hidden on desktop */
+.mobile-tabs { display: none; }
+@media (max-width: 900px) { .mobile-tabs { display: flex; } }
+
 @media (max-width: 600px) {
-  .event-header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .event-header-actions {
-    justify-content: flex-start;
-    width: 100%;
-  }
-  .watch-toggle-btn {
-    width: 100%;
-    justify-content: center;
-  }
-  .event-meta {
-    font-size: 11px;
-    gap: 8px;
-  }
-  .video-container {
-    aspect-ratio: 16 / 9;
-  }
+  .event-header { flex-direction: column; align-items: stretch; }
+  .event-header-actions { justify-content: flex-start; width: 100%; }
+  .watch-toggle-btn { width: 100%; justify-content: center; }
+  .event-meta { font-size: 11px; gap: 8px; }
+  .video-pane { width: 100%; }
 }
 {% endblock %}
 
@@ -291,31 +340,47 @@
 <div class="event-layout">
   <!-- Video Pane -->
   <div class="video-pane">
-    <div class="video-container">
+    <div class="video-wrapper" id="video-wrapper">
       {% if embed_url %}
-        <iframe src="{{ embed_url }}" allow="autoplay; fullscreen" allowfullscreen></iframe>
+        <div class="video-loader" id="video-loader">
+          <div class="spinner"></div>
+          <div class="video-loader-text">Loading video…</div>
+        </div>
+        <iframe
+          id="lecture-iframe"
+          src="{{ embed_url }}"
+          allowfullscreen
+          allow="autoplay; picture-in-picture"
+          referrerpolicy="no-referrer-when-downgrade"
+          onload="onVideoLoaded()"
+        ></iframe>
       {% else %}
         <div class="video-empty">
           <div class="icon">🎬</div>
           <div>
             {% if ev.drive_link %}
-              This recording can't be embedded directly — it's a Docs/Slides link, not a video file.
+              This recording can't be played directly — it may be a Docs/Slides link, not a video file.
             {% else %}
               No recording has been linked to this session yet.
             {% endif %}
           </div>
           {% if ev.drive_link %}
-            <a class="btn btn-ghost btn-sm" href="{{ ev.drive_link }}" target="_blank" rel="noopener">Open link instead</a>
+            <a class="btn btn-ghost btn-sm" href="{{ ev.drive_link }}" target="_blank" rel="noopener">Open in Drive instead</a>
           {% elif ev.meet_link %}
             <a class="btn btn-ghost btn-sm" href="{{ ev.meet_link }}" target="_blank" rel="noopener">Join Meet instead</a>
           {% endif %}
         </div>
       {% endif %}
-    </div>
+    </div><!-- /.video-wrapper -->
+  </div>
+
+  <!-- Mobile tab bar (hidden on desktop) -->
+  <div class="mobile-tabs" id="mobile-tabs">
+    <button class="mobile-tab" id="tab-notes" onclick="showTab('notes')">📝 Notes</button>
   </div>
 
   <!-- Notes Pane -->
-  <div class="notes-pane">
+  <div class="notes-pane" id="notes-pane">
     <div class="notes-card">
       <h3>Your Notes</h3>
       <textarea id="notes-textarea" placeholder="Take notes while you watch…">{{ ev.user_description or '' }}</textarea>
@@ -333,6 +398,7 @@
 const EVENT_ID = {{ ev.id }};
 let saveTimer = null;
 
+/* ── Notes ─────────────────────────────────────── */
 function setNotesStatus(msg) {
   document.getElementById('notes-status').textContent = msg;
 }
@@ -352,28 +418,96 @@ async function saveNotes() {
   }
 }
 
-// Autosave 1.2s after the user stops typing
 document.getElementById('notes-textarea').addEventListener('input', () => {
   clearTimeout(saveTimer);
   setNotesStatus('Typing…');
   saveTimer = setTimeout(saveNotes, 1200);
 });
 
+/* ── Watch toggle ───────────────────────────────── */
 async function toggleWatch() {
-  const res = await fetch(`/event/${EVENT_ID}/watched`, { method: 'POST' });
+  const res  = await fetch(`/event/${EVENT_ID}/watched`, { method: 'POST' });
   const data = await res.json();
-  const btn = document.getElementById('watch-toggle');
+  const btn  = document.getElementById('watch-toggle');
   const icon = document.getElementById('watch-icon');
-  const label = document.getElementById('watch-label');
+  const lbl  = document.getElementById('watch-label');
   if (data.watched) {
     btn.classList.add('done');
     icon.textContent = '✓';
-    label.textContent = 'Watched';
+    lbl.textContent  = 'Watched';
   } else {
     btn.classList.remove('done');
     icon.textContent = '○';
-    label.textContent = 'Mark as watched';
+    lbl.textContent  = 'Mark as watched';
   }
 }
+
+/* ── Video scale-to-fit ─────────────────────────────────────────────
+ * Drive renders its player at a fixed 640px internal width regardless
+ * of the iframe's CSS size. On mobile (<640px) the right side overflows
+ * and gets clipped. Fix: render at 640×360 and scale DOWN via CSS
+ * transform so it fills the container with nothing cut off.
+ * ─────────────────────────────────────────────────────────────────── */
+const IFRAME_W = 640;
+const IFRAME_H = 360;
+
+function scaleVideo() {
+  const wrapper = document.getElementById('video-wrapper');
+  const iframe  = wrapper && wrapper.querySelector('iframe');
+  if (!wrapper || !iframe) return;
+
+  const containerW = wrapper.clientWidth;
+  const scale      = containerW / IFRAME_W;
+  const scaledH    = Math.round(IFRAME_H * scale);
+
+  iframe.style.transform = `scale(${scale})`;
+  // Override the aspect-ratio fallback so height matches the scaled iframe
+  wrapper.style.height      = scaledH + 'px';
+  wrapper.style.aspectRatio = 'unset';
+}
+
+scaleVideo();
+window.addEventListener('resize', scaleVideo);
+if (window.ResizeObserver) {
+  new ResizeObserver(scaleVideo)
+    .observe(document.getElementById('video-wrapper') || document.body);
+}
+
+/* ── Loading overlay ────────────────────────────── */
+function onVideoLoaded() {
+  const loader = document.getElementById('video-loader');
+  if (loader) {
+    loader.classList.add('hidden');
+    setTimeout(() => loader.remove(), 350);
+  }
+  scaleVideo(); // re-measure after iframe content settles
+}
+
+/* ── Mobile tabs ────────────────────────────────── */
+function showTab(tab) {
+  const notesPane = document.getElementById('notes-pane');
+  const tabBtn    = document.getElementById('tab-notes');
+  if (tab !== 'notes') return;
+  const isOpen = notesPane.classList.contains('active');
+  if (isOpen) {
+    notesPane.classList.remove('active');
+    tabBtn.classList.remove('active');
+  } else {
+    notesPane.classList.add('active');
+    tabBtn.classList.add('active');
+    setTimeout(() => notesPane.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+  }
+}
+
+/* ── Desktop: always show notes pane ───────────── */
+function syncLayout() {
+  const notesPane = document.getElementById('notes-pane');
+  if (window.innerWidth > 900) {
+    notesPane.classList.add('active');
+    notesPane.style.display = '';
+  }
+}
+syncLayout();
+window.addEventListener('resize', syncLayout);
 </script>
 {% endblock %}
