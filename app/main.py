@@ -11,11 +11,13 @@ from app.utils import drive_embed_url
 main_bp = Blueprint('main', __name__)
 IST = pytz.timezone('Asia/Kolkata')
 
-@main_bp.route('/')
+@main_bp.route("/")
 def index():
+
     if current_user.is_authenticated:
-        return redirect(url_for('main.dashboard'))
-    return redirect(url_for('auth.login'))
+        return redirect(url_for("main.dashboard"))
+
+    return render_template("home.html")
 
 @main_bp.route('/setup', methods=['GET', 'POST'])
 @login_required

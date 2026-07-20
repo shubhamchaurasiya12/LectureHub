@@ -1,0 +1,1207 @@
+{% extends "base.html" %}
+
+{% block title %}LecFlow – Smart Lecture Management for IIT Madras BS Students{% endblock %}
+
+{% block extra_styles %}
+<style>
+/* ─────────────────────────────────────────────────────────
+   RESET / SCOPE
+   ───────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+/* ─────────────────────────────────────────────────────────
+   ANCHOR SCROLL OFFSET  (so navbar doesn't clip targets)
+   ───────────────────────────────────────────────────────── */
+[id] { scroll-margin-top: 80px; }
+
+/* ─────────────────────────────────────────────────────────
+   REDUCED-MOTION GUARD
+   ───────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ─────────────────────────────────────────────────────────
+   HERO
+   ───────────────────────────────────────────────────────── */
+.hero {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+    padding: 40px 0 72px;
+    position: relative;
+}
+
+.hero-content { position: relative; z-index: 2; }
+
+/* badge */
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(249,115,22,.10);
+    color: var(--accent);
+    padding: 6px 16px 6px 10px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    border: 1px solid rgba(249,115,22,.20);
+    letter-spacing: .3px;
+}
+
+.badge-dot {
+    width: 7px; height: 7px;
+    background: var(--accent);
+    border-radius: 50%;
+    flex-shrink: 0;
+    animation: blink 2.4s ease-in-out infinite;
+}
+@keyframes blink {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: .4; transform: scale(.75); }
+}
+
+/* headline */
+.hero h1 {
+    font-size: clamp(36px, 5vw, 58px);
+    font-weight: 800;
+    line-height: 1.08;
+    letter-spacing: -1.5px;
+    margin-bottom: 20px;
+}
+
+.gradient-text {
+    background: linear-gradient(130deg, #F97316 30%, #D97706 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* description */
+.hero-description {
+    font-size: 17px;
+    color: var(--text-soft);
+    max-width: 500px;
+    line-height: 1.75;
+    margin-bottom: 36px;
+}
+
+/* CTA row */
+.hero-actions {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 52px;
+}
+
+.btn-secondary {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 12px 26px;
+    border-radius: 100px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background .2s, border-color .2s, box-shadow .2s, transform .15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.btn-secondary:hover {
+    background: var(--surface2);
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(0,0,0,.08);
+}
+
+/* trust strip */
+.hero-trust {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.trust-avatars {
+    display: flex;
+}
+.trust-avatar {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    border: 2px solid var(--bg, #fff);
+    background: var(--accent-dim);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    margin-left: -8px;
+    flex-shrink: 0;
+}
+.trust-avatar:first-child { margin-left: 0; }
+.trust-text {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 500;
+}
+.trust-text strong { color: var(--text); }
+
+/* ─────────────────────────────────────────────────────────
+   HERO VISUAL
+   ───────────────────────────────────────────────────────── */
+.hero-visual {
+    position: relative;
+    height: 440px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* glow blobs – use pseudo-elements so z-index is clean */
+.hero-visual::before,
+.hero-visual::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+}
+.hero-visual::before {
+    width: 340px; height: 340px;
+    background: radial-gradient(circle, rgba(249,115,22,.10), transparent 68%);
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    animation: blob-pulse 5s ease-in-out infinite;
+}
+.hero-visual::after {
+    width: 180px; height: 180px;
+    background: radial-gradient(circle, rgba(249,115,22,.07), transparent 70%);
+    top: 10%; right: 4%;
+    animation: blob-pulse 7s ease-in-out infinite reverse;
+}
+@keyframes blob-pulse {
+    0%,100% { transform: translate(-50%,-50%) scale(1); opacity: .6; }
+    50%      { transform: translate(-50%,-50%) scale(1.12); opacity: 1; }
+}
+
+/* card grid */
+.floating-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    width: 100%;
+    max-width: 360px;
+    position: relative;
+    z-index: 2;
+    /* isolate from ::before/::after transforms */
+}
+
+/* individual cards – NO hardcoded `background: white` */
+.floating-card {
+    background: var(--surface);
+    border-radius: var(--radius, 14px);
+    padding: 20px 18px;
+    border: 1px solid var(--border);
+    box-shadow: 0 6px 20px rgba(0,0,0,.06);
+    text-align: center;
+    /* float animation per card, not stacked transforms */
+    will-change: transform;
+}
+.floating-card:nth-child(1) { animation: float 5.5s ease-in-out infinite 0s; }
+.floating-card:nth-child(2) { animation: float 5.5s ease-in-out infinite 1.4s; }
+.floating-card:nth-child(3) { animation: float 5.5s ease-in-out infinite 2.8s; }
+.floating-card:nth-child(4) { animation: float 5.5s ease-in-out infinite .7s; }
+
+@keyframes float {
+    0%,100% { transform: translateY(0); }
+    50%      { transform: translateY(-9px); }
+}
+
+.floating-card.featured {
+    grid-column: 1 / -1;
+    background: var(--accent-dim);
+    border-color: rgba(249,115,22,.30);
+}
+
+.card-icon  { font-size: 26px; margin-bottom: 6px; display: block; }
+.card-text  { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+.card-count { font-size: 22px; font-weight: 800; color: var(--text); margin-top: 4px; }
+
+/* ─────────────────────────────────────────────────────────
+   COURSE STRIP  (new section)
+   ───────────────────────────────────────────────────────── */
+.course-strip {
+    padding: 32px 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+    position: relative;
+}
+.course-strip-label {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    margin-bottom: 20px;
+}
+.course-scroll-track {
+    display: flex;
+    gap: 10px;
+    /* marquee via CSS */
+    animation: marquee 28s linear infinite;
+    width: max-content;
+}
+.course-scroll-track:hover { animation-play-state: paused; }
+@keyframes marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+}
+.course-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 18px;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-soft);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.course-pill-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+}
+
+/* ─────────────────────────────────────────────────────────
+   SECTION SHARED
+   ───────────────────────────────────────────────────────── */
+.section-header {
+    text-align: center;
+    margin-bottom: 52px;
+    padding: 0 20px;
+}
+.section-tag {
+    display: inline-block;
+    background: var(--accent-dim);
+    color: var(--accent);
+    padding: 4px 14px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin-bottom: 14px;
+}
+.section-header h2 {
+    font-size: clamp(26px, 4vw, 38px);
+    font-weight: 800;
+    margin-bottom: 12px;
+    letter-spacing: -.5px;
+    line-height: 1.15;
+}
+.section-subtitle {
+    font-size: 16px;
+    color: var(--text-soft);
+    max-width: 560px;
+    margin: 0 auto;
+    line-height: 1.7;
+}
+
+/* ─────────────────────────────────────────────────────────
+   FEATURES
+   ───────────────────────────────────────────────────────── */
+.features {
+    padding: 80px 32px;
+    background: var(--surface);
+    border-radius: 24px;
+    margin: 52px 0;
+    position: relative;
+    overflow: hidden;
+}
+/* subtle grid pattern */
+.features::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: .35;
+    pointer-events: none;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+    position: relative; /* above ::before */
+}
+
+.feature-card {
+    background: var(--bg, #fff);
+    padding: 28px 22px;
+    border-radius: var(--radius, 14px);
+    border: 1px solid var(--border);
+    transition: transform .25s, box-shadow .25s, border-color .25s;
+    position: relative;
+    overflow: hidden;
+}
+.feature-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), #D97706);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform .28s ease;
+}
+.feature-card:hover::after { transform: scaleX(1); }
+.feature-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 28px rgba(0,0,0,.08);
+    border-color: rgba(249,115,22,.3);
+}
+
+.feature-icon {
+    font-size: 30px;
+    margin-bottom: 14px;
+    display: block;
+}
+.feature-card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+.feature-card p {
+    color: var(--text-soft);
+    line-height: 1.65;
+    font-size: 13.5px;
+    margin: 0;
+}
+
+/* ─────────────────────────────────────────────────────────
+   WHY LECFLOW  (new comparison section)
+   ───────────────────────────────────────────────────────── */
+.why-section {
+    padding: 80px 0;
+}
+.why-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    align-items: start;
+}
+.why-before {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius, 14px);
+    padding: 28px 24px;
+}
+.why-after {
+    background: var(--accent-dim);
+    border: 1px solid rgba(249,115,22,.25);
+    border-radius: var(--radius, 14px);
+    padding: 28px 24px;
+}
+.why-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.why-before .why-label { color: var(--muted); }
+.why-after  .why-label { color: var(--accent); }
+.why-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13.5px;
+    line-height: 1.5;
+}
+.why-row:last-child { border-bottom: none; padding-bottom: 0; }
+.why-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+.why-before .why-row { color: var(--text-soft); }
+.why-after  .why-row { color: var(--text); font-weight: 500; }
+
+/* ─────────────────────────────────────────────────────────
+   HOW IT WORKS
+   ───────────────────────────────────────────────────────── */
+.how-it-works { padding: 80px 0; }
+
+.steps {
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    gap: 0;
+    padding: 0 20px;
+    flex-wrap: nowrap;
+    position: relative;
+}
+/* connecting line */
+.steps::before {
+    content: '';
+    position: absolute;
+    top: 54px; /* align with step icon centers */
+    left: calc(50% - 300px);
+    right: calc(50% - 300px);
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: .25;
+    pointer-events: none;
+}
+
+.step {
+    flex: 1;
+    min-width: 0;
+    max-width: 260px;
+    text-align: center;
+    padding: 36px 20px 28px;
+    background: var(--surface);
+    border-radius: var(--radius, 14px);
+    border: 1px solid var(--border);
+    transition: transform .25s, box-shadow .25s, border-color .25s;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 1;
+}
+.step:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 28px rgba(0,0,0,.08);
+    border-color: rgba(249,115,22,.35);
+}
+
+.step-number {
+    position: absolute;
+    top: -13px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent);
+    color: #fff;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    font-weight: 800;
+    box-shadow: 0 2px 8px rgba(249,115,22,.4);
+}
+.step-icon { font-size: 38px; margin-bottom: 10px; display: block; }
+.step h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+.step p  { color: var(--text-soft); font-size: 13.5px; line-height: 1.65; margin: 0; }
+
+/* connectors between steps */
+.step-arrow {
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    color: var(--accent);
+    opacity: .55;
+    font-size: 22px;
+    flex-shrink: 0;
+    z-index: 1;
+    align-self: center;
+    margin-top: -20px; /* offset for step-number bump */
+}
+
+/* ─────────────────────────────────────────────────────────
+   TESTIMONIALS
+   ───────────────────────────────────────────────────────── */
+.testimonials {
+    padding: 80px 32px;
+    background: var(--surface);
+    border-radius: 24px;
+    margin: 0 0 52px;
+}
+
+.testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+}
+
+.testimonial-card {
+    background: var(--bg, #fff);
+    padding: 24px 22px;
+    border-radius: var(--radius, 14px);
+    border: 1px solid var(--border);
+    transition: transform .25s, box-shadow .25s;
+    display: flex;
+    flex-direction: column;
+}
+.testimonial-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 28px rgba(0,0,0,.08);
+}
+
+.testimonial-stars { font-size: 15px; margin-bottom: 12px; letter-spacing: 1px; }
+.testimonial-card > p {
+    font-size: 13.5px;
+    line-height: 1.75;
+    color: var(--text-soft);
+    margin-bottom: 20px;
+    flex: 1;
+}
+
+.testimonial-author { display: flex; align-items: center; gap: 12px; }
+.author-avatar {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: var(--accent-dim);
+    color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    flex-shrink: 0;
+    border: 1px solid rgba(249,115,22,.2);
+}
+.author-name { font-weight: 700; font-size: 13.5px; }
+.author-role { font-size: 11.5px; color: var(--muted); margin-top: 1px; }
+
+/* ─────────────────────────────────────────────────────────
+   CTA
+   ───────────────────────────────────────────────────────── */
+.cta {
+    padding: 20px 0 60px;
+    text-align: center;
+}
+.cta-content {
+    max-width: 620px;
+    margin: 0 auto;
+    padding: 64px 40px;
+    background: linear-gradient(135deg, #F97316 0%, #D97706 100%);
+    border-radius: 24px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+}
+/* decorative ring */
+.cta-content::before {
+    content: '';
+    position: absolute;
+    top: -40%; right: -20%;
+    width: 360px; height: 360px;
+    border-radius: 50%;
+    border: 60px solid rgba(255,255,255,.07);
+    pointer-events: none;
+}
+.cta-content::after {
+    content: '';
+    position: absolute;
+    bottom: -50%; left: -15%;
+    width: 280px; height: 280px;
+    border-radius: 50%;
+    border: 40px solid rgba(255,255,255,.05);
+    pointer-events: none;
+}
+.cta-content h2 {
+    font-size: clamp(26px, 4vw, 38px);
+    font-weight: 800;
+    margin-bottom: 14px;
+    position: relative; z-index: 1;
+    letter-spacing: -.5px;
+}
+.cta-content > p {
+    font-size: 17px;
+    opacity: .92;
+    margin-bottom: 32px;
+    position: relative; z-index: 1;
+    line-height: 1.6;
+}
+.cta-content .btn-primary {
+    background: #fff;
+    color: var(--accent);
+    position: relative; z-index: 1;
+}
+.cta-content .btn-primary:hover {
+    background: rgba(255,255,255,.9);
+    box-shadow: 0 8px 28px rgba(0,0,0,.18);
+    transform: translateY(-2px);
+}
+.cta-note {
+    font-size: 12.5px;
+    opacity: .75;
+    margin-top: 14px;
+    position: relative; z-index: 1;
+    letter-spacing: .2px;
+}
+
+/* ─────────────────────────────────────────────────────────
+   FOOTER STRIP  (new)
+   ───────────────────────────────────────────────────────── */
+.footer-strip {
+    border-top: 1px solid var(--border);
+    padding: 28px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.footer-brand {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.footer-brand span { color: var(--accent); }
+.footer-copy {
+    font-size: 12px;
+    color: var(--muted);
+}
+.footer-links {
+    display: flex;
+    gap: 20px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.footer-links a {
+    font-size: 12.5px;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color .15s;
+}
+.footer-links a:hover { color: var(--accent); }
+
+/* ─────────────────────────────────────────────────────────
+   SCROLL-REVEAL UTILITY  (JS will toggle this)
+   ───────────────────────────────────────────────────────── */
+.reveal {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity .55s ease, transform .55s ease;
+}
+.reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ─────────────────────────────────────────────────────────
+   RESPONSIVE
+   ───────────────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+    .hero {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: 40px;
+        padding: 32px 0 60px;
+    }
+    .hero-description { margin-left: auto; margin-right: auto; }
+    .hero-actions      { justify-content: center; }
+    .hero-trust        { justify-content: center; }
+    .hero-visual       { height: 340px; }
+    .floating-grid     { max-width: 320px; }
+
+    .why-grid { grid-template-columns: 1fr; }
+
+    .steps { flex-wrap: wrap; gap: 20px; }
+    .steps::before { display: none; }
+    .step  { max-width: 100%; width: 100%; }
+    .step-arrow {
+        transform: rotate(90deg);
+        padding: 4px 0;
+        margin-top: 0;
+    }
+
+    .footer-strip { flex-direction: column; text-align: center; }
+    .footer-strip .footer-links { justify-content: center; }
+}
+
+@media (max-width: 768px) {
+    .hero-visual       { height: 280px; }
+    .floating-grid     { max-width: 280px; gap: 10px; }
+    .floating-card     { padding: 14px 12px; }
+    .card-icon         { font-size: 22px; }
+    .card-count        { font-size: 19px; }
+
+    .features          { padding: 56px 20px; border-radius: 18px; }
+    .testimonials      { padding: 56px 20px; border-radius: 18px; }
+
+    .testimonials-grid { grid-template-columns: 1fr; }
+
+    .cta-content { padding: 44px 24px; margin: 0 16px; }
+
+    .steps { padding: 0; }
+}
+
+@media (max-width: 480px) {
+    .hero h1      { letter-spacing: -.8px; }
+    .hero-actions { flex-direction: column; align-items: stretch; }
+    .hero-actions .btn,
+    .hero-actions .btn-secondary { width: 100%; justify-content: center; }
+
+    .hero-visual   { height: 240px; }
+    .floating-grid { max-width: 220px; gap: 8px; }
+    .floating-card { padding: 12px 10px; }
+    .card-icon     { font-size: 18px; margin-bottom: 4px; }
+    .card-text     { font-size: 9.5px; }
+    .card-count    { font-size: 16px; }
+
+    .features-grid { grid-template-columns: 1fr; }
+    .cta-content h2 { font-size: 24px; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ── Hero ──────────────────────────────────────────────── -->
+<section class="hero">
+    <div class="hero-content">
+        <div class="hero-badge">
+            <span class="badge-dot"></span>
+            🎓 Built for IIT Madras BS Students
+        </div>
+
+        <h1>
+            Find. Learn.<br>
+            <span class="gradient-text">Flow.</span>
+        </h1>
+
+        <p class="hero-description">
+            One place for your IIT Madras BS lecture schedule, recorded sessions,
+            and notes — synced from your calendar, ready when you are.
+        </p>
+
+        <div class="hero-actions">
+            <a href="{{ url_for('auth.google_login') }}" class="btn btn-primary btn-lg">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2.2" style="flex-shrink:0;">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+                Get Started — It's Free
+            </a>
+            <a href="#features" class="btn-secondary">See What's Inside ↓</a>
+        </div>
+
+        <div class="hero-trust">
+            <div class="trust-avatars">
+                <div class="trust-avatar">AR</div>
+                <div class="trust-avatar">VS</div>
+                <div class="trust-avatar">PM</div>
+                <div class="trust-avatar">RK</div>
+                <div class="trust-avatar">DM</div>
+            </div>
+            <p class="trust-text">
+                Trusted by <strong>hundreds of BS students</strong> across terms
+            </p>
+        </div>
+    </div>
+
+    <div class="hero-visual">
+        <div class="floating-grid">
+            <div class="floating-card">
+                <span class="card-icon">📅</span>
+                <div class="card-text">Today's Sessions</div>
+                <div class="card-count">3</div>
+            </div>
+            <div class="floating-card">
+                <span class="card-icon">📹</span>
+                <div class="card-text">Recordings</div>
+                <div class="card-count">12</div>
+            </div>
+            <div class="floating-card">
+                <span class="card-icon">📝</span>
+                <div class="card-text">Your Notes</div>
+                <div class="card-count">8</div>
+            </div>
+            <div class="floating-card featured">
+                <span class="card-icon">🔄</span>
+                <div class="card-text">Auto-synced from iCal</div>
+                <div class="card-count" style="font-size:15px;font-weight:700;">Live</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── Course Strip ──────────────────────────────────────── -->
+<div class="course-strip">
+    <p class="course-strip-label">Works with your BS courses</p>
+    <div class="course-scroll-track" aria-hidden="true">
+        <!-- duplicated for seamless loop -->
+        {% set courses = [
+            ("📐", "Mathematics I"),
+            ("📊", "Statistics I"),
+            ("🐍", "Python Programming"),
+            ("💻", "Computational Thinking"),
+            ("📈", "Statistics II"),
+            ("🗃️", "Database Management"),
+            ("🤖", "Machine Learning Foundations"),
+            ("📉", "Business Analytics"),
+            ("📐", "Mathematics II"),
+            ("🌐", "Tools in Data Science"),
+        ] %}
+        {% for icon, name in courses %}
+        <span class="course-pill">
+            <span class="course-pill-dot"></span>{{ icon }} {{ name }}
+        </span>
+        {% endfor %}
+        <!-- duplicate for seamless loop -->
+        {% for icon, name in courses %}
+        <span class="course-pill">
+            <span class="course-pill-dot"></span>{{ icon }} {{ name }}
+        </span>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- ── Features ──────────────────────────────────────────── -->
+<section id="features" class="features">
+    <div class="section-header">
+        <span class="section-tag">Features</span>
+        <h2>Everything in One Place</h2>
+        <p class="section-subtitle">
+            Designed around the actual IIT Madras BS workflow — not a generic
+            student planner with the logo swapped out.
+        </p>
+    </div>
+
+    <div class="features-grid">
+        <div class="feature-card reveal">
+            <span class="feature-icon">📅</span>
+            <h3>iCal Calendar Sync</h3>
+            <p>Pulls your live sessions straight from the IIT Madras iCal feed, including recurring events and rescheduled classes — no manual entry needed.</p>
+        </div>
+        <div class="feature-card reveal">
+            <span class="feature-icon">🎥</span>
+            <h3>Lecture Recordings</h3>
+            <p>Watch Google Drive recordings inline without leaving the app. Each event links directly to the right file — no hunting through shared folders.</p>
+        </div>
+        <div class="feature-card reveal">
+            <span class="feature-icon">📝</span>
+            <h3>Per-Lecture Notes</h3>
+            <p>Write notes tied to a specific session. They autosave as you type and are ready the next time you revisit that lecture.</p>
+        </div>
+        <div class="feature-card reveal">
+            <span class="feature-icon">🔁</span>
+            <h3>Recurring Event Handling</h3>
+            <p>The app correctly expands RRULE recurrences, so weekly live sessions show up as individual, trackable events — not a single ambiguous entry.</p>
+        </div>
+        <div class="feature-card reveal">
+            <span class="feature-icon">📊</span>
+            <h3>Session Progress</h3>
+            <p>Mark sessions as watched or pending. See at a glance how many recordings you still need to catch up on before the next quiz.</p>
+        </div>
+        <div class="feature-card reveal">
+            <span class="feature-icon">🔒</span>
+            <h3>Secure Google Login</h3>
+            <p>Sign in with your Google account — no separate password to remember. Your data stays yours and is never shared with third parties.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ── Why LecFlow ───────────────────────────────────────── -->
+<section id="why" class="why-section">
+    <div class="section-header">
+        <span class="section-tag">Why LecFlow</span>
+        <h2>Replace the Spreadsheet</h2>
+        <p class="section-subtitle">
+            Most BS students track lectures in a Google Sheet or a sticky-notes
+            folder. LecFlow is what that spreadsheet was trying to be.
+        </p>
+    </div>
+
+    <div class="why-grid">
+        <div class="why-before reveal">
+            <div class="why-label">
+                <span>😓</span> Without LecFlow
+            </div>
+            <div class="why-row">
+                <span class="why-icon">❌</span>
+                Cross-checking the iCal URL manually every week to find live session links
+            </div>
+            <div class="why-row">
+                <span class="why-icon">❌</span>
+                Searching a shared Drive folder for the right recording after each session
+            </div>
+            <div class="why-row">
+                <span class="why-icon">❌</span>
+                Notes scattered across Notion, WhatsApp saved messages, and random docs
+            </div>
+            <div class="why-row">
+                <span class="why-icon">❌</span>
+                No idea how many recordings you still haven't watched before an exam
+            </div>
+            <div class="why-row">
+                <span class="why-icon">❌</span>
+                Recurring sessions sometimes missing or duplicated in calendar views
+            </div>
+        </div>
+
+        <div class="why-after reveal">
+            <div class="why-label">
+                <span>✨</span> With LecFlow
+            </div>
+            <div class="why-row">
+                <span class="why-icon">✅</span>
+                Live session links appear automatically from your iCal feed — click and join
+            </div>
+            <div class="why-row">
+                <span class="why-icon">✅</span>
+                Recording embedded directly in the event page, indexed by date and subject
+            </div>
+            <div class="why-row">
+                <span class="why-icon">✅</span>
+                Notes saved per lecture, autosync'd, accessible whenever you revisit
+            </div>
+            <div class="why-row">
+                <span class="why-icon">✅</span>
+                Visual watch-status on every session so you know exactly what's left
+            </div>
+            <div class="why-row">
+                <span class="why-icon">✅</span>
+                RRULE recurrences expanded correctly — every occurrence, properly dated
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── How It Works ──────────────────────────────────────── -->
+<section id="how-it-works" class="how-it-works">
+    <div class="section-header">
+        <span class="section-tag">How It Works</span>
+        <h2>Up in Three Steps</h2>
+        <p class="section-subtitle">From login to organised in under two minutes.</p>
+    </div>
+
+    <div class="steps">
+        <div class="step reveal">
+            <div class="step-number">1</div>
+            <span class="step-icon">🔑</span>
+            <h3>Sign In</h3>
+            <p>Use your Google account. No extra sign-up form. One click and you're in.</p>
+        </div>
+        <div class="step-arrow" aria-hidden="true">→</div>
+        <div class="step reveal">
+            <div class="step-number">2</div>
+            <span class="step-icon">🔗</span>
+            <h3>Add Your iCal</h3>
+            <p>Paste the IIT Madras BS iCal URL. LecFlow fetches and organises every session automatically.</p>
+        </div>
+        <div class="step-arrow" aria-hidden="true">→</div>
+        <div class="step reveal">
+            <div class="step-number">3</div>
+            <span class="step-icon">🚀</span>
+            <h3>Learn &amp; Track</h3>
+            <p>Watch recordings inline, write notes, mark sessions done. Stay on top of every subject.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ── Testimonials ──────────────────────────────────────── -->
+<section id="testimonials" class="testimonials">
+    <div class="section-header">
+        <span class="section-tag">Student Voices</span>
+        <h2>What BS Students Say</h2>
+        <p class="section-subtitle">
+            Feedback from students across different terms and levels of the program.
+        </p>
+    </div>
+
+    <div class="testimonials-grid">
+        <div class="testimonial-card reveal">
+            <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+            <p>"Finally stopped losing track of which recordings I'd actually watched. The per-lecture notes alone saved my Statistics II graded assignments."</p>
+            <div class="testimonial-author">
+                <div class="author-avatar">AR</div>
+                <div>
+                    <div class="author-name">Ananya R.</div>
+                    <div class="author-role">Foundation Level · Term 2</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="testimonial-card reveal">
+            <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+            <p>"The iCal sync just works. Recurring live sessions show up correctly every week — something my calendar app has always gotten wrong."</p>
+            <div class="testimonial-author">
+                <div class="author-avatar">VS</div>
+                <div>
+                    <div class="author-name">Vikram S.</div>
+                    <div class="author-role">Diploma Level · Term 4</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="testimonial-card reveal">
+            <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+            <p>"Watching recordings inside the event page instead of hunting through Drive is a small change that genuinely saves me 10 minutes every study session."</p>
+            <div class="testimonial-author">
+                <div class="author-avatar">PM</div>
+                <div>
+                    <div class="author-name">Priya M.</div>
+                    <div class="author-role">Degree Level · Term 6</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── CTA ───────────────────────────────────────────────── -->
+<section class="cta">
+    <div class="cta-content">
+        <h2>Ready to Find. Learn. Flow?</h2>
+        <p>
+            Sign in with Google, add your iCal link, and have your entire lecture
+            schedule organised in under two minutes — for free.
+        </p>
+        <a href="{{ url_for('auth.google_login') }}" class="btn btn-primary btn-lg">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.2" style="flex-shrink:0;">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+            Start Now — It's Free
+        </a>
+        <p class="cta-note">No credit card &nbsp;·&nbsp; No setup fee &nbsp;·&nbsp; Free for IIT Madras BS students</p>
+    </div>
+</section>
+
+<!-- ── Footer Strip ──────────────────────────────────────── -->
+<footer class="footer-strip">
+    <div class="footer-brand">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.2">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+        Lec<span>Flow</span>
+    </div>
+    <p class="footer-copy">
+        © {{ 2025 }} LecFlow · Made for IIT Madras BS students
+    </p>
+    <ul class="footer-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#why">Why LecFlow</a></li>
+        <li><a href="#how-it-works">How It Works</a></li>
+        <li><a href="{{ url_for('auth.google_login') }}">Sign In</a></li>
+    </ul>
+</footer>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+    'use strict';
+
+    /* ── Scroll-reveal ──────────────────────────────────── */
+    const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                // stagger siblings in the same parent
+                const siblings = Array.from(
+                    entry.target.parentElement.querySelectorAll('.reveal:not(.is-visible)')
+                );
+                const idx = siblings.indexOf(entry.target);
+                setTimeout(() => {
+                    entry.target.classList.add('is-visible');
+                }, Math.max(0, idx * 80));
+                revealObserver.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+
+    /* ── Smooth scroll for anchor links ────────────────── */
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            const target = document.querySelector(this.getAttribute('href'));
+            if (!target) return;
+            e.preventDefault();
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    });
+
+
+    /* ── Parallax on hero visual ────────────────────────── */
+    const heroVisual = document.querySelector('.hero-visual');
+    if (heroVisual && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        let rafId = null;
+        let targetX = 0, targetY = 0;
+        let currentX = 0, currentY = 0;
+
+        heroVisual.addEventListener('mousemove', (e) => {
+            const rect = heroVisual.getBoundingClientRect();
+            targetX = ((e.clientX - rect.left) / rect.width  - 0.5) * 12;
+            targetY = ((e.clientY - rect.top)  / rect.height - 0.5) * 12;
+        });
+
+        heroVisual.addEventListener('mouseleave', () => {
+            targetX = 0;
+            targetY = 0;
+        });
+
+        function lerpParallax() {
+            currentX += (targetX - currentX) * 0.08;
+            currentY += (targetY - currentY) * 0.08;
+
+            document.querySelectorAll('.floating-card').forEach((card, i) => {
+                const depth = 0.6 + i * 0.2;
+                // Write only the parallax offset; float animation runs via CSS independently
+                card.style.setProperty('--px', `${currentX * depth}px`);
+                card.style.setProperty('--py', `${currentY * depth}px`);
+                // Use a wrapper transform that stacks with the CSS animation
+                card.style.transform = `translate(${currentX * depth}px, ${currentY * depth}px)`;
+            });
+
+            rafId = requestAnimationFrame(lerpParallax);
+        }
+
+        // start loop only when card is visible
+        const startObs = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    rafId = requestAnimationFrame(lerpParallax);
+                } else {
+                    cancelAnimationFrame(rafId);
+                }
+            });
+        });
+        startObs.observe(heroVisual);
+
+        // on leave, reset transforms so CSS float can resume cleanly
+        heroVisual.addEventListener('mouseleave', () => {
+            setTimeout(() => {
+                if (Math.abs(currentX) < 0.1 && Math.abs(currentY) < 0.1) {
+                    document.querySelectorAll('.floating-card').forEach(card => {
+                        card.style.transform = '';
+                    });
+                }
+            }, 600);
+        });
+    }
+
+
+    /* ── Dev console branding ───────────────────────────── */
+    console.log('%c LecFlow ', 'background:#F97316;color:#fff;font-size:18px;font-weight:800;padding:6px 14px;border-radius:6px;');
+    console.log('%c Find. Learn. Flow.', 'color:#F97316;font-size:13px;font-weight:600;');
+    console.log('%c Built for IIT Madras BS students ❤️', 'color:#6B7280;font-size:11px;');
+}());
+</script>
+{% endblock %}
