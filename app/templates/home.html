@@ -1176,22 +1176,25 @@
 
 <!-- ── Footer Strip ──────────────────────────────────────── -->
 
+<!-- ── Footer Strip ──────────────────────────────────────── -->
 <footer class="footer-strip">
     <div class="footer-brand">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
              stroke-width="2.2">
             <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
         </svg>
-        LecFlow
+        Lec<span>Flow</span>
     </div>
     <p class="footer-copy">
-        © {{ 2025 }} LecFlow · Made for IIT Madras BS students
+        © 2025 LecFlow · Made for IIT Madras BS students
     </p>
     <ul class="footer-links">
         <li><a href="#features">Features</a></li>
         <li><a href="#why">Why LecFlow</a></li>
         <li><a href="#how-it-works">How It Works</a></li>
         <li><a href="{{ url_for('auth.google_login') }}">Sign In</a></li>
+        <li><a href="{{ url_for('main.privacy_policy') }}">Privacy Policy</a></li>
+        <li><a href="{{ url_for('main.terms_of_service') }}">Terms of Service</a></li>
     </ul>
 </footer>
 
