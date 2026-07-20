@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}LecFlow – Smart Lecture Management for IIT Madras BS Students{% endblock %}
+{% block title %}LecFlow - Lecture Management for IIT Madras BS Students{% endblock %}
 
 {% block extra_styles %}
 <style>
@@ -445,6 +445,57 @@
 .why-before .why-row { color: var(--text-soft); }
 .why-after  .why-row { color: var(--text); font-weight: 500; }
 
+
+/* ─────────────────────────────────────────────────────────
+   ABOUT SECTION
+   ───────────────────────────────────────────────────────── */
+.about-section {
+    padding: 60px 0;
+}
+
+.about-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    padding: 0 20px;
+}
+
+.about-card {
+    background: var(--surface);
+    padding: 32px 24px;
+    border-radius: var(--radius, 14px);
+    border: 1px solid var(--border);
+    transition: transform .25s, box-shadow .25s;
+    text-align: center;
+}
+
+.about-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 28px rgba(0,0,0,.08);
+}
+
+.about-icon {
+    font-size: 40px;
+    display: block;
+    margin-bottom: 16px;
+}
+
+.about-card h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.about-card p {
+    color: var(--text-soft);
+    line-height: 1.7;
+    font-size: 14px;
+}
+
+.about-card strong {
+    color: var(--text);
+}
+
 /* ─────────────────────────────────────────────────────────
    HOW IT WORKS
    ───────────────────────────────────────────────────────── */
@@ -779,13 +830,14 @@
         </div>
 
         <h1>
-            Find. Learn.<br>
-            <span class="gradient-text">Flow.</span>
+            LecFlow
+            <span class="gradient-text">Lecture Management</span>
         </h1>
 
         <p class="hero-description">
-            One place for your IIT Madras BS lecture schedule, recorded sessions,
-            and notes — synced from your calendar, ready when you are.
+            <strong>LecFlow</strong> helps IIT Madras BS students organize their 
+            lecture calendar, recordings, and notes in one place. Sync your iCal, 
+            watch recordings inline, and track your progress — all with your Google account.
         </p>
 
         <div class="hero-actions">
@@ -869,6 +921,47 @@
         {% endfor %}
     </div>
 </div>
+
+<!-- ── What is LecFlow ───────────────────────────────────── -->
+<section id="about" class="about-section">
+    <div class="section-header">
+        <span class="section-tag">About LecFlow</span>
+        <h2>What is LecFlow?</h2>
+        <p class="section-subtitle">
+            A lecture management platform designed specifically for the IIT Madras BS program.
+        </p>
+    </div>
+
+    <div class="about-grid">
+        <div class="about-card reveal">
+            <div class="about-icon">🎯</div>
+            <h3>Purpose</h3>
+            <p>
+                <strong>LecFlow</strong> is built to solve a specific problem: helping IIT Madras BS students 
+                manage their lecture schedules, recordings, and notes without juggling multiple tools 
+                like Google Calendar, Drive, Notion, and WhatsApp.
+            </p>
+        </div>
+        <div class="about-card reveal">
+            <div class="about-icon">⚡</div>
+            <h3>How It Works</h3>
+            <p>
+                Simply sign in with your Google account, paste your IIT Madras iCal URL, and LecFlow 
+                automatically fetches all your lectures. Each session gets its own page with the 
+                recording link and space for notes.
+            </p>
+        </div>
+        <div class="about-card reveal">
+            <div class="about-icon">👥</div>
+            <h3>Who It's For</h3>
+            <p>
+                Any student in the IIT Madras BS program — whether you're in Foundation, Diploma, 
+                or Degree level. If you have an iCal feed and Google Drive recordings, LecFlow works 
+                for you.
+            </p>
+        </div>
+    </div>
+</section>
 
 <!-- ── Features ──────────────────────────────────────────── -->
 <section id="features" class="features">
@@ -1082,13 +1175,14 @@
 </section>
 
 <!-- ── Footer Strip ──────────────────────────────────────── -->
+
 <footer class="footer-strip">
     <div class="footer-brand">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
              stroke-width="2.2">
             <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
         </svg>
-        Lec<span>Flow</span>
+        LecFlow
     </div>
     <p class="footer-copy">
         © {{ 2025 }} LecFlow · Made for IIT Madras BS students
