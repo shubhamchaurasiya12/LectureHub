@@ -338,3 +338,14 @@ def delete_subject(subject_id):
     
     flash(f'Subject "{name}" removed.', 'success')
     return redirect(url_for('main.dashboard'))
+
+
+@main_bp.route('/privacy')
+def privacy_policy():
+    """Render the privacy policy page."""
+    return render_template('privacy_policy.html')
+
+@main_bp.route('/terms')
+def terms_of_service():
+    """Render the terms of service page."""
+    return render_template('terms.html')
