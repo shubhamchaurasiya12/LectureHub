@@ -168,7 +168,7 @@
   padding: 26px;
   box-shadow: 0 2px 16px rgba(0, 0, 0, .05);
   position: sticky;
-  top: calc(14px + 54px + 14px);  /* below floating pill nav */
+  top: calc(14px + 54px + 14px);
 }
 .form-card-title {
   font-size: 15px;
@@ -184,14 +184,257 @@
   line-height: 1.5;
 }
 
-/* Date row */
+/* ── Dropdown Component Styles ────────────────── */
+/* These styles are used by the modular dropdown component */
+
+.subject-select-wrapper {
+  position: relative;
+}
+
+.subject-select-wrapper::after {
+  content: '';
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid var(--muted);
+  pointer-events: none;
+  transition: border-top-color .15s;
+}
+
+.subject-select-wrapper:hover::after {
+  border-top-color: var(--accent);
+}
+
+select#subject-select {
+  width: 100%;
+  padding: 12px 40px 12px 14px;
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: none;
+}
+
+select#subject-select:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+select#subject-select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.15);
+  transform: translateY(-1px);
+}
+
+select#subject-select option {
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 400;
+  background: #fff;
+  color: var(--text);
+}
+
+select#subject-select option:hover {
+  background: var(--accent-dim);
+}
+
+select#subject-select option[value=""] {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+select#subject-select:not(:has(option[value=""]:checked)) {
+  color: var(--text);
+  font-weight: 600;
+}
+
+select#subject-select optgroup {
+  font-weight: 700;
+  color: var(--text-soft);
+  background: var(--surface2);
+  padding: 6px 0;
+}
+
+select#subject-select option:not([value=""]):hover {
+  background: var(--accent-dim);
+}
+
+.subject-select-wrapper::before {
+  content: '📚 ';
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+select#subject-select {
+  padding-left: 40px;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+select#subject-select:focus {
+  animation: slideDown .2s ease-out;
+}
+
+select#subject-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: var(--surface2);
+}
+
+/* ── Custom subject input ────────────────────── */
+.custom-subject-wrapper {
+  margin-top: 12px;
+  animation: slideDown .3s ease-out;
+  display: none;
+}
+
+.custom-subject-wrapper.visible {
+  display: block;
+}
+
+#custom-subject-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px dashed var(--accent);
+  border-radius: var(--radius-sm);
+  background: var(--accent-dim);
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  color: var(--text);
+  outline: none;
+  transition: all .2s ease;
+}
+
+#custom-subject-input:focus {
+  border-color: var(--accent);
+  border-style: solid;
+  box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
+  background: #fff;
+}
+
+#custom-subject-input::placeholder {
+  color: var(--muted);
+}
+
+.custom-subject-hint {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.custom-subject-hint .highlight {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ── Auto-fill indicator ─────────────────────── */
+.auto-fill-badge {
+  display: inline-block;
+  background: var(--green-light);
+  color: var(--green);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 100px;
+  margin-left: 8px;
+  border: 1px solid var(--green-border);
+}
+
+.calendar-url-wrapper {
+  position: relative;
+}
+
+.calendar-url-wrapper .url-status {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+}
+
+/* ── Date row ────────────────────────────────── */
 .date-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
 }
 
-/* Form actions */
+/* Date picker styling with default values */
+input[type="date"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  font-size: 13px;
+  color: var(--text);
+  font-family: inherit;
+  transition: border-color .15s, box-shadow .15s;
+  cursor: pointer;
+}
+
+input[type="date"]:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, .1);
+}
+
+input[type="date"]:hover {
+  border-color: var(--accent);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: .45;
+  cursor: pointer;
+  transition: opacity .15s;
+}
+
+input[type="date"]:hover::-webkit-calendar-picker-indicator {
+  opacity: .8;
+}
+
+input[type="date"]:not([value=""]) {
+  border-color: var(--green);
+  background: var(--green-desc);
+}
+
+input[type="date"]:not([value=""]):focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, .1);
+}
+
+/* ── Form actions ────────────────────────────── */
 .form-actions {
   display: flex;
   gap: 10px;
@@ -202,10 +445,18 @@
   justify-content: center;
 }
 
-/* Date picker icon tint to match light theme */
-input[type="date"]::-webkit-calendar-picker-indicator {
-  opacity: .45;
-  cursor: pointer;
+/* ── Loading spinner for URL fetch ───────────── */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.url-loading {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin .65s linear infinite;
 }
 
 /* ── Responsive ─────────────────────────────── */
@@ -221,6 +472,11 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   .date-row { grid-template-columns: 1fr; }
   .form-actions { flex-direction: column; }
   .form-actions .btn { justify-content: center; }
+  
+  select#subject-select {
+    font-size: 16px;
+    padding: 12px 38px 12px 12px;
+  }
 }
 
 {% endblock %}
@@ -235,6 +491,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     <!-- ── Left: Instructions ──────────────────── -->
     <div class="howto-side">
       <div class="howto-header">
+        <p>IF YOUR SUBJECT IS NOT IN THE DROPDOWN</p>
         <h1>Add a subject</h1>
         <p>Follow the steps below to find your course calendar link from the IITM BS student dashboard.</p>
       </div>
@@ -281,21 +538,11 @@ input[type="date"]::-webkit-calendar-picker-indicator {
           <div class="step-num">5</div>
           <div class="step-body">
             <div class="step-title">Paste it in the form →</div>
-            <div class="step-desc">Paste the link into the <strong>Calendar Link</strong> field on the right and hit <strong>Add Subject</strong>.</div>
+            <div class="step-desc">If the subject's calendar link is already stored, it will auto-fill. Otherwise, paste the link manually.</div>
           </div>
         </div>
 
       </div><!-- /.steps -->
-
-      <div class="url-hint">
-        <div class="url-hint-label">Both URL formats are supported</div>
-        <div class="url-example">calendar.google.com/calendar/embed?src=c_xxx%40group.calendar.google.com</div>
-        <div class="url-example">calendar.google.com/calendar/u/0/r?cid=Y18z…</div>
-        <div class="url-hint-note">
-          <span>✓</span> The app auto-converts either format — just paste whatever the dashboard gives you.
-          The calendar must be <strong>public</strong> for syncing to work.
-        </div>
-      </div>
 
     </div><!-- /.howto-side -->
 
@@ -303,39 +550,81 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     <div>
       <div class="form-card">
         <div class="form-card-title">Subject details</div>
-        <div class="form-card-sub">Give it a short name and paste the calendar link. Date filters are optional — leave blank to sync everything.</div>
+        <div class="form-card-sub">
+          Select a subject from the list, or choose "Other" to add a custom subject.
+          <span class="auto-fill-badge">Auto-fill supported</span>
+        </div>
 
         <form method="POST" id="add-form">
 
           <div class="form-group">
-            <label>Subject Name</label>
-            <input
-              type="text"
-              name="subject_name"
-              placeholder="e.g. DSA, DBMS, Maths-2"
-              required
-              autofocus
-            />
+            <label for="subject-select">Subject Name</label>
+            
+            {# 
+              Use the modular dropdown component
+              This automatically generates options from the database
+              dropdown_subjects is passed from the Flask route
+            #}
+            {% with 
+              select_id='subject-select',
+              select_name='subject_name',
+              wrapper_class='subject-select-wrapper',
+              show_custom_option=True,
+              required=True,
+              dropdown_subjects=dropdown_subjects
+            %}
+              {% include 'components/subject_dropdown.html' %}
+            {% endwith %}
+            
+            <!-- Custom Subject Input (hidden by default) -->
+            <div class="custom-subject-wrapper" id="custom-subject-wrapper">
+              <input
+                type="text"
+                id="custom-subject-input"
+                name="custom_subject_name"
+                placeholder="Enter your subject name (e.g., 'Data Science', 'AI', etc.)"
+                autocomplete="off"
+              />
+              <div class="custom-subject-hint">
+                <span>💡</span>
+                <span>This will be added to the dropdown for future use by all users.</span>
+              </div>
+            </div>
           </div>
 
           <div class="form-group">
-            <label>Calendar Link</label>
-            <input
-              type="url"
-              name="calendar_url"
-              placeholder="Paste the Google Calendar link here"
-              required
-            />
+            <label for="calendar-url">Calendar Link</label>
+            <div class="calendar-url-wrapper">
+              <input
+                id="calendar-url"
+                type="url"
+                name="calendar_url"
+                placeholder="Paste the Google Calendar link here"
+                required
+              />
+              <span class="url-status" id="url-status"></span>
+            </div>
+            <div id="url-feedback" style="margin-top: 6px; font-size: 12px; color: var(--muted);"></div>
           </div>
 
           <div class="date-row">
             <div class="form-group" style="margin-bottom:0">
-              <label>From date <span style="color:var(--border);font-weight:400">(optional)</span></label>
-              <input type="date" name="filter_start" />
+              <label for="filter-start">From date <span style="color:var(--border);font-weight:400"></span></label>
+              <input 
+                id="filter-start" 
+                type="date" 
+                name="filter_start" 
+                value="2026-06-16"
+              />
             </div>
             <div class="form-group" style="margin-bottom:0">
-              <label>Until date <span style="color:var(--border);font-weight:400">(optional)</span></label>
-              <input type="date" name="filter_end" />
+              <label for="filter-end">Until date <span style="color:var(--border);font-weight:400"></span></label>
+              <input 
+                id="filter-end" 
+                type="date" 
+                name="filter_end" 
+                value="2026-09-30"
+              />
             </div>
           </div>
 
@@ -356,10 +645,237 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 {% block scripts %}
 <script>
-document.getElementById('add-form').addEventListener('submit', function () {
-  const btn = document.getElementById('add-btn');
-  btn.innerHTML = '<span class="spinner"></span> Syncing…';
-  btn.disabled = true;
+// Load the SubjectDropdown class from the component
+// In production, you'd load this via a script tag or module system
+
+// For now, we'll use the inline version (you can move this to a separate file)
+class SubjectDropdown {
+  constructor(options = {}) {
+    this.selectId = options.selectId || 'subject-select';
+    this.customInputId = options.customInputId || 'custom-subject-input';
+    this.customWrapperId = options.customWrapperId || 'custom-subject-wrapper';
+    this.calendarUrlId = options.calendarUrlId || 'calendar-url';
+    this.urlStatusId = options.urlStatusId || 'url-status';
+    this.urlFeedbackId = options.urlFeedbackId || 'url-feedback';
+    this.fetchUrlEndpoint = options.fetchUrlEndpoint || '/get_subject_url/';
+    
+    this.select = document.getElementById(this.selectId);
+    this.customInput = document.getElementById(this.customInputId);
+    this.customWrapper = document.getElementById(this.customWrapperId);
+    this.calendarUrl = document.getElementById(this.calendarUrlId);
+    this.urlStatus = document.getElementById(this.urlStatusId);
+    this.urlFeedback = document.getElementById(this.urlFeedbackId);
+    
+    this.originalPlaceholder = this.calendarUrl ? this.calendarUrl.placeholder : '';
+    
+    this.init();
+  }
+  
+  init() {
+    if (!this.select) return;
+    
+    this.select.addEventListener('change', this.handleSelectChange.bind(this));
+    
+    if (this.customInput) {
+      this.customInput.addEventListener('input', this.handleCustomInput.bind(this));
+      this.customInput.addEventListener('blur', this.handleCustomBlur.bind(this));
+    }
+    
+    if (this.select.value) {
+      this.select.dispatchEvent(new Event('change'));
+    }
+  }
+  
+  async handleSelectChange(event) {
+    const selectedOption = this.select.options[this.select.selectedIndex];
+    const subjectName = this.select.value;
+    const dataUrl = selectedOption ? selectedOption.getAttribute('data-url') : null;
+    
+    this.clearStatus();
+    
+    if (subjectName === '__custom__') {
+      this.showCustomInput();
+      return;
+    } else {
+      this.hideCustomInput();
+    }
+    
+    if (!subjectName) {
+      this.resetCalendarUrl();
+      return;
+    }
+    
+    if (dataUrl && dataUrl.trim() !== '') {
+      this.fillCalendarUrl(dataUrl, 'auto-filled from database');
+      return;
+    }
+    
+    this.showLoading();
+    
+    try {
+      const result = await this.fetchCalendarUrl(subjectName);
+      
+      if (result && result.found && result.calendar_url) {
+        this.fillCalendarUrl(result.calendar_url, 'auto-filled');
+        if (selectedOption) {
+          selectedOption.setAttribute('data-url', result.calendar_url);
+        }
+      } else {
+        this.showManualEntryRequired();
+      }
+    } catch (error) {
+      console.error('Error fetching calendar URL:', error);
+      this.showManualEntryRequired();
+    }
+  }
+  
+  async fetchCalendarUrl(subjectName) {
+    if (!subjectName) return null;
+    
+    try {
+      const response = await fetch(`${this.fetchUrlEndpoint}${encodeURIComponent(subjectName)}`);
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching calendar URL:', error);
+      return null;
+    }
+  }
+  
+  fillCalendarUrl(url, source = 'auto-filled') {
+    if (!this.calendarUrl) return;
+    
+    this.calendarUrl.value = url;
+    this.calendarUrl.placeholder = this.originalPlaceholder;
+    this.calendarUrl.disabled = false;
+    this.calendarUrl.style.borderColor = 'var(--green)';
+    
+    if (this.urlStatus) this.urlStatus.innerHTML = '✅';
+    if (this.urlFeedback) {
+      this.urlFeedback.innerHTML = `<span style="color: var(--green);">✓ Calendar URL ${source}</span>`;
+    }
+  }
+  
+  showManualEntryRequired() {
+    if (!this.calendarUrl) return;
+    
+    this.calendarUrl.value = '';
+    this.calendarUrl.placeholder = 'Paste the Google Calendar link here';
+    this.calendarUrl.disabled = false;
+    this.calendarUrl.style.borderColor = 'var(--amber)';
+    
+    if (this.urlStatus) this.urlStatus.innerHTML = '⚠️';
+    if (this.urlFeedback) {
+      this.urlFeedback.innerHTML = '<span style="color: var(--amber);">⚠ No stored calendar URL. Please paste it manually.</span>';
+    }
+  }
+  
+  showCustomInput() {
+    if (this.customWrapper) this.customWrapper.classList.add('visible');
+    if (this.customInput) {
+      this.customInput.required = true;
+      setTimeout(() => this.customInput.focus(), 100);
+    }
+    if (this.calendarUrl) {
+      this.calendarUrl.value = '';
+      this.calendarUrl.placeholder = 'Paste the Google Calendar link here';
+      this.calendarUrl.disabled = false;
+    }
+    if (this.urlStatus) this.urlStatus.innerHTML = '✏️';
+    if (this.urlFeedback) {
+      this.urlFeedback.innerHTML = '<span style="color: var(--accent);">Enter your custom subject name above, then paste the calendar link.</span>';
+    }
+  }
+  
+  hideCustomInput() {
+    if (this.customWrapper) this.customWrapper.classList.remove('visible');
+    if (this.customInput) {
+      this.customInput.required = false;
+      this.customInput.value = '';
+      this.customInput.style.borderColor = '';
+    }
+  }
+  
+  handleCustomInput(event) {
+    const value = event.target.value.trim();
+    event.target.style.borderColor = value ? 'var(--green)' : '';
+  }
+  
+  handleCustomBlur(event) {
+    const value = event.target.value.trim();
+    if (!value && this.select.value === '__custom__') {
+      event.target.style.borderColor = 'var(--red)';
+    }
+  }
+  
+  showLoading() {
+    if (this.urlStatus) this.urlStatus.innerHTML = '<span class="url-loading"></span>';
+    if (this.urlFeedback) this.urlFeedback.textContent = 'Checking for calendar URL...';
+  }
+  
+  clearStatus() {
+    if (this.urlStatus) this.urlStatus.innerHTML = '';
+    if (this.urlFeedback) this.urlFeedback.textContent = '';
+    if (this.calendarUrl) this.calendarUrl.style.borderColor = '';
+  }
+  
+  resetCalendarUrl() {
+    if (this.calendarUrl) {
+      this.calendarUrl.value = '';
+      this.calendarUrl.placeholder = this.originalPlaceholder;
+      this.calendarUrl.disabled = false;
+      this.calendarUrl.style.borderColor = '';
+    }
+  }
+}
+
+// Initialize the dropdown when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+  const dropdown = new SubjectDropdown({
+    selectId: 'subject-select',
+    customInputId: 'custom-subject-input',
+    customWrapperId: 'custom-subject-wrapper',
+    calendarUrlId: 'calendar-url',
+    urlStatusId: 'url-status',
+    urlFeedbackId: 'url-feedback',
+    fetchUrlEndpoint: '/get_subject_url/'
+  });
+  
+  // Handle form submission
+  const form = document.getElementById('add-form');
+  const addBtn = document.getElementById('add-btn');
+  
+  form.addEventListener('submit', function(e) {
+    const subjectSelect = document.getElementById('subject-select');
+    const customSubjectInput = document.getElementById('custom-subject-input');
+    const calendarUrlInput = document.getElementById('calendar-url');
+    const urlFeedback = document.getElementById('url-feedback');
+    
+    // If custom subject is selected, validate
+    if (subjectSelect.value === '__custom__') {
+      if (!customSubjectInput.value.trim()) {
+        e.preventDefault();
+        customSubjectInput.style.borderColor = 'var(--red)';
+        customSubjectInput.focus();
+        alert('Please enter a custom subject name.');
+        return;
+      }
+    }
+    
+    // If calendar URL is empty, show error
+    if (!calendarUrlInput.value.trim()) {
+      e.preventDefault();
+      calendarUrlInput.style.borderColor = 'var(--red)';
+      urlFeedback.innerHTML = '<span style="color: var(--red);">✗ Calendar URL is required</span>';
+      calendarUrlInput.focus();
+      return;
+    }
+    
+    // Disable button and show loading state
+    addBtn.innerHTML = '<span class="spinner"></span> Adding subject…';
+    addBtn.disabled = true;
+  });
 });
+
 </script>
 {% endblock %}

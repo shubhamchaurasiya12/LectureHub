@@ -1,0 +1,118 @@
+<!-- D:\iitm_scheduler\templates\components\subject_dropdown.html -->
+{# 
+  Reusable Subject Dropdown Component
+  Usage: 
+  {% include 'components/subject_dropdown.html' %}
+  
+  Or with custom classes:
+  {% with 
+    select_id='subject-select',
+    select_name='subject_name',
+    wrapper_class='subject-select-wrapper',
+    show_custom_option=True,
+    required=True
+  %}
+    {% include 'components/subject_dropdown.html' %}
+  {% endwith %}
+#}
+
+{% with 
+  select_id=select_id|default('subject-select'),
+  select_name=select_name|default('subject_name'),
+  wrapper_class=wrapper_class|default('subject-select-wrapper'),
+  show_custom_option=show_custom_option|default(True),
+  required=required|default(True),
+  dropdown_subjects=dropdown_subjects|default([])
+%}
+
+<div class="{{ wrapper_class }}">
+  <select 
+    id="{{ select_id }}" 
+    name="{{ select_name }}"
+    {% if required %}required{% endif %}
+    aria-label="Select a subject"
+  >
+    <option value="">Select a subject…</option>
+    
+    {% if dropdown_subjects %}
+      {# Group subjects by category #}
+      {% set foundation = [] %}
+      {% set diploma = [] %}
+      {% set advanced = [] %}
+      {% set other = [] %}
+      
+      {% for subj in dropdown_subjects %}
+        {% if subj.name in ['Python', 'CT', 'Math 1', 'Math 2', 'Stat 1', 'Stat 2', 'English 1', 'English 2'] %}
+          {% set _ = foundation.append(subj) %}
+        {% elif subj.name in ['PDSA', 'DBMS', 'MAD 1', 'MAD 2', 'MLF', 'JAVA', 'System Command', 'BDM'] %}
+          {% set _ = diploma.append(subj) %}
+        {% elif subj.name in ['MLT', 'MLP', 'TDS', 'BA', 'GEN AI'] %}
+          {% set _ = advanced.append(subj) %}
+        {% else %}
+          {% set _ = other.append(subj) %}
+        {% endif %}
+      {% endfor %}
+      
+      {# Foundation Courses #}
+      {% if foundation %}
+        <optgroup label="Foundation">
+          {% for subj in foundation|sort(attribute='name') %}
+            <option value="{{ subj.name }}" data-url="{{ subj.calendar_url or '' }}">
+              {{ subj.name }}
+              {% if subj.calendar_url %}🔗{% endif %}
+            </option>
+          {% endfor %}
+        </optgroup>
+      {% endif %}
+      
+      {# Diploma/Core Courses #}
+      {% if diploma %}
+        <optgroup label="Diploma &amp; Core">
+          {% for subj in diploma|sort(attribute='name') %}
+            <option value="{{ subj.name }}" data-url="{{ subj.calendar_url or '' }}">
+              {{ subj.name }}
+              {% if subj.calendar_url %}🔗{% endif %}
+            </option>
+          {% endfor %}
+        </optgroup>
+      {% endif %}
+      
+      {# Advanced/Specialized #}
+      {% if advanced %}
+        <optgroup label="Advanced">
+          {% for subj in advanced|sort(attribute='name') %}
+            <option value="{{ subj.name }}" data-url="{{ subj.calendar_url or '' }}">
+              {{ subj.name }}
+              {% if subj.calendar_url %}🔗{% endif %}
+            </option>
+          {% endfor %}
+        </optgroup>
+      {% endif %}
+      
+      {# Other Subjects #}
+      {% if other %}
+        <optgroup label="Other">
+          {% for subj in other|sort(attribute='name') %}
+            <option value="{{ subj.name }}" data-url="{{ subj.calendar_url or '' }}">
+              {{ subj.name }}
+              {% if subj.calendar_url %}🔗{% endif %}
+            </option>
+          {% endfor %}
+        </optgroup>
+      {% endif %}
+    {% else %}
+      <option disabled>No subjects available</option>
+    {% endif %}
+    
+    {# Custom Subject Option #}
+    {% if show_custom_option %}
+      <optgroup label="Other">
+        <option value="__custom__" style="color: var(--accent); font-weight: 600;">
+          ✏️ Other (Enter custom subject)
+        </option>
+      </optgroup>
+    {% endif %}
+  </select>
+</div>
+
+{% endwith %}

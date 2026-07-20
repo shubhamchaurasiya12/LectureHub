@@ -17,6 +17,7 @@
   margin-top: 6px;
 }
 
+/* ── Subject Row Styles ───────────────────────── */
 .subject-row {
   display: grid;
   grid-template-columns: 1fr 2fr 1fr 1fr auto;
@@ -46,6 +47,153 @@
   text-transform: uppercase;
   letter-spacing: .5px;
 }
+
+/* ── Dropdown in setup page ──────────────────── */
+.subject-row .subject-select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.subject-row .subject-select-wrapper::after {
+  content: '';
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid var(--muted);
+  pointer-events: none;
+  transition: border-top-color .15s;
+}
+
+.subject-row .subject-select-wrapper:hover::after {
+  border-top-color: var(--accent);
+}
+
+.subject-row .subject-select-wrapper::before {
+  content: '📚 ';
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  pointer-events: none;
+  opacity: 0.7;
+  z-index: 1;
+}
+
+.subject-row select.subject-select {
+  width: 100%;
+  padding: 8px 32px 8px 32px;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--text);
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+  transition: all .2s ease;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  min-height: 38px;
+}
+
+.subject-row select.subject-select:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+.subject-row select.subject-select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.15);
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.subject-row select.subject-select option {
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 400;
+  background: #fff;
+  color: var(--text);
+}
+
+.subject-row select.subject-select option:hover {
+  background: var(--accent-dim);
+}
+
+.subject-row select.subject-select option[value=""] {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.subject-row select.subject-select optgroup {
+  font-weight: 700;
+  color: var(--text-soft);
+  background: var(--surface2);
+  padding: 4px 0;
+}
+
+.subject-row select.subject-select:not(:has(option[value=""]:checked)) {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* ── Custom subject input for setup page ──────── */
+.subject-row .custom-subject-wrapper {
+  display: none;
+  margin-top: 6px;
+  animation: slideDown .3s ease-out;
+}
+
+.subject-row .custom-subject-wrapper.visible {
+  display: block;
+}
+
+.subject-row .custom-subject-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1.5px dashed var(--accent);
+  border-radius: var(--radius-sm);
+  background: var(--accent-dim);
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+  color: var(--text);
+  outline: none;
+  transition: all .2s ease;
+}
+
+.subject-row .custom-subject-input:focus {
+  border-color: var(--accent);
+  border-style: solid;
+  box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
+  background: #fff;
+}
+
+.subject-row .custom-subject-input::placeholder {
+  color: var(--muted);
+}
+
+.subject-row .custom-subject-hint {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.subject-row .custom-subject-hint .highlight {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ── Other form elements ──────────────────────── */
 .subject-row input,
 .subject-row select {
   background: var(--bg);
@@ -56,16 +204,33 @@
   color: var(--text);
   width: 100%;
   transition: border-color 0.15s, box-shadow 0.15s;
+  font-family: 'Inter', sans-serif;
 }
+
 .subject-row input:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-dim);
+  outline: none;
 }
+
 .subject-row input::placeholder {
   color: var(--muted);
   opacity: 0.7;
 }
 
+.subject-row .url-status {
+  font-size: 14px;
+  margin-left: 4px;
+}
+
+.subject-row .url-feedback {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 4px;
+  display: block;
+}
+
+/* ── Remove Button ───────────────────────────── */
 .remove-btn {
   background: none;
   border: 1px solid var(--border);
@@ -88,6 +253,7 @@
   background: rgba(255, 59, 48, 0.06);
 }
 
+/* ── Hint Box ────────────────────────────────── */
 .hint {
   background: var(--surface2);
   border: 1px solid var(--border);
@@ -111,7 +277,7 @@
   word-break: break-all;
 }
 
-/* Override base input for date – keep consistent */
+/* ── Date Inputs ─────────────────────────────── */
 input[type="date"] {
   padding: 8px 10px;
   font-size: 13px;
@@ -121,17 +287,48 @@ input[type="date"] {
   color: var(--text);
   appearance: none;
   -webkit-appearance: none;
-}
-input[type="date"]::-webkit-calendar-picker-indicator {
-  filter: invert(0.8);
   cursor: pointer;
 }
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: .45;
+  cursor: pointer;
+  transition: opacity .15s;
+}
+
+input[type="date"]:hover::-webkit-calendar-picker-indicator {
+  opacity: .8;
+}
+
 input[type="date"]:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-dim);
 }
 
-/* Buttons at the bottom */
+input[type="date"]:not([value=""]) {
+  border-color: var(--green);
+  background: var(--green-desc);
+}
+
+input[type="date"]:not([value=""]):focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, .1);
+}
+
+/* ── Auto-fill badge ──────────────────────────── */
+.auto-fill-badge {
+  display: inline-block;
+  background: var(--green-light);
+  color: var(--green);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 100px;
+  margin-left: 6px;
+  border: 1px solid var(--green-border);
+}
+
+/* ── Buttons at the bottom ────────────────────── */
 .setup-actions {
   display: flex;
   gap: 12px;
@@ -150,13 +347,40 @@ input[type="date"]:focus {
 }
 .setup-actions .btn-primary {
   background: var(--accent);
-  color: #0B0B0E;
+  color: #fff;
 }
 .setup-actions .btn-primary:hover {
-  box-shadow: 0 0 20px var(--accent-glow);
+  background: var(--accent-hover);
+  box-shadow: 0 4px 16px rgba(249, 115, 22, 0.28);
 }
 
-/* Responsive tweaks */
+/* ── Loading spinner for URL fetch ───────────── */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.url-loading {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin .65s linear infinite;
+}
+
+/* ── Animations ──────────────────────────────── */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Responsive tweaks ────────────────────────── */
 @media (max-width: 700px) {
   .subject-row {
     grid-template-columns: 1fr 1fr;
@@ -174,6 +398,29 @@ input[type="date"]:focus {
   .subject-row input[type="date"] {
     width: 100%;
   }
+  .subject-row .subject-select-wrapper::before {
+    display: none;
+  }
+  .subject-row select.subject-select {
+    padding-left: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .subject-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .subject-row .remove-btn {
+    grid-column: span 1;
+  }
+  .setup-actions {
+    flex-direction: column;
+  }
+  .setup-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
 }
 {% endblock %}
 
@@ -189,7 +436,7 @@ input[type="date"]:focus {
     Go to your IITM course portal → find the session calendar → click the embed link or share URL.<br/>
     It usually looks like:<br/>
     <code>https://calendar.google.com/calendar/embed?src=c_xxxxx%40group.calendar.google.com&amp;ctz=Asia%2FKolkata</code><br/><br/>
-    <strong>Time period (optional):</strong> Leave blank to fetch all events, or set a start and end date to only see lectures within that window.
+    <span class="auto-fill-badge">Auto-fill supported</span>
   </div>
 
   <form method="POST" id="setup-form">
@@ -202,13 +449,7 @@ input[type="date"]:focus {
     </div>
 
     <div id="subjects-container">
-      <div class="subject-row">
-        <input type="text" name="subject_name" placeholder="e.g. DSA" required />
-        <input type="url" name="calendar_url" placeholder="https://calendar.google.com/calendar/embed?src=..." required />
-        <input type="date" name="filter_start" />
-        <input type="date" name="filter_end" />
-        <button type="button" class="remove-btn" onclick="removeRow(this)" title="Remove">✕</button>
-      </div>
+      <!-- Initial row will be added by JavaScript -->
     </div>
 
     <div class="setup-actions">
@@ -221,20 +462,358 @@ input[type="date"]:focus {
 </div>
 {% endblock %}
 
+<!-- D:\iitm_scheduler\templates\setup.html -->
+<!-- Update the script section at the bottom -->
+
 {% block scripts %}
 <script>
+// ── SubjectDropdown class for setup page ──────
+class SubjectDropdown {
+  constructor(row, options = {}) {
+    this.row = row;
+    this.selectId = options.selectId || 'subject-select';
+    this.customInputId = options.customInputId || 'custom-subject-input';
+    this.customWrapperId = options.customWrapperId || 'custom-subject-wrapper';
+    this.calendarUrlId = options.calendarUrlId || 'calendar-url';
+    this.urlStatusId = options.urlStatusId || 'url-status';
+    this.urlFeedbackId = options.urlFeedbackId || 'url-feedback';
+    this.fetchUrlEndpoint = options.fetchUrlEndpoint || '/get_subject_url/';
+    
+    // Find elements within the row
+    this.select = this.row.querySelector(`#${this.selectId}`) || this.row.querySelector('select.subject-select');
+    this.customInput = this.row.querySelector(`#${this.customInputId}`);
+    this.customWrapper = this.row.querySelector(`#${this.customWrapperId}`);
+    this.calendarUrl = this.row.querySelector(`#${this.calendarUrlId}`) || this.row.querySelector('input[name="calendar_url"]');
+    this.urlStatus = this.row.querySelector(`#${this.urlStatusId}`);
+    this.urlFeedback = this.row.querySelector(`#${this.urlFeedbackId}`);
+    
+    this.originalPlaceholder = this.calendarUrl ? this.calendarUrl.placeholder : '';
+    
+    this.init();
+  }
+  
+  init() {
+    if (!this.select) return;
+    
+    this.select.addEventListener('change', this.handleSelectChange.bind(this));
+    
+    if (this.customInput) {
+      this.customInput.addEventListener('input', this.handleCustomInput.bind(this));
+      this.customInput.addEventListener('blur', this.handleCustomBlur.bind(this));
+    }
+    
+    // Trigger initial change if there's a value
+    if (this.select.value) {
+      this.select.dispatchEvent(new Event('change'));
+    }
+  }
+  
+  async handleSelectChange(event) {
+    const selectedOption = this.select.options[this.select.selectedIndex];
+    const subjectName = this.select.value;
+    const dataUrl = selectedOption ? selectedOption.getAttribute('data-url') : null;
+    
+    this.clearStatus();
+    
+    // Handle custom subject option
+    if (subjectName === '__custom__') {
+      this.showCustomInput();
+      return;
+    } else {
+      this.hideCustomInput();
+    }
+    
+    if (!subjectName) {
+      this.resetCalendarUrl();
+      return;
+    }
+    
+    // Check if URL is stored in data attribute
+    if (dataUrl && dataUrl.trim() !== '') {
+      this.fillCalendarUrl(dataUrl, 'auto-filled from database');
+      return;
+    }
+    
+    // If no URL in data attribute, try fetching from server
+    this.showLoading();
+    
+    try {
+      const result = await this.fetchCalendarUrl(subjectName);
+      
+      if (result && result.found && result.calendar_url) {
+        this.fillCalendarUrl(result.calendar_url, 'auto-filled');
+        if (selectedOption) {
+          selectedOption.setAttribute('data-url', result.calendar_url);
+        }
+      } else {
+        this.showManualEntryRequired();
+      }
+    } catch (error) {
+      console.error('Error fetching calendar URL:', error);
+      this.showManualEntryRequired();
+    }
+  }
+  
+  async fetchCalendarUrl(subjectName) {
+    if (!subjectName) return null;
+    
+    try {
+      const response = await fetch(`${this.fetchUrlEndpoint}${encodeURIComponent(subjectName)}`);
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching calendar URL:', error);
+      return null;
+    }
+  }
+  
+  fillCalendarUrl(url, source = 'auto-filled') {
+    if (!this.calendarUrl) return;
+    
+    this.calendarUrl.value = url;
+    this.calendarUrl.placeholder = this.originalPlaceholder;
+    this.calendarUrl.disabled = false;
+    this.calendarUrl.style.borderColor = 'var(--green)';
+    
+    if (this.urlStatus) {
+      this.urlStatus.textContent = '✅';
+      this.urlStatus.style.color = 'var(--green)';
+    }
+    if (this.urlFeedback) {
+      this.urlFeedback.innerHTML = `<span style="color: var(--green);">✓ Calendar URL ${source}</span>`;
+    }
+  }
+  
+  showManualEntryRequired() {
+    if (!this.calendarUrl) return;
+    
+    this.calendarUrl.value = '';
+    this.calendarUrl.placeholder = 'Paste the Google Calendar link here';
+    this.calendarUrl.disabled = false;
+    this.calendarUrl.style.borderColor = 'var(--amber)';
+    
+    if (this.urlStatus) {
+      this.urlStatus.textContent = '⚠️';
+      this.urlStatus.style.color = 'var(--amber)';
+    }
+    if (this.urlFeedback) {
+      this.urlFeedback.innerHTML = '<span style="color: var(--amber);">⚠ No stored calendar URL. Please paste it manually.</span>';
+    }
+  }
+  
+  showCustomInput() {
+    if (this.customWrapper) {
+      this.customWrapper.classList.add('visible');
+    }
+    if (this.customInput) {
+      this.customInput.required = true;
+      setTimeout(() => this.customInput.focus(), 100);
+    }
+    if (this.calendarUrl) {
+      this.calendarUrl.value = '';
+      this.calendarUrl.placeholder = 'Paste the Google Calendar link here';
+      this.calendarUrl.disabled = false;
+    }
+    if (this.urlStatus) {
+      this.urlStatus.textContent = '✏️';
+      this.urlStatus.style.color = 'var(--accent)';
+    }
+    if (this.urlFeedback) {
+      this.urlFeedback.innerHTML = '<span style="color: var(--accent);">Enter your custom subject name above, then paste the calendar link.</span>';
+    }
+  }
+  
+  hideCustomInput() {
+    if (this.customWrapper) {
+      this.customWrapper.classList.remove('visible');
+    }
+    if (this.customInput) {
+      this.customInput.required = false;
+      this.customInput.value = '';
+      this.customInput.style.borderColor = '';
+    }
+  }
+  
+  handleCustomInput(event) {
+    const value = event.target.value.trim();
+    event.target.style.borderColor = value ? 'var(--green)' : '';
+  }
+  
+  handleCustomBlur(event) {
+    const value = event.target.value.trim();
+    if (!value && this.select.value === '__custom__') {
+      event.target.style.borderColor = 'var(--red)';
+    }
+  }
+  
+  showLoading() {
+    if (this.urlStatus) {
+      this.urlStatus.innerHTML = '<span class="url-loading"></span>';
+    }
+    if (this.urlFeedback) {
+      this.urlFeedback.textContent = 'Checking for calendar URL...';
+    }
+  }
+  
+  clearStatus() {
+    if (this.urlStatus) {
+      this.urlStatus.textContent = '';
+      this.urlStatus.style.color = '';
+    }
+    if (this.urlFeedback) {
+      this.urlFeedback.textContent = '';
+      this.urlFeedback.style.color = '';
+    }
+    if (this.calendarUrl) {
+      this.calendarUrl.style.borderColor = '';
+    }
+  }
+  
+  resetCalendarUrl() {
+    if (this.calendarUrl) {
+      this.calendarUrl.value = '';
+      this.calendarUrl.placeholder = this.originalPlaceholder;
+      this.calendarUrl.disabled = false;
+      this.calendarUrl.style.borderColor = '';
+    }
+  }
+}
+
+// ── Row management ─────────────────────────────
+let dropdownInstances = [];
+
+function createSubjectRowHTML(index) {
+  // Use the JSON data passed from Flask
+  const dropdownSubjects = {{ dropdown_subjects_json|tojson|safe }};
+  
+  // Group subjects by category
+  const foundation = [];
+  const diploma = [];
+  const advanced = [];
+  const other = [];
+  
+  dropdownSubjects.forEach(subj => {
+    const name = subj.name;
+    if (['Python', 'CT', 'Math 1', 'Math 2', 'Stat 1', 'Stat 2', 'English 1', 'English 2'].includes(name)) {
+      foundation.push(subj);
+    } else if (['PDSA', 'DBMS', 'MAD 1', 'MAD 2', 'MLF', 'JAVA', 'System Command', 'BDM'].includes(name)) {
+      diploma.push(subj);
+    } else if (['MLT', 'MLP', 'TDS', 'BA', 'GEN AI'].includes(name)) {
+      advanced.push(subj);
+    } else {
+      other.push(subj);
+    }
+  });
+  
+  let optionsHTML = '';
+  
+  // Foundation group
+  if (foundation.length > 0) {
+    optionsHTML += '<optgroup label="Foundation">';
+    foundation.forEach(subj => {
+      optionsHTML += `<option value="${subj.name}" data-url="${subj.calendar_url || ''}">${subj.name}${subj.calendar_url ? ' 🔗' : ''}</option>`;
+    });
+    optionsHTML += '</optgroup>';
+  }
+  
+  // Diploma group
+  if (diploma.length > 0) {
+    optionsHTML += '<optgroup label="Diploma &amp; Core">';
+    diploma.forEach(subj => {
+      optionsHTML += `<option value="${subj.name}" data-url="${subj.calendar_url || ''}">${subj.name}${subj.calendar_url ? ' 🔗' : ''}</option>`;
+    });
+    optionsHTML += '</optgroup>';
+  }
+  
+  // Advanced group
+  if (advanced.length > 0) {
+    optionsHTML += '<optgroup label="Advanced">';
+    advanced.forEach(subj => {
+      optionsHTML += `<option value="${subj.name}" data-url="${subj.calendar_url || ''}">${subj.name}${subj.calendar_url ? ' 🔗' : ''}</option>`;
+    });
+    optionsHTML += '</optgroup>';
+  }
+  
+  // Other group
+  if (other.length > 0) {
+    optionsHTML += '<optgroup label="Other">';
+    other.forEach(subj => {
+      optionsHTML += `<option value="${subj.name}" data-url="${subj.calendar_url || ''}">${subj.name}${subj.calendar_url ? ' 🔗' : ''}</option>`;
+    });
+    optionsHTML += '</optgroup>';
+  }
+  
+  // Custom option
+  optionsHTML += `<optgroup label="Other">
+    <option value="__custom__" style="color: var(--accent); font-weight: 600;">✏️ Other (Enter custom subject)</option>
+  </optgroup>`;
+  
+  return `
+    <div class="subject-row" data-row-index="${index}">
+      <div>
+        <div class="subject-select-wrapper">
+          <select class="subject-select" name="subject_name" required>
+            <option value="">Select a subject…</option>
+            ${optionsHTML}
+          </select>
+        </div>
+        <div class="custom-subject-wrapper" id="custom-subject-wrapper-${index}">
+          <input
+            type="text"
+            class="custom-subject-input"
+            id="custom-subject-input-${index}"
+            name="custom_subject_name"
+            placeholder="Enter your subject name (e.g., 'Data Science', 'AI', etc.)"
+            autocomplete="off"
+          />
+          <div class="custom-subject-hint">
+            <span>💡</span>
+            <span>This will be added to the dropdown for future use by all users.</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <input
+          type="url"
+          name="calendar_url"
+          id="calendar-url-${index}"
+          placeholder="Paste the Google Calendar link here"
+          required
+        />
+        <span class="url-status" id="url-status-${index}"></span>
+        <span class="url-feedback" id="url-feedback-${index}"></span>
+      </div>
+      <div>
+        <input type="date" name="filter_start" value="2026-06-16" />
+      </div>
+      <div>
+        <input type="date" name="filter_end" value="2026-09-30" />
+      </div>
+      <div>
+        <button type="button" class="remove-btn" onclick="removeRow(this)" title="Remove">✕</button>
+      </div>
+    </div>
+  `;
+}
+
 function addRow() {
   const container = document.getElementById('subjects-container');
+  const index = container.children.length;
   const div = document.createElement('div');
-  div.className = 'subject-row';
-  div.innerHTML = `
-    <input type="text"  name="subject_name" placeholder="e.g. Maths" />
-    <input type="url"   name="calendar_url" placeholder="https://calendar.google.com/..." />
-    <input type="date"  name="filter_start" />
-    <input type="date"  name="filter_end" />
-    <button type="button" class="remove-btn" onclick="removeRow(this)" title="Remove">✕</button>
-  `;
-  container.appendChild(div);
+  div.innerHTML = createSubjectRowHTML(index);
+  container.appendChild(div.firstElementChild);
+  
+  // Initialize the dropdown for this row
+  const row = container.lastElementChild;
+  const dropdown = new SubjectDropdown(row, {
+    selectId: `subject-select-${index}`,
+    customInputId: `custom-subject-input-${index}`,
+    customWrapperId: `custom-subject-wrapper-${index}`,
+    calendarUrlId: `calendar-url-${index}`,
+    urlStatusId: `url-status-${index}`,
+    urlFeedbackId: `url-feedback-${index}`
+  });
+  dropdownInstances.push(dropdown);
 }
 
 function removeRow(btn) {
@@ -244,10 +823,55 @@ function removeRow(btn) {
   }
 }
 
-document.getElementById('setup-form').addEventListener('submit', function(e) {
-  const btn = document.getElementById('submit-btn');
-  btn.innerHTML = '<span class="spinner"></span> Syncing...';
-  btn.disabled = true;
+// ── Initialize on page load ─────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  // Add initial row
+  addRow();
+  
+  // Handle form submission
+  const form = document.getElementById('setup-form');
+  const submitBtn = document.getElementById('submit-btn');
+  
+  form.addEventListener('submit', function(e) {
+    // Validate all rows
+    const rows = document.querySelectorAll('#subjects-container .subject-row');
+    let isValid = true;
+    
+    rows.forEach(row => {
+      const select = row.querySelector('select.subject-select');
+      const customInput = row.querySelector('.custom-subject-input');
+      const calendarUrl = row.querySelector('input[name="calendar_url"]');
+      const urlFeedback = row.querySelector('.url-feedback');
+      
+      // Check if custom subject is selected
+      if (select.value === '__custom__') {
+        if (!customInput.value.trim()) {
+          e.preventDefault();
+          customInput.style.borderColor = 'var(--red)';
+          isValid = false;
+          alert('Please enter a custom subject name for all rows.');
+          return;
+        }
+      }
+      
+      // Check if calendar URL is empty
+      if (!calendarUrl.value.trim()) {
+        e.preventDefault();
+        calendarUrl.style.borderColor = 'var(--red)';
+        if (urlFeedback) {
+          urlFeedback.innerHTML = '<span style="color: var(--red);">✗ Calendar URL is required</span>';
+        }
+        isValid = false;
+        return;
+      }
+    });
+    
+    if (!isValid) return;
+    
+    // Disable button and show loading state
+    submitBtn.innerHTML = '<span class="spinner"></span> Syncing...';
+    submitBtn.disabled = true;
+  });
 });
 </script>
 {% endblock %}

@@ -139,3 +139,31 @@ def drive_embed_url(url):
     if file_id:
         return f"https://drive.google.com/file/d/{file_id}/preview"
     return None
+
+
+def extract_calendar_id(url):
+    """Extract raw Google Calendar ID from any calendar URL format."""
+    url = url.strip()
+
+    # Already an iCal URL — extract from path
+    # e.g. .../ical/c_xxx%40group.calendar.google.com/public/basic.ics
+    ical_match = re.search(r'/calendar/ical/([^/]+)/', url)
+    if ical_match:
+        return requests.utils.unquote(ical_match.group(1))
+
+    # ?cid=base64EncodedCalendarId
+    cid_match = re.search(r'[?&]cid=([^&]+)', url)
+    if cid_match:
+        try:
+            cid_b64 = requests.utils.unquote(cid_match.group(1))
+            cid_b64 += '=' * (-len(cid_b64) % 4)
+            return base64.b64decode(cid_b64).decode('utf-8')
+        except Exception:
+            pass
+
+    # ?src=calendar_id
+    src_match = re.search(r'[?&]src=([^&]+)', url)
+    if src_match:
+        return requests.utils.unquote(src_match.group(1))
+
+    return None

@@ -2,7 +2,177 @@
 {% block title %}Dashboard – IITM Lecture Tracker{% endblock %}
 
 {% block extra_styles %}
-/* HEADER */
+/* ── LAYOUT & CONTAINER ────────────────────── */
+.dashboard-container {
+  position: relative;
+  min-height: 400px;
+}
+
+/* ── BLUR OVERLAY ──────────────────────────── */
+.blur-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.blur-overlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.blur-overlay-content {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 32px 40px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 400px;
+  width: 90%;
+}
+
+.blur-overlay-content .loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 16px;
+}
+
+.blur-overlay-content .loading-text {
+  font-size: 15px;
+  color: var(--text);
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.blur-overlay-content .loading-subtext {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* ── TOAST NOTIFICATION ────────────────────── */
+.toast-container {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.toast {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 320px;
+  max-width: 480px;
+  transform: translateX(120%);
+  animation: slideIn 0.3s ease forwards;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.toast.removing {
+  animation: slideOut 0.3s ease forwards;
+}
+
+.toast-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.toast-content {
+  flex: 1;
+}
+
+.toast-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.toast-message {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.toast-close {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 18px;
+  padding: 0 4px;
+  line-height: 1;
+  opacity: 0.6;
+  transition: opacity 0.15s;
+}
+
+.toast-close:hover {
+  opacity: 1;
+}
+
+.toast.success {
+  border-left: 3px solid var(--green);
+}
+
+.toast.error {
+  border-left: 3px solid var(--red);
+}
+
+.toast.info {
+  border-left: 3px solid var(--accent);
+}
+
+.toast.warning {
+  border-left: 3px solid #f59e0b;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+}
+
+/* ── HEADER ────────────────────────────────── */
 .dash-header {
   display: flex;
   align-items: center;
@@ -12,20 +182,26 @@
   gap: 12px;
 }
 .dash-title {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 700;
-  letter-spacing: -0.4px;
+  letter-spacing: -0.5px;
   color: var(--text);
 }
-.dash-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.dash-actions { 
+  display: flex; 
+  gap: 10px; 
+  flex-wrap: wrap; 
+  align-items: center;
+}
 
-/* TABS */
+/* ── TABS ──────────────────────────────────── */
 .tabs {
   display: flex;
   gap: 4px;
   border-bottom: 1px solid var(--border);
   margin-bottom: 24px;
   overflow-x: auto;
+  padding-bottom: 0;
 }
 .tab-btn {
   background: none;
@@ -34,14 +210,18 @@
   font-family: inherit;
   font-size: 13px;
   font-weight: 500;
-  padding: 10px 16px;
+  padding: 10px 18px;
   cursor: pointer;
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
   white-space: nowrap;
-  transition: color .15s, border-color .15s;
+  transition: all 0.2s ease;
+  position: relative;
 }
-.tab-btn:hover { color: var(--text-soft); }
+.tab-btn:hover { 
+  color: var(--text-soft);
+  background: var(--surface2);
+}
 .tab-btn.active {
   color: var(--accent);
   border-bottom-color: var(--accent);
@@ -49,35 +229,136 @@
 .tab-count {
   background: var(--surface2);
   border-radius: 10px;
-  padding: 1px 6px;
+  padding: 1px 7px;
   font-size: 11px;
-  margin-left: 4px;
+  margin-left: 6px;
   color: var(--muted);
+  font-weight: 600;
 }
 
-/* SUBJECT META */
+/* ── SUBJECT META ──────────────────────────── */
 .subject-meta {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 12px;
+  padding: 16px;
+  background: var(--surface2);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
 }
 .subject-meta .last-sync {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
   font-family: var(--mono);
 }
 .subject-meta .filter-period {
   font-size: 11px;
   color: var(--muted);
-  background: var(--surface2);
-  padding: 2px 8px;
-  border-radius: 12px;
+  background: var(--bg);
+  padding: 4px 10px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
 }
 
-/* STATS ROW */
+/* ── BUTTONS ───────────────────────────────── */
+.btn {
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text-soft);
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
+  color: white;
+}
+
+.btn-danger {
+  background: rgba(220, 38, 38, 0.1);
+  color: var(--red);
+  border-color: var(--red);
+}
+
+.btn-danger:hover {
+  background: var(--red);
+  color: white;
+}
+
+.btn-ghost {
+  background: transparent;
+  border-color: transparent;
+}
+
+.btn-ghost:hover {
+  background: var(--surface2);
+  border-color: var(--border);
+}
+
+/* ── BUTTON LOADING STATE ──────────────────── */
+.btn-loading {
+  position: relative;
+  pointer-events: none;
+}
+
+.btn-loading .btn-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── STATS ROW ─────────────────────────────── */
 .stats-row {
   display: flex;
   gap: 12px;
@@ -88,13 +369,19 @@
   background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: 20px;
-  padding: 4px 12px;
+  padding: 6px 16px;
   font-size: 12px;
   color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
-.stat-chip strong { color: var(--text); }
+.stat-chip strong { 
+  color: var(--text);
+  font-size: 14px;
+}
 
-/* TABLE */
+/* ── TABLE ─────────────────────────────────── */
 .table-wrap {
   overflow-x: auto;
   border-radius: var(--radius);
@@ -104,68 +391,95 @@
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 700px;
+  min-width: 800px;
 }
-thead { background: var(--surface2); }
+thead { 
+  background: var(--surface2);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
 th {
-  padding: 11px 14px;
+  padding: 12px 16px;
   text-align: left;
   font-size: 11px;
   font-weight: 600;
   color: var(--muted);
   text-transform: uppercase;
-  letter-spacing: .5px;
+  letter-spacing: 0.5px;
   white-space: nowrap;
+  border-bottom: 2px solid var(--border);
 }
 td {
-  padding: 12px 14px;
+  padding: 14px 16px;
   border-top: 1px solid var(--border);
-  vertical-align: top;
+  vertical-align: middle;
 }
-tr:hover td { background: var(--accent-dim); }
-tr.watched-row td { opacity: .55; }
+tr {
+  transition: background 0.15s ease;
+}
+tr:hover td { 
+  background: var(--accent-dim);
+}
+tr.watched-row td { 
+  opacity: 0.5;
+  background: var(--bg);
+}
 
-/* DATE CELL */
+/* ── DATE CELL ─────────────────────────────── */
 .date-cell {
   font-family: var(--mono);
   font-size: 12px;
   color: var(--muted);
   white-space: nowrap;
+  line-height: 1.6;
 }
 .date-cell .day {
   color: var(--text);
-  font-weight: 500;
+  font-weight: 600;
   display: block;
+  font-size: 13px;
 }
 
-/* TITLE CELL */
+/* ── TITLE CELL ────────────────────────────── */
 .cal-title {
   font-weight: 500;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text);
   text-decoration: none;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  transition: color 0.15s;
 }
-.cal-title:hover { color: var(--accent); }
+.cal-title:hover { 
+  color: var(--accent);
+}
 .cal-title .play-icon {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
+  transition: color 0.15s, transform 0.15s;
 }
-.cal-title:hover .play-icon { color: var(--accent); }
+.cal-title:hover .play-icon { 
+  color: var(--accent);
+  transform: scale(1.1);
+}
 
-/* DESCRIPTION */
-.desc-cell { min-width: 180px; max-width: 260px; }
+/* ── DESCRIPTION ───────────────────────────── */
+.desc-cell { 
+  min-width: 200px; 
+  max-width: 300px; 
+}
 .desc-display {
   font-size: 13px;
   color: var(--text-soft);
   cursor: pointer;
-  padding: 4px 6px;
-  border-radius: 5px;
-  min-height: 28px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  min-height: 36px;
   border: 1px solid transparent;
-  transition: border-color .15s, background .15s;
+  transition: all 0.15s ease;
+  line-height: 1.5;
 }
 .desc-display:hover {
   border-color: var(--border);
@@ -175,67 +489,93 @@ tr.watched-row td { opacity: .55; }
   content: 'Add note…';
   color: var(--muted);
   font-style: italic;
+  opacity: 0.7;
 }
-.desc-edit { display: none; }
+.desc-edit { 
+  display: none;
+}
 .desc-edit textarea {
   font-size: 13px;
-  min-height: 60px;
+  min-height: 80px;
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   color: var(--text);
-  padding: 6px 8px;
+  padding: 8px 10px;
   width: 100%;
   font-family: inherit;
+  resize: vertical;
+  line-height: 1.5;
 }
-.desc-edit .save-desc-btn { margin-top: 6px; }
+.desc-edit textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+.desc-edit .desc-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
 
-/* LINK CELL */
-.link-cell { white-space: nowrap; }
+/* ── LINK CELL ─────────────────────────────── */
+.link-cell { 
+  white-space: nowrap;
+}
 .link-badge {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 4px 10px;
+  gap: 6px;
+  padding: 6px 14px;
   border-radius: 20px;
   font-size: 12px;
   font-weight: 500;
   text-decoration: none;
-  transition: opacity .15s;
+  transition: all 0.2s ease;
 }
-.link-badge:hover { opacity: .85; }
+.link-badge:hover { 
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
 
-/* Meet link – uses secondary blue */
 .link-meet {
-  background: var(--accent-dim);
+  background: rgba(59, 130, 246, 0.1);
   color: var(--accent2);
-  border: 1px solid var(--accent2);
+  border: 1px solid rgba(59, 130, 246, 0.2);
 }
-/* Recording link – uses green */
+.link-meet:hover {
+  background: rgba(59, 130, 246, 0.15);
+}
+
 .link-drive {
-  background: rgba(52, 199, 89, 0.12);
+  background: rgba(52, 199, 89, 0.1);
   color: var(--green);
-  border: 1px solid var(--green);
+  border: 1px solid rgba(52, 199, 89, 0.2);
 }
+.link-drive:hover {
+  background: rgba(52, 199, 89, 0.15);
+}
+
 .link-none {
   color: var(--muted);
   font-size: 12px;
+  opacity: 0.6;
 }
 
-/* WATCHED TOGGLE */
+/* ── WATCHED TOGGLE ────────────────────────── */
 .watch-btn {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   border: 2px solid var(--border);
   background: none;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: border-color .15s, background .15s, color .15s;
+  transition: all 0.2s ease;
   color: var(--muted);
 }
 .watch-btn.done {
@@ -246,6 +586,7 @@ tr.watched-row td { opacity: .55; }
 .watch-btn:hover {
   border-color: var(--accent);
   color: var(--accent);
+  transform: scale(1.1);
 }
 .watch-btn.done:hover {
   border-color: var(--red);
@@ -253,223 +594,282 @@ tr.watched-row td { opacity: .55; }
   background: rgba(255, 59, 48, 0.1);
 }
 
-/* EMPTY STATE */
+/* ── EMPTY STATE ───────────────────────────── */
 .empty-state {
   text-align: center;
-  padding: 60px 20px;
+  padding: 80px 20px;
   color: var(--muted);
 }
-.empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+.empty-state .icon { 
+  font-size: 48px; 
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
 .empty-state h3 {
-  font-size: 16px;
+  font-size: 18px;
   color: var(--text);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
-.empty-state p { color: var(--muted); }
-
-/* SYNC STATUS */
-#sync-status {
-  font-size: 12px;
+.empty-state p { 
   color: var(--muted);
-  padding: 4px 0;
+  font-size: 14px;
+  line-height: 1.6;
 }
-
-/* FILTER PERIOD (already defined above, but kept for clarity) */
-.filter-period {
-  font-size: 11px;
-  color: var(--muted);
-  background: var(--surface2);
-  padding: 2px 8px;
-  border-radius: 12px;
-  white-space: nowrap;
-}
-
-/* Buttons inside actions – ensure they use palette */
-.dash-actions .btn {
-  background: var(--surface2);
-  color: var(--text-soft);
-  border: 1px solid var(--border);
-}
-.dash-actions .btn:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-}
-.dash-actions .btn-ghost { background: transparent; }
 {% endblock %}
 
 {% block content %}
-<div class="dash-header">
-  <div class="dash-title">My Lectures</div>
-  <div class="dash-actions">
-    <span id="sync-status"></span>
-    <button class="btn btn-ghost btn-sm" onclick="syncAll(this)">
-      ↻ Sync All
-    </button>
-    <a href="{{ url_for('main.add_subject') }}" class="btn btn-ghost btn-sm">+ Subject</a>
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- BLUR OVERLAY -->
+<div class="blur-overlay" id="blur-overlay">
+  <div class="blur-overlay-content">
+    <div class="loading-spinner"></div>
+    <div class="loading-text" id="overlay-text">Processing...</div>
+    <div class="loading-subtext" id="overlay-subtext">Please wait</div>
   </div>
 </div>
 
-<!-- TABS -->
-<div class="tabs">
+<div class="dashboard-container">
+  <div class="dash-header">
+    <div class="dash-title">📚 My Lectures</div>
+    <div class="dash-actions">
+      <a href="{{ url_for('main.add_subject') }}" class="btn">
+        <span>+</span> Add Subject
+      </a>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    {% for subj in subjects %}
+      <button class="tab-btn {% if active_tab == subj.id|string %}active{% endif %}"
+              data-subject="{{ subj.id }}"
+              onclick="switchTab('{{ subj.id }}')">
+        {{ subj.name }}
+        <span class="tab-count">{{ events_by_subject[subj.id]|length }}</span>
+      </button>
+    {% endfor %}
+  </div>
+
+  <!-- PANELS -->
   {% for subj in subjects %}
-    <button class="tab-btn {% if active_tab == subj.id|string %}active{% endif %}"
-            data-subject="{{ subj.id }}"
-            onclick="switchTab('{{ subj.id }}')">
-      {{ subj.name }}
-      <span class="tab-count">{{ events_by_subject[subj.id]|length }}</span>
-    </button>
-  {% endfor %}
-</div>
+  <div class="tab-panel" id="panel-{{ subj.id }}"
+       style="display: {% if active_tab == subj.id|string %}block{% else %}none{% endif %}">
 
-<!-- PANELS -->
-{% for subj in subjects %}
-<div class="tab-panel" id="panel-{{ subj.id }}"
-     style="display: {% if active_tab == subj.id|string %}block{% else %}none{% endif %}">
-
-  <div class="subject-meta">
-    <div>
-      <span class="last-sync">
-        Last synced:
-        {% if subj.last_synced %}
-          {{ subj.last_synced.strftime('%d %b %Y, %H:%M UTC') }}
-        {% else %}
-          never
-        {% endif %}
-      </span>
-
-      {% if subj.filter_start or subj.filter_end %}
-        <span class="filter-period" style="margin-left: 8px;">
-          📅
-          {% if subj.filter_start %}
-            {{ subj.filter_start.strftime('%d %b %Y') }}
+    <div class="subject-meta">
+      <div>
+        <span class="last-sync">
+          ⏱ Last synced:
+          {% if subj.last_synced %}
+            {{ subj.last_synced.strftime('%d %b %Y, %H:%M') }}
           {% else %}
-            start
-          {% endif %}
-          –
-          {% if subj.filter_end %}
-            {{ subj.filter_end.strftime('%d %b %Y') }}
-          {% else %}
-            now
+            never
           {% endif %}
         </span>
-      {% endif %}
-    </div>
-    <div style="display:flex; gap:8px;">
-      <button class="btn btn-ghost btn-sm" onclick="syncSubject({{ subj.id }}, this)">
-        ↻ Sync
-      </button>
-      <form action="{{ url_for('main.delete_subject', subject_id=subj.id) }}" method="POST"
-            onsubmit="return confirm('Remove {{ subj.name }}? All events will be deleted.')">
-        <button class="btn btn-danger btn-sm" type="submit">Remove</button>
-      </form>
-    </div>
-  </div>
 
-  {% set evs = events_by_subject[subj.id] %}
-  {% set watched_count = evs | selectattr('watched') | list | length %}
-
-  <div class="stats-row">
-    <div class="stat-chip">Total <strong>{{ evs|length }}</strong></div>
-    <div class="stat-chip">Watched <strong>{{ watched_count }}</strong></div>
-    <div class="stat-chip">Remaining <strong>{{ evs|length - watched_count }}</strong></div>
-  </div>
-
-  {% if evs %}
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Calendar Title</th>
-          <th>Your Notes</th>
-          <th>Link</th>
-          <th style="text-align:center">Watched</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for ev in evs %}
-        <tr id="row-{{ ev.id }}" class="{% if ev.watched %}watched-row{% endif %}">
-          <!-- DATE -->
-          <td class="date-cell">
-            {% if ev.date %}
-              <span class="day">{{ ev.date.strftime('%a') }}</span>
-              {{ ev.date.strftime('%d %b %Y') }}<br/>
-              {{ ev.date.strftime('%I:%M %p') }} IST
+        {% if subj.filter_start or subj.filter_end %}
+          <span class="filter-period">
+            📅
+            {% if subj.filter_start %}
+              {{ subj.filter_start.strftime('%d %b %Y') }}
             {% else %}
-              <span style="color:var(--border)">—</span>
+              start
             {% endif %}
-          </td>
+            –
+            {% if subj.filter_end %}
+              {{ subj.filter_end.strftime('%d %b %Y') }}
+            {% else %}
+              now
+            {% endif %}
+          </span>
+        {% endif %}
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-sm" onclick="syncSubject('{{ subj.id }}', this)" id="sync-btn-{{ subj.id }}">
+          ↻ Sync
+        </button>
+        <button class="btn btn-danger btn-sm" onclick="deleteSubject('{{ subj.id }}', '{{ subj.name }}')" id="delete-btn-{{ subj.id }}">
+          🗑 Remove
+        </button>
+      </div>
+    </div>
 
-          <!-- CALENDAR TITLE (links to event detail) -->
-          <td>
-            <a class="cal-title" href="{{ url_for('main.event_detail', event_id=ev.id) }}">
-              <span class="play-icon">▶</span> {{ ev.calendar_title }}
-            </a>
-          </td>
+    {% set evs = events_by_subject[subj.id] %}
+    {% set watched_count = evs | selectattr('watched') | list | length %}
 
-          <!-- USER NOTES -->
-          <td class="desc-cell">
-            <div class="desc-display {% if not ev.user_description %}empty{% endif %}"
-                 id="desc-display-{{ ev.id }}"
-                 onclick="editDesc({{ ev.id }})">
-              {{ ev.user_description or '' }}
-            </div>
-            <div class="desc-edit" id="desc-edit-{{ ev.id }}">
-              <textarea id="desc-ta-{{ ev.id }}" placeholder="Add your notes here…">{{ ev.user_description or '' }}</textarea>
-              <div style="display:flex; gap:6px; margin-top:6px;">
-                <button class="btn btn-primary btn-sm save-desc-btn" onclick="saveDesc({{ ev.id }})">Save</button>
-                <button class="btn btn-ghost btn-sm" onclick="cancelDesc({{ ev.id }})">Cancel</button>
+    <div class="stats-row">
+      <div class="stat-chip">📊 Total <strong>{{ evs|length }}</strong></div>
+      <div class="stat-chip">✅ Watched <strong>{{ watched_count }}</strong></div>
+      <div class="stat-chip">⏳ Remaining <strong>{{ evs|length - watched_count }}</strong></div>
+    </div>
+
+    {% if evs %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Calendar Title</th>
+            <th>Your Notes</th>
+            <th>Link</th>
+            <th style="text-align:center;width:80px;">Watched</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ev in evs %}
+          <tr id="row-{{ ev.id }}" class="{% if ev.watched %}watched-row{% endif %}">
+            <!-- DATE -->
+            <td class="date-cell">
+              {% if ev.date %}
+                <span class="day">{{ ev.date.strftime('%a') }}</span>
+                {{ ev.date.strftime('%d %b %Y') }}<br/>
+                {{ ev.date.strftime('%I:%M %p') }} IST
+              {% else %}
+                <span style="color:var(--border)">—</span>
+              {% endif %}
+            </td>
+
+            <!-- CALENDAR TITLE -->
+            <td>
+              <a class="cal-title" href="{{ url_for('main.event_detail', event_id=ev.id) }}">
+                <span class="play-icon">▶</span> {{ ev.calendar_title }}
+              </a>
+            </td>
+
+            <!-- USER NOTES -->
+            <td class="desc-cell">
+              <div class="desc-display {% if not ev.user_description %}empty{% endif %}"
+                   id="desc-display-{{ ev.id }}"
+                   onclick="editDesc({{ ev.id }})">
+                {{ ev.user_description or '' }}
               </div>
-            </div>
-          </td>
+              <div class="desc-edit" id="desc-edit-{{ ev.id }}">
+                <textarea id="desc-ta-{{ ev.id }}" placeholder="Add your notes here…">{{ ev.user_description or '' }}</textarea>
+                <div class="desc-actions">
+                  <button class="btn btn-primary btn-sm" onclick="saveDesc({{ ev.id }})">Save</button>
+                  <button class="btn btn-ghost btn-sm" onclick="cancelDesc({{ ev.id }})">Cancel</button>
+                </div>
+              </div>
+            </td>
 
-          <!-- LINK -->
-          <td class="link-cell">
-            {% set show_meet = (ev.meet_link and (not ev.end_datetime or now < ev.end_datetime)) %}
-            {% set show_drive = ev.drive_link %}
+            <!-- LINK -->
+            <td class="link-cell">
+              {% set show_meet = (ev.meet_link and (not ev.end_datetime or now < ev.end_datetime)) %}
+              {% set show_drive = ev.drive_link %}
 
-            {% if show_drive %}
-              <a class="link-badge link-drive" href="{{ ev.drive_link }}" target="_blank" rel="noopener">
-                🎬 Recording
-              </a>
-            {% elif show_meet %}
-              <a class="link-badge link-meet" href="{{ ev.meet_link }}" target="_blank" rel="noopener">
-                📹 Join Live
-              </a>
-            {% else %}
-              <span class="link-none">—</span>
-            {% endif %}
-          </td>
+              {% if show_drive %}
+                <a class="link-badge link-drive" href="{{ ev.drive_link }}" target="_blank" rel="noopener">
+                  🎬 Recording
+                </a>
+              {% elif show_meet %}
+                <a class="link-badge link-meet" href="{{ ev.meet_link }}" target="_blank" rel="noopener">
+                  📹 Join Live
+                </a>
+              {% else %}
+                <span class="link-none">—</span>
+              {% endif %}
+            </td>
 
-          <!-- WATCHED -->
-          <td style="text-align:center">
-            <button class="watch-btn {% if ev.watched %}done{% endif %}"
-                    id="watch-{{ ev.id }}"
-                    onclick="toggleWatch({{ ev.id }})"
-                    title="{% if ev.watched %}Mark as unwatched{% else %}Mark as watched{% endif %}">
-              {% if ev.watched %}✓{% else %}○{% endif %}
-            </button>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+            <!-- WATCHED -->
+            <td style="text-align:center">
+              <button class="watch-btn {% if ev.watched %}done{% endif %}"
+                      id="watch-{{ ev.id }}"
+                      onclick="toggleWatch({{ ev.id }})"
+                      title="{% if ev.watched %}Mark as unwatched{% else %}Mark as watched{% endif %}">
+                {% if ev.watched %}✓{% else %}○{% endif %}
+              </button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% else %}
+    <div class="empty-state">
+      <div class="icon">📅</div>
+      <h3>No events found</h3>
+      <p>Click <strong>Sync</strong> to fetch events from this calendar,<br>or check that the calendar URL is public and accessible.</p>
+    </div>
+    {% endif %}
   </div>
-
-  {% else %}
-  <div class="empty-state">
-    <div class="icon">📅</div>
-    <h3>No events found</h3>
-    <p>Click <strong>Sync</strong> to fetch events from this calendar, or check that the calendar URL is public.</p>
-  </div>
-  {% endif %}
+  {% endfor %}
 </div>
-{% endfor %}
-
 {% endblock %}
 
 {% block scripts %}
 <script>
+// ── TOAST NOTIFICATIONS ──────────────────────
+function showToast(title, message, type = 'info', duration = 4000) {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  
+  const icons = {
+    success: '✅',
+    error: '❌',
+    info: 'ℹ️',
+    warning: '⚠️'
+  };
+  
+  toast.innerHTML = `
+    <div class="toast-icon">${icons[type] || icons.info}</div>
+    <div class="toast-content">
+      <div class="toast-title">${title}</div>
+      <div class="toast-message">${message}</div>
+    </div>
+    <button class="toast-close" onclick="closeToast(this.parentElement)">×</button>
+  `;
+  
+  container.appendChild(toast);
+  
+  // Auto remove
+  if (duration > 0) {
+    setTimeout(() => closeToast(toast), duration);
+  }
+}
+
+function closeToast(toast) {
+  toast.classList.add('removing');
+  setTimeout(() => {
+    if (toast.parentElement) {
+      toast.parentElement.removeChild(toast);
+    }
+  }, 300);
+}
+
+// ── BLUR OVERLAY ─────────────────────────────
+function showOverlay(text = 'Processing...', subtext = 'Please wait') {
+  const overlay = document.getElementById('blur-overlay');
+  document.getElementById('overlay-text').textContent = text;
+  document.getElementById('overlay-subtext').textContent = subtext;
+  overlay.classList.add('active');
+}
+
+function hideOverlay() {
+  const overlay = document.getElementById('blur-overlay');
+  overlay.classList.remove('active');
+}
+
+// ── BUTTON LOADING STATE ─────────────────────
+function setButtonLoading(btn, loading = true) {
+  if (loading) {
+    btn.classList.add('btn-loading');
+    btn.disabled = true;
+    const originalContent = btn.innerHTML;
+    btn.setAttribute('data-original-content', originalContent);
+    btn.innerHTML = '<span class="btn-spinner"></span> Loading...';
+  } else {
+    btn.classList.remove('btn-loading');
+    btn.disabled = false;
+    const originalContent = btn.getAttribute('data-original-content');
+    if (originalContent) {
+      btn.innerHTML = originalContent;
+    }
+  }
+}
+
 // ── TAB SWITCHING ─────────────────────────────
 function switchTab(id) {
   document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
@@ -485,79 +885,118 @@ function editDesc(id) {
   document.getElementById('desc-edit-' + id).style.display = 'block';
   document.getElementById('desc-ta-' + id).focus();
 }
+
 function cancelDesc(id) {
   document.getElementById('desc-display-' + id).style.display = 'block';
   document.getElementById('desc-edit-' + id).style.display = 'none';
 }
+
 async function saveDesc(id) {
   const text = document.getElementById('desc-ta-' + id).value;
-  await fetch(`/event/${id}/description`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ description: text })
-  });
-  const display = document.getElementById('desc-display-' + id);
-  display.textContent = text;
-  display.classList.toggle('empty', !text);
-  cancelDesc(id);
+  try {
+    await fetch(`/event/${id}/description`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ description: text })
+    });
+    const display = document.getElementById('desc-display-' + id);
+    display.textContent = text;
+    display.classList.toggle('empty', !text);
+    cancelDesc(id);
+    showToast('Success', 'Note saved successfully', 'success', 2000);
+  } catch (error) {
+    showToast('Error', 'Failed to save note', 'error');
+  }
 }
 
 // ── WATCHED TOGGLE ────────────────────────────
 async function toggleWatch(id) {
-  const res = await fetch(`/event/${id}/watched`, { method: 'POST' });
-  const data = await res.json();
   const btn = document.getElementById('watch-' + id);
-  const row = document.getElementById('row-' + id);
-  if (data.watched) {
-    btn.textContent = '✓';
-    btn.classList.add('done');
-    btn.title = 'Mark as unwatched';
-    row.classList.add('watched-row');
-  } else {
-    btn.textContent = '○';
-    btn.classList.remove('done');
-    btn.title = 'Mark as watched';
-    row.classList.remove('watched-row');
+  const originalContent = btn.innerHTML;
+  btn.innerHTML = '<span style="font-size:12px;">⏳</span>';
+  btn.disabled = true;
+  
+  try {
+    const res = await fetch(`/event/${id}/watched`, { method: 'POST' });
+    const data = await res.json();
+    const row = document.getElementById('row-' + id);
+    
+    if (data.watched) {
+      btn.innerHTML = '✓';
+      btn.classList.add('done');
+      btn.title = 'Mark as unwatched';
+      row.classList.add('watched-row');
+    } else {
+      btn.innerHTML = '○';
+      btn.classList.remove('done');
+      btn.title = 'Mark as watched';
+      row.classList.remove('watched-row');
+    }
+  } catch (error) {
+    btn.innerHTML = originalContent;
+    showToast('Error', 'Failed to update status', 'error');
+  } finally {
+    btn.disabled = false;
   }
 }
 
 // ── SYNC ──────────────────────────────────────
-function setStatus(msg) {
-  document.getElementById('sync-status').textContent = msg;
-}
-
 async function syncSubject(subjectId, btn) {
-  const orig = btn.innerHTML;
-  btn.innerHTML = '<span class="spinner"></span>';
-  btn.disabled = true;
-  setStatus('Syncing…');
+  setButtonLoading(btn, true);
+  showOverlay('Syncing Calendar', 'Fetching events from Google Calendar...');
+  
   try {
     const res = await fetch(`/sync/${subjectId}`, { method: 'POST' });
     const data = await res.json();
-    setStatus(data.msg);
-    setTimeout(() => { setStatus(''); location.reload(); }, 1200);
-  } catch {
-    setStatus('Sync failed');
-    btn.innerHTML = orig;
-    btn.disabled = false;
+    
+    if (data.ok) {
+      showToast('Sync Complete', data.msg, 'success', 3000);
+      setTimeout(() => location.reload(), 1500);
+    } else {
+      hideOverlay();
+      setButtonLoading(btn, false);
+      showToast('Sync Failed', data.msg || 'An error occurred', 'error');
+    }
+  } catch (error) {
+    hideOverlay();
+    setButtonLoading(btn, false);
+    showToast('Sync Error', 'Failed to connect to server', 'error');
   }
 }
 
-async function syncAll(btn) {
-  const orig = btn.innerHTML;
-  btn.innerHTML = '<span class="spinner"></span> Syncing…';
-  btn.disabled = true;
-  setStatus('Syncing all subjects…');
+// ── DELETE SUBJECT ────────────────────────────
+async function deleteSubject(subjectId, subjectName) {
+  if (!confirm(`Remove "${subjectName}"?\n\nAll synced events will be permanently deleted.`)) {
+    return;
+  }
+  
+  const btn = document.getElementById('delete-btn-' + subjectId);
+  setButtonLoading(btn, true);
+  showOverlay('Removing Subject', `Deleting "${subjectName}" and all events...`);
+  
   try {
-    const res = await fetch('/sync_all', { method: 'POST' });
-    const data = await res.json();
-    const ok = data.results.filter(r => r.ok).length;
-    setStatus(`Synced ${ok}/${data.results.length} subjects`);
-    setTimeout(() => { setStatus(''); location.reload(); }, 1200);
-  } catch {
-    setStatus('Sync failed');
-    btn.innerHTML = orig;
-    btn.disabled = false;
+    const res = await fetch(`/subject/${subjectId}/delete`, { 
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    
+    if (res.redirected) {
+      window.location.href = res.url;
+    } else {
+      const data = await res.json();
+      if (data.success) {
+        showToast('Deleted', `"${subjectName}" has been removed`, 'success', 3000);
+        setTimeout(() => location.reload(), 1500);
+      } else {
+        hideOverlay();
+        setButtonLoading(btn, false);
+        showToast('Delete Failed', data.msg || 'Could not delete subject', 'error');
+      }
+    }
+  } catch (error) {
+    hideOverlay();
+    setButtonLoading(btn, false);
+    showToast('Error', 'Failed to delete subject', 'error');
   }
 }
 </script>
