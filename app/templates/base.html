@@ -1,0 +1,476 @@
+<!-- D:\iitm_scheduler\templates\base.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}LF LECFLOW{% endblock %}</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #FFFFFF;
+      --surface:      #F9FAFB;
+      --surface2:     #F3F4F6;
+      --border:       #E5E7EB;
+      --border-dim:   #F0F0F0;
+
+      --accent:       #F97316;
+      --accent-dim:   rgba(249, 115, 22, 0.08);
+      --accent-hover: #EA6C10;
+
+      --green:        #16A34A;
+      --green-light:  #DCFCE7;
+      --green-border: #86EFAC;
+      --green-desc:   #F0FDF4;
+
+      --amber:        #D97706;
+      --red:          #DC2626;
+
+      --text:         #111827;
+      --text-soft:    #4B5563;
+      --muted:        #9CA3AF;
+
+      --radius:       10px;
+      --radius-sm:    6px;
+      --mono:         'JetBrains Mono', monospace;
+      --nav-h:        54px;
+    }
+
+    /* ── Base ───────────────────────────── */
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      font-size: 14px;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      padding-top: calc(var(--nav-h) + 24px);
+    }
+
+    /* ── Nav — floating glass pill ──────── */
+    nav {
+      position: fixed;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 48px);
+      max-width: 1100px;
+      height: var(--nav-h);
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(229, 231, 235, 0.85);
+      border-radius: 100px;
+      box-shadow:
+        0 2px 16px rgba(0, 0, 0, 0.07),
+        0 1px 3px rgba(0, 0, 0, 0.04);
+      padding: 0 10px 0 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 1000;
+    }
+
+    .nav-brand {
+      font-weight: 800;
+      font-size: 15px;
+      letter-spacing: -0.5px;
+      color: var(--text);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .nav-brand-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.5px;
+      flex-shrink: 0;
+    }
+
+    .nav-brand-label {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+    .nav-brand-label .top {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.3px;
+    }
+    .nav-brand-label .sub {
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .nav-links a,
+    .nav-links button {
+      color: var(--text-soft);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 7px 14px;
+      border-radius: 100px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      transition: color .15s, background .15s;
+      font-family: inherit;
+      letter-spacing: 0.1px;
+    }
+
+    .nav-links a:hover,
+    .nav-links button:hover {
+      color: var(--text);
+      background: var(--surface2);
+    }
+
+    .nav-links .nav-cta {
+      background: var(--accent);
+      color: #fff;
+      font-weight: 600;
+      padding: 7px 18px;
+    }
+    .nav-links .nav-cta:hover {
+      background: var(--accent-hover);
+      color: #fff;
+    }
+
+    /* ── Container ──────────────────────── */
+    .container {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 32px 24px 64px;
+    }
+
+    /* ── Flash Messages ─────────────────── */
+    .flash-list { list-style: none; margin-bottom: 24px; }
+
+    .flash-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 16px;
+      border-radius: var(--radius);
+      margin-bottom: 8px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .flash-item::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .flash-success {
+      background: var(--green-desc);
+      border: 1px solid var(--green-border);
+      color: var(--green);
+    }
+    .flash-success::before { background: var(--green); }
+
+    .flash-error {
+      background: #FEF2F2;
+      border: 1px solid #FECACA;
+      color: var(--red);
+    }
+    .flash-error::before { background: var(--red); }
+
+    .flash-warning {
+      background: #FFFBEB;
+      border: 1px solid #FDE68A;
+      color: var(--amber);
+    }
+    .flash-warning::before { background: var(--amber); }
+
+    /* ── Cards ──────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+    .card + .card { margin-top: 14px; }
+
+    /* ── Buttons ────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 18px;
+      border-radius: 100px;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      transition: background .15s, transform .1s, box-shadow .15s;
+      text-decoration: none;
+      letter-spacing: 0.1px;
+      white-space: nowrap;
+    }
+    .btn:active { transform: scale(.97); }
+
+    /* Orange primary */
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      box-shadow: 0 4px 16px rgba(249, 115, 22, 0.28);
+    }
+
+    .btn-ghost {
+      background: #fff;
+      color: var(--text-soft);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-dim);
+    }
+
+    .btn-danger {
+      background: transparent;
+      color: var(--red);
+      border: 1px solid #FECACA;
+    }
+    .btn-danger:hover {
+      background: #FEF2F2;
+      border-color: var(--red);
+    }
+
+    .btn-sm { padding: 5px 14px; font-size: 12px; }
+    .btn-lg { padding: 12px 28px; font-size: 15px; }
+
+    /* ── Mark as Watched button ─────────── */
+    /* Usage: <button class="watch-btn" id="watch-{id}">
+                  <span class="watch-icon"></span>
+               </button>                                    */
+    .watch-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid #D1D5DB;
+      background: transparent;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      transition: border-color .15s, background .15s;
+      padding: 0;
+    }
+    .watch-btn:hover {
+      border-color: var(--green);
+    }
+    /* watched state — add class "done" via JS */
+    .watch-btn.done {
+      background: var(--green-light);
+      border-color: var(--green-border);
+      color: var(--green);
+    }
+
+    /* ── Description cell ───────────────── */
+    /* Very light green background, black text */
+    .desc-display {
+      background: var(--green-desc);
+      border: 1px solid var(--green-border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 13px;
+      padding: 6px 10px;
+      min-height: 32px;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    .desc-display:hover {
+      border-color: var(--green);
+    }
+    .desc-display.empty::before {
+      content: 'Add notes…';
+      color: #86EFAC;
+      font-style: italic;
+    }
+    .desc-edit textarea {
+      background: var(--green-desc);
+      border: 1px solid var(--green);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 13px;
+    }
+    .desc-edit textarea:focus {
+      box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.12);
+    }
+
+    /* ── Forms ──────────────────────────── */
+    .form-group { margin-bottom: 20px; }
+
+    label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 7px;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="url"],
+    input[type="number"],
+    input[type="date"],
+    select,
+    textarea {
+      width: 100%;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      padding: 10px 14px;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+      appearance: none;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-dim);
+    }
+    input::placeholder, textarea::placeholder {
+      color: var(--muted);
+      opacity: 1;
+    }
+
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239CA3AF' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 36px;
+      cursor: pointer;
+    }
+
+    textarea { resize: vertical; min-height: 80px; }
+
+    /* ── Spinner ────────────────────────── */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .65s linear infinite;
+      display: inline-block;
+    }
+
+    /* ── Utility ────────────────────────── */
+    .text-muted   { color: var(--muted); }
+    .text-soft    { color: var(--text-soft); }
+    .text-accent  { color: var(--accent); }
+    .text-green   { color: var(--green); }
+    .text-red     { color: var(--red); }
+    .text-mono    { font-family: var(--mono); }
+    .divider      { border: none; border-top: 1px solid var(--border-dim); margin: 24px 0; }
+
+    /* ── Responsive ─────────────────────── */
+    @media (max-width: 640px) {
+      nav {
+        width: calc(100% - 24px);
+        padding: 0 8px 0 14px;
+        top: 10px;
+      }
+      .container { padding: 24px 16px 48px; }
+      .nav-brand-label .sub { display: none; }
+      .nav-links a,
+      .nav-links button { padding: 6px 10px; font-size: 12px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .01ms !important;
+        transition-duration: .01ms !important;
+      }
+    }
+
+    {% block extra_styles %}{% endblock %}
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a
+      class="nav-brand"
+      href="{% if current_user.is_authenticated %}{{ url_for('main.dashboard') }}{% else %}{{ url_for('auth.login') }}{% endif %}"
+    >
+      <div class="nav-brand-icon">LH</div>
+      <div class="nav-brand-label">
+        <span class="top">LECFLOW</span>
+        <span class="sub">IIT Madras · BS</span>
+      </div>
+    </a>
+
+    <div class="nav-links">
+      {% if current_user.is_authenticated %}
+        <a href="{{ url_for('main.add_subject') }}">+ Subject</a>
+        <form action="{{ url_for('auth.logout') }}" method="get" style="display:inline">
+          <button type="submit">Sign out</button>
+        </form>
+      {% else %}
+        <a href="{{ url_for('auth.login') }}">Sign in</a>
+        <a href="{{ url_for('auth.register') }}" class="nav-cta">Get started</a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul class="flash-list">
+          {% for cat, msg in messages %}
+            <li class="flash-item flash-{{ cat }}">{{ msg }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </div>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

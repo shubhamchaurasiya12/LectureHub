@@ -1,0 +1,1135 @@
+{% extends "base.html" %}
+{% block title %}{{ ev.calendar_title }} – IITM Lecture Tracker{% endblock %}
+
+{# embed_url is passed from Python — covers both Drive and YouTube. #}
+
+{% block extra_styles %}
+/* ── Header ───────────────────────────────────── */
+.event-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.event-breadcrumb {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.event-breadcrumb a {
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.event-breadcrumb a:hover { color: var(--accent); }
+.event-title {
+  font-size: clamp(18px, 4vw, 24px);
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+.event-meta {
+  font-size: 12px;
+  color: var(--muted);
+  font-family: var(--mono);
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.event-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+.watch-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+.watch-toggle-btn.done {
+  border-color: var(--green);
+  background: rgba(52,199,89,.12);
+  color: var(--green);
+}
+.watch-toggle-btn:hover { border-color: var(--accent); color: var(--accent); }
+.watch-toggle-btn.done:hover {
+  border-color: var(--red); color: var(--red);
+  background: rgba(255,59,48,.08);
+}
+
+/* ── Event Links ──────────────────────────────── */
+.event-links { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
+.link-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 12px; border-radius: 20px;
+  font-size: 12px; font-weight: 500;
+  text-decoration: none; transition: opacity 0.15s;
+}
+.link-badge:hover { opacity: 0.8; }
+.link-meet  { background: var(--accent-dim);   color: var(--accent2); border: 1px solid var(--accent2); }
+.link-drive { background: rgba(52,199,89,.12); color: var(--green);   border: 1px solid var(--green);   }
+.link-yt    { background: rgba(255,48,48,.08); color: #e02020;        border: 1px solid #e02020;        }
+
+/* ── Layout ───────────────────────────────────── */
+.event-layout { display: flex; gap: 20px; align-items: flex-start; }
+.video-pane   { flex: 1 1 62%; min-width: 0; }
+.notes-pane   { flex: 1 1 38%; min-width: 260px; }
+
+/* ── Video Container ───────────────────────────── */
+.video-wrapper {
+  position: relative;
+  width: 100%;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: #000;
+  aspect-ratio: 16 / 9;
+}
+.video-wrapper iframe {
+  display: block;
+  width: 640px;
+  height: 360px;
+  border: 0;
+  transform-origin: top left;
+}
+
+/* ── Empty / error states ─────────────────────── */
+.video-empty {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 10px; padding: 24px;
+  text-align: center; color: var(--muted);
+  background: var(--bg); font-size: 13px;
+}
+.video-empty .icon { font-size: 34px; margin-bottom: 4px; }
+.video-empty .btn  { margin-top: 10px; }
+
+/* ── Loading overlay ──────────────────────────── */
+.video-loader {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 12px; background: #000; z-index: 2;
+  transition: opacity 0.3s ease; pointer-events: none;
+}
+.video-loader.hidden { opacity: 0; }
+.spinner {
+  width: 32px; height: 32px;
+  border: 3px solid rgba(255,255,255,.12);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.video-loader-text { font-size: 12px; color: rgba(255,255,255,.4); font-family: var(--mono); }
+
+```css
+/* ═══════════════════════════════════════════════
+   Notes — rich markdown editor
+═══════════════════════════════════════════════ */
+
+.notes-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  position: sticky;
+  top: 72px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Card header */
+.notes-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 0;
+}
+
+.notes-card-header h3 {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin: 0;
+}
+
+/* Toolbar */
+.notes-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 8px;
+  background: var(--surface2);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  margin-top: 10px;
+  flex-wrap: wrap;
+  row-gap: 3px;
+}
+
+.tb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 24px;
+  padding: 0 5px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-soft);
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--mono);
+  white-space: nowrap;
+  letter-spacing: -0.2px;
+  transition: background .1s, color .1s, border-color .1s;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.tb-btn:hover {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+.tb-btn.tb-on {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.tb-italic {
+  font-style: italic;
+  font-family: inherit;
+  font-size: 12.5px;
+}
+
+.tb-sep {
+  width: 1px;
+  height: 14px;
+  background: var(--border);
+  margin: 0 3px;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.tb-spacer {
+  flex: 1;
+  min-width: 2px;
+}
+
+.tb-pdf {
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 0 8px;
+  letter-spacing: 0;
+  color: var(--muted);
+  min-width: unset;
+  gap: 3px;
+}
+
+.tb-pdf:hover {
+  color: var(--accent);
+  background: var(--accent-dim);
+  border-color: var(--accent);
+}
+
+.tb-pdf svg {
+  flex-shrink: 0;
+}
+
+
+/* ═══════════════════════════════════════════════
+   Editor / Preview
+═══════════════════════════════════════════════ */
+
+/*
+   IMPORTANT:
+   Keep the notes body at a fixed height.
+   Both textarea and preview fill this exact space.
+   This prevents Preview from expanding the card.
+*/
+.notes-body {
+  padding: 8px 14px 2px;
+  height: 300px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Markdown editor */
+#notes-textarea {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+
+  color: var(--text);
+  padding: 12px;
+
+  font-size: 13px;
+  font-family: var(--mono);
+  line-height: 1.65;
+
+  resize: none;
+  outline: none;
+
+  transition:
+    border-color .15s,
+    box-shadow .15s;
+
+  box-sizing: border-box;
+  tab-size: 2;
+
+  /* Long notes scroll inside the editor */
+  overflow-y: auto;
+}
+
+#notes-textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+
+/* Markdown preview */
+.notes-preview {
+  display: none;
+
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+
+  padding: 14px 16px;
+
+  font-size: 14px;
+  line-height: 1.7;
+
+  color: var(--text);
+
+  box-sizing: border-box;
+  word-break: break-word;
+
+  /* Long preview scrolls instead of expanding */
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.notes-preview.visible {
+  display: block;
+}
+
+
+/* Preview content */
+.notes-preview h1,
+.notes-preview h2,
+.notes-preview h3 {
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--text);
+  margin: 1em 0 0.35em;
+}
+
+.notes-preview h1 {
+  font-size: 1.35em;
+}
+
+.notes-preview h2 {
+  font-size: 1.15em;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: .2em;
+}
+
+.notes-preview h3 {
+  font-size: 1.0em;
+}
+
+.notes-preview h1:first-child,
+.notes-preview h2:first-child,
+.notes-preview h3:first-child {
+  margin-top: 0;
+}
+
+.notes-preview p {
+  margin: 0 0 .75em;
+}
+
+.notes-preview a {
+  color: var(--accent2);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.notes-preview strong {
+  font-weight: 700;
+}
+
+.notes-preview em {
+  font-style: italic;
+}
+
+.notes-preview code {
+  font-family: var(--mono);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: .86em;
+  color: var(--accent2);
+}
+
+.notes-preview pre {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  overflow-x: auto;
+  margin: .75em 0;
+  position: relative;
+}
+
+.notes-preview pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+  font-size: 12.5px;
+}
+
+.notes-preview blockquote {
+  border-left: 3px solid var(--accent);
+  margin: .75em 0;
+  padding: 4px 14px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.notes-preview ul,
+.notes-preview ol {
+  padding-left: 22px;
+  margin: .5em 0;
+}
+
+.notes-preview li {
+  margin: .2em 0;
+}
+
+.notes-preview hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1.1em 0;
+}
+
+.notes-preview table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: .75em 0;
+  font-size: 13px;
+}
+
+.notes-preview th,
+.notes-preview td {
+  border: 1px solid var(--border);
+  padding: 5px 10px;
+  text-align: left;
+}
+
+.notes-preview th {
+  background: var(--surface2);
+  font-weight: 600;
+}
+
+.notes-preview img {
+  max-width: 100%;
+  border-radius: var(--radius-sm);
+}
+
+.notes-preview .math-block {
+  text-align: center;
+  overflow-x: auto;
+  margin: .85em 0;
+  padding: 8px 0;
+}
+
+.notes-preview .math-error {
+  color: var(--red, #ff3b30);
+  font-family: var(--mono);
+  font-size: .88em;
+  background: rgba(255,59,48,.08);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.notes-preview-empty {
+  color: var(--muted);
+  font-style: italic;
+  font-size: 13px;
+  text-align: center;
+  padding-top: 60px;
+}
+
+
+/* ═══════════════════════════════════════════════
+   Footer
+═══════════════════════════════════════════════ */
+
+.notes-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px 14px;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+#notes-status {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.notes-footer .btn-primary {
+  background: var(--accent);
+  color: #0B0B0E;
+}
+
+.notes-footer .btn-primary:hover {
+  box-shadow: 0 0 18px var(--accent-glow);
+}
+
+
+/* ═══════════════════════════════════════════════
+   Mobile
+═══════════════════════════════════════════════ */
+
+@media (max-width: 900px) {
+
+  .event-layout {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .video-pane,
+  .notes-pane {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+
+  .notes-pane {
+    display: none;
+  }
+
+  .notes-pane.active {
+    display: block;
+  }
+
+  .notes-card {
+    position: static;
+    border-radius: 0 0 var(--radius) var(--radius);
+    border-top: none;
+    overflow: hidden;
+  }
+
+  /*
+     Smaller fixed editor on mobile.
+     Preview and textarea remain exactly
+     the same height.
+  */
+  .notes-body {
+    height: 320px;
+    padding: 6px 10px 2px;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  #notes-textarea,
+  .notes-preview {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    max-height: none;
+  }
+
+  .mobile-tab {
+    flex: 1;
+    padding: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+    color: var(--muted);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-family: inherit;
+    transition: color .15s, border-color .15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mobile-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  .notes-toolbar {
+    flex-wrap: wrap;
+  }
+}
+
+
+/* Mobile tabs */
+.mobile-tabs {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .mobile-tabs {
+    display: flex;
+  }
+}
+
+
+/* Small phones */
+@media (max-width: 600px) {
+
+  .event-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .event-header-actions {
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .watch-toggle-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .event-meta {
+    font-size: 11px;
+    gap: 8px;
+  }
+
+  .video-pane {
+    width: 100%;
+  }
+
+  .notes-card-header {
+    padding: 12px 14px 0;
+  }
+
+  .notes-body {
+    height: 300px;
+    padding: 6px 10px 2px;
+  }
+
+  .notes-footer {
+    padding: 6px 12px 12px;
+  }
+
+  .tb-btn {
+    min-width: 24px;
+    height: 22px;
+    font-size: 11px;
+  }
+}
+{% endblock %}
+
+{% block content %}
+<div class="event-breadcrumb">
+  <a href="{{ url_for('main.dashboard', tab=subject.id) }}">← {{ subject.name }}</a>
+</div>
+
+<div class="event-header">
+  <div style="flex:1; min-width:0;">
+    <div class="event-title">{{ ev.calendar_title }}</div>
+    <div class="event-meta">
+      {% if ev.date %}
+        <span>📅 {{ ev.date.strftime('%a, %d %b %Y') }}</span>
+        <span>🕐 {{ ev.date.strftime('%I:%M %p') }} IST{% if ev.end_datetime %} – {{ ev.end_datetime.strftime('%I:%M %p') }} IST{% endif %}</span>
+      {% endif %}
+    </div>
+    <div class="event-links">
+      {% if ev.drive_link %}
+        <a class="link-badge link-drive" href="{{ ev.drive_link }}" target="_blank" rel="noopener">🎬 Open in Drive</a>
+      {% endif %}
+      {% if ev.youtube_link and not ev.drive_link %}
+        <a class="link-badge link-yt" href="{{ ev.youtube_link }}" target="_blank" rel="noopener">▶ Open on YouTube</a>
+      {% endif %}
+      {% if ev.meet_link and (not ev.end_datetime or now < ev.end_datetime) %}
+        <a class="link-badge link-meet" href="{{ ev.meet_link }}" target="_blank" rel="noopener">📹 Join Live</a>
+      {% endif %}
+    </div>
+  </div>
+  <div class="event-header-actions">
+    <button class="watch-toggle-btn {% if ev.watched %}done{% endif %}"
+            id="watch-toggle" onclick="toggleWatch()">
+      <span id="watch-icon">{% if ev.watched %}✓{% else %}○{% endif %}</span>
+      <span id="watch-label">{% if ev.watched %}Watched{% else %}Mark as watched{% endif %}</span>
+    </button>
+  </div>
+</div>
+
+<div class="event-layout">
+  <!-- Video Pane -->
+  <div class="video-pane">
+    <div class="video-wrapper" id="video-wrapper">
+      {% if embed_url %}
+        <div class="video-loader" id="video-loader">
+          <div class="spinner"></div>
+          <div class="video-loader-text">Loading video…</div>
+        </div>
+        <iframe
+          id="lecture-iframe"
+          src="{{ embed_url }}"
+          allowfullscreen
+          allow="autoplay; picture-in-picture"
+          referrerpolicy="no-referrer-when-downgrade"
+          onload="onVideoLoaded()"
+        ></iframe>
+      {% else %}
+        <div class="video-empty">
+          <div class="icon">🎬</div>
+          <div>
+            {% if ev.drive_link %}
+              This recording can't be played directly — it may be a Docs/Slides link, not a video file.
+            {% else %}
+              No recording has been linked to this session yet.
+            {% endif %}
+          </div>
+          {% if ev.drive_link %}
+            <a class="btn btn-ghost btn-sm" href="{{ ev.drive_link }}" target="_blank" rel="noopener">Open in Drive instead</a>
+          {% elif ev.meet_link %}
+            <a class="btn btn-ghost btn-sm" href="{{ ev.meet_link }}" target="_blank" rel="noopener">Join Meet instead</a>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Mobile tab bar -->
+  <div class="mobile-tabs" id="mobile-tabs">
+    <button class="mobile-tab" id="tab-notes" onclick="showTab('notes')">📝 Notes</button>
+  </div>
+
+  <!-- Notes Pane -->
+  <div class="notes-pane" id="notes-pane">
+    <div class="notes-card">
+
+      <div class="notes-card-header">
+        <h3>Your Notes</h3>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="notes-toolbar" id="notes-toolbar" role="toolbar" aria-label="Formatting">
+        <button class="tb-btn"          onclick="applyFmt('bold')"        title="Bold (Ctrl+B)">B</button>
+        <button class="tb-btn tb-italic" onclick="applyFmt('italic')"     title="Italic (Ctrl+I)">I</button>
+        <div class="tb-sep"></div>
+        <button class="tb-btn" onclick="applyFmt('h1')" title="Heading 1">H1</button>
+        <button class="tb-btn" onclick="applyFmt('h2')" title="Heading 2">H2</button>
+        <button class="tb-btn" onclick="applyFmt('h3')" title="Heading 3">H3</button>
+        <div class="tb-sep"></div>
+        <button class="tb-btn" onclick="applyFmt('math-inline')" title="Inline math $…$"  style="font-family:serif;font-size:13px;">$</button>
+        <button class="tb-btn" onclick="applyFmt('math-block')"  title="Block math $$…$$" style="font-family:serif;font-size:11px;">$$</button>
+        <div class="tb-sep"></div>
+        <button class="tb-btn" onclick="applyFmt('code-inline')" title="Inline code (Ctrl+K)" style="font-size:14px;letter-spacing:-1px;">` `</button>
+        <button class="tb-btn" onclick="applyFmt('code-block')"  title="Code block (Ctrl+Shift+K)">&lt;/&gt;</button>
+        <div class="tb-sep"></div>
+        <button class="tb-btn" onclick="applyFmt('quote')" title="Blockquote" style="font-size:14px;">&ldquo;</button>
+        <button class="tb-btn" onclick="applyFmt('hr')"    title="Divider"    style="font-size:16px; padding:0 3px;">—</button>
+        <div class="tb-spacer"></div>
+        <button class="tb-btn" id="preview-btn" onclick="togglePreview()" title="Preview (Ctrl+P)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+        <button class="tb-btn tb-pdf" onclick="downloadNotesPDF()" title="Download notes as PDF">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          PDF
+        </button>
+      </div>
+
+      <div class="notes-body">
+        <textarea
+          id="notes-textarea"
+          placeholder="Write notes in Markdown…&#10;&#10;**bold**  *italic*  # Heading&#10;$E = mc^2$ inline math&#10;$$ block math $$&#10;&#96;&#96;&#96;python   code blocks"
+          spellcheck="true"
+        >{{ ev.user_description or '' }}</textarea>
+        <div class="notes-preview" id="notes-preview" aria-live="polite"></div>
+      </div>
+
+      <div class="notes-footer">
+        <span id="notes-status"></span>
+        <button class="btn btn-primary btn-sm" onclick="saveNotes()">Save</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const EVENT_ID = {{ ev.id }};
+const EV_TITLE = {{ ev.calendar_title | tojson }};
+
+/* ─────────────────────────────────────────────────
+   Lib loader
+───────────────────────────────────────────────── */
+function loadCSS(href) {
+  const l = document.createElement('link');
+  l.rel = 'stylesheet'; l.href = href;
+  document.head.appendChild(l);
+}
+function loadScript(src) {
+  return new Promise((res) => {
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = res;
+    s.onerror = () => { console.warn('Failed to load', src); res(); };
+    document.head.appendChild(s);
+  });
+}
+loadCSS('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css');
+loadCSS('https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css');
+
+let mdReady = false;
+(async () => {
+  await loadScript('https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js');
+  await loadScript('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js');
+  await loadScript('https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js');
+  setupMarkdown();
+  mdReady = true;
+})();
+
+/* ─────────────────────────────────────────────────
+   Markdown setup
+───────────────────────────────────────────────── */
+function setupMarkdown() {
+  marked.use({
+    extensions: [
+      {
+        name: 'blockMath', level: 'block',
+        start(src) { return src.indexOf('$$'); },
+        tokenizer(src) {
+          const m = /^\$\$([\s\S]+?)\$\$/.exec(src);
+          if (m) return { type: 'blockMath', raw: m[0], expr: m[1].trim() };
+        },
+        renderer(token) {
+          try {
+            return '<div class="math-block">' + katex.renderToString(token.expr, { displayMode: true, throwOnError: false }) + '</div>\n';
+          } catch (_) {
+            return '<div class="math-block math-error">' + escHtml(token.expr) + '</div>\n';
+          }
+        }
+      },
+      {
+        name: 'inlineMath', level: 'inline',
+        start(src) { return src.indexOf('$'); },
+        tokenizer(src) {
+          const m = /^\$([^\$\n]+?)\$/.exec(src);
+          if (m) return { type: 'inlineMath', raw: m[0], expr: m[1].trim() };
+        },
+        renderer(token) {
+          try {
+            return katex.renderToString(token.expr, { displayMode: false, throwOnError: false });
+          } catch (_) {
+            return '<span class="math-error">' + escHtml(token.expr) + '</span>';
+          }
+        }
+      }
+    ]
+  });
+  marked.use({
+    renderer: {
+      code(code, lang) {
+        const language = lang && hljs.getLanguage(lang) ? lang : 'plaintext';
+        try {
+          const v = hljs.highlight(code, { language, ignoreIllegals: true }).value;
+          return `<pre><code class="hljs language-${language}">${v}</code></pre>\n`;
+        } catch (_) {
+          return `<pre><code>${escHtml(code)}</code></pre>\n`;
+        }
+      }
+    }
+  });
+}
+function escHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+/* ─────────────────────────────────────────────────
+   Notes save / autosave
+───────────────────────────────────────────────── */
+let saveTimer = null;
+function setNotesStatus(msg) { document.getElementById('notes-status').textContent = msg; }
+async function saveNotes() {
+  const text = document.getElementById('notes-textarea').value;
+  setNotesStatus('Saving…');
+  try {
+    await fetch(`/event/${EVENT_ID}/description`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ description: text })
+    });
+    setNotesStatus('Saved ' + new Date().toLocaleTimeString());
+  } catch {
+    setNotesStatus('Could not save — retry?');
+  }
+}
+document.getElementById('notes-textarea').addEventListener('input', () => {
+  clearTimeout(saveTimer);
+  setNotesStatus('Typing…');
+  saveTimer = setTimeout(saveNotes, 1200);
+});
+
+/* ─────────────────────────────────────────────────
+   Watch toggle
+───────────────────────────────────────────────── */
+async function toggleWatch() {
+  const res  = await fetch(`/event/${EVENT_ID}/watched`, { method: 'POST' });
+  const data = await res.json();
+  const btn  = document.getElementById('watch-toggle');
+  const icon = document.getElementById('watch-icon');
+  const lbl  = document.getElementById('watch-label');
+  if (data.watched) {
+    btn.classList.add('done'); icon.textContent = '✓'; lbl.textContent = 'Watched';
+  } else {
+    btn.classList.remove('done'); icon.textContent = '○'; lbl.textContent = 'Mark as watched';
+  }
+}
+
+/* ─────────────────────────────────────────────────
+   Formatting toolbar
+───────────────────────────────────────────────── */
+function applyFmt(type) {
+  const ta   = document.getElementById('notes-textarea');
+  const ss   = ta.selectionStart, se = ta.selectionEnd;
+  const val  = ta.value;
+  const sel  = val.slice(ss, se);
+  const pre  = val.slice(0, ss);
+  const post = val.slice(se);
+  let newVal, newSs, newSe;
+
+  const wrap = (l, r) => {
+    if (sel) { newVal = pre + l + sel + r + post; newSs = ss + l.length; newSe = se + l.length; }
+    else      { newVal = pre + l + r + post;       newSs = newSe = ss + l.length; }
+  };
+  const linePrefix = (prefix) => {
+    const lineStart = val.lastIndexOf('\n', ss - 1) + 1;
+    const lineEnd   = val.indexOf('\n', se);
+    const end       = lineEnd === -1 ? val.length : lineEnd;
+    const line      = val.slice(lineStart, end);
+    if (line.startsWith(prefix)) {
+      newVal = val.slice(0, lineStart) + line.slice(prefix.length) + val.slice(end);
+      newSs  = Math.max(ss - prefix.length, lineStart);
+      newSe  = Math.max(se - prefix.length, lineStart);
+    } else {
+      newVal = val.slice(0, lineStart) + prefix + line + val.slice(end);
+      newSs  = ss + prefix.length; newSe = se + prefix.length;
+    }
+  };
+
+  switch (type) {
+    case 'bold':        wrap('**', '**'); break;
+    case 'italic':      wrap('*', '*');   break;
+    case 'math-inline': wrap('$', '$');   break;
+    case 'code-inline': wrap('`', '`');   break;
+    case 'h1':          linePrefix('# ');   break;
+    case 'h2':          linePrefix('## ');  break;
+    case 'h3':          linePrefix('### '); break;
+    case 'quote':       linePrefix('> ');   break;
+    case 'math-block': {
+      const body = sel || '';
+      newVal = pre + '$$\n' + body + (body ? '' : '\n') + '\n$$' + post;
+      newSs = newSe = ss + 3 + (body ? body.length : 0); break;
+    }
+    case 'code-block': {
+      const body = sel || '';
+      newVal = pre + '```\n' + body + (body ? '' : '\n') + '\n```' + post;
+      newSs = newSe = ss + 4 + (body ? body.length : 0); break;
+    }
+    case 'hr': {
+      const nl = (pre && !pre.endsWith('\n')) ? '\n' : '';
+      newVal = pre + nl + '\n---\n\n' + post;
+      newSs = newSe = ss + nl.length + 6; break;
+    }
+    default: return;
+  }
+  ta.value = newVal; ta.selectionStart = newSs; ta.selectionEnd = newSe;
+  ta.focus(); ta.dispatchEvent(new Event('input'));
+}
+
+document.getElementById('notes-textarea').addEventListener('keydown', (e) => {
+  const mod = e.ctrlKey || e.metaKey;
+  if (!mod) return;
+  switch (e.key.toLowerCase()) {
+    case 'b': e.preventDefault(); applyFmt('bold');        break;
+    case 'i': e.preventDefault(); applyFmt('italic');      break;
+    case 'k': e.preventDefault(); e.shiftKey ? applyFmt('code-block') : applyFmt('code-inline'); break;
+    case 'p': e.preventDefault(); togglePreview();         break;
+  }
+});
+
+/* ─────────────────────────────────────────────────
+   Preview toggle
+───────────────────────────────────────────────── */
+let previewOpen = false;
+function renderPreview() {
+  const md   = document.getElementById('notes-textarea').value.trim();
+  const prev = document.getElementById('notes-preview');
+  if (!mdReady) { prev.innerHTML = '<div class="notes-preview-empty">Loading renderer…</div>'; return; }
+  if (!md)      { prev.innerHTML = '<div class="notes-preview-empty">Nothing to preview yet.</div>'; return; }
+  prev.innerHTML = marked.parse(md);
+}
+function togglePreview() {
+  previewOpen = !previewOpen;
+  const ta   = document.getElementById('notes-textarea');
+  const prev = document.getElementById('notes-preview');
+  const btn  = document.getElementById('preview-btn');
+  if (previewOpen) {
+    renderPreview();
+    ta.style.display = 'none'; prev.classList.add('visible'); btn.classList.add('tb-on');
+    btn.title = 'Back to edit (Ctrl+P)';
+  } else {
+    ta.style.display = 'block'; prev.classList.remove('visible'); btn.classList.remove('tb-on');
+    btn.title = 'Preview (Ctrl+P)'; ta.focus();
+  }
+}
+
+/* ─────────────────────────────────────────────────
+   PDF export
+───────────────────────────────────────────────── */
+function downloadNotesPDF() {
+  const md = document.getElementById('notes-textarea').value.trim();
+  if (!md)      { setNotesStatus('Nothing to export.'); return; }
+  if (!mdReady) { setNotesStatus('Renderer not ready yet.'); return; }
+  const rendered = marked.parse(md);
+  const now = new Date().toLocaleDateString('en-IN', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  const printHTML = `<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>${escHtml(EV_TITLE)} – Notes</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:740px;margin:40px auto;padding:0 28px 60px;color:#111;font-size:15px;line-height:1.75}
+.doc-header{border-bottom:2px solid #111;padding-bottom:12px;margin-bottom:28px}
+.doc-title{font-size:1.5em;font-weight:700;margin:0 0 4px}.doc-meta{font-size:12px;color:#666}
+h1,h2,h3{font-weight:700;line-height:1.3;margin:1.1em 0 0.4em}h1{font-size:1.5em}
+h2{font-size:1.25em;border-bottom:1px solid #ddd;padding-bottom:.2em}h3{font-size:1.1em}
+p{margin:0 0 .8em}a{color:#007aff}strong{font-weight:700}em{font-style:italic}
+code{font-family:'Menlo','Courier New',monospace;background:#f3f4f6;padding:1px 5px;border-radius:3px;font-size:.87em}
+pre{background:#f6f8fa;border:1px solid #e1e4e8;border-radius:5px;padding:14px 16px;overflow-x:auto;margin:.8em 0}
+pre code{background:none;padding:0;font-size:13px}
+blockquote{border-left:3px solid #007aff;margin:.9em 0;padding:4px 16px;color:#555;font-style:italic}
+table{border-collapse:collapse;width:100%;margin:.9em 0;font-size:13px}
+th,td{border:1px solid #ddd;padding:7px 12px;text-align:left}th{background:#f4f4f4;font-weight:600}
+hr{border:none;border-top:1px solid #ddd;margin:1.4em 0}ul,ol{padding-left:24px;margin:.6em 0}
+li{margin:.25em 0}img{max-width:100%;border-radius:4px}
+.math-block{text-align:center;overflow-x:auto;margin:1em 0}
+.math-error{color:#c0392b;font-family:monospace;background:#fdf3f2;padding:2px 6px;border-radius:3px}
+@media print{body{margin:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style></head><body>
+<div class="doc-header">
+  <div class="doc-title">${escHtml(EV_TITLE)}</div>
+  <div class="doc-meta">Notes &nbsp;·&nbsp; ${now}</div>
+</div>
+${rendered}
+<script>
+let a=0;function t(){if(document.readyState==='complete'||a>20){window.print();}else{a++;setTimeout(t,200);}}
+window.addEventListener('load',t);
+<\/script></body></html>`;
+  const blob = new Blob([printHTML], { type: 'text/html' });
+  const url  = URL.createObjectURL(blob);
+  const win  = window.open(url, '_blank');
+  if (!win) { setNotesStatus('Allow pop-ups to export PDF.'); URL.revokeObjectURL(url); return; }
+  win.addEventListener('unload', () => URL.revokeObjectURL(url), { once: true });
+  setNotesStatus('PDF dialog opened ↗');
+}
+
+/* ─────────────────────────────────────────────────
+   Video scale-to-fit
+───────────────────────────────────────────────── */
+const IFRAME_W = 640, IFRAME_H = 360;
+function scaleVideo() {
+  const wrapper = document.getElementById('video-wrapper');
+  const iframe  = wrapper && wrapper.querySelector('iframe');
+  if (!wrapper || !iframe) return;
+  const scale  = wrapper.clientWidth / IFRAME_W;
+  const scaled = Math.round(IFRAME_H * scale);
+  iframe.style.transform    = `scale(${scale})`;
+  wrapper.style.height      = scaled + 'px';
+  wrapper.style.aspectRatio = 'unset';
+}
+scaleVideo();
+window.addEventListener('resize', scaleVideo);
+if (window.ResizeObserver) {
+  new ResizeObserver(scaleVideo).observe(document.getElementById('video-wrapper') || document.body);
+}
+
+function onVideoLoaded() {
+  const loader = document.getElementById('video-loader');
+  if (loader) { loader.classList.add('hidden'); setTimeout(() => loader.remove(), 350); }
+  scaleVideo();
+}
+
+/* ─────────────────────────────────────────────────
+   Mobile tabs
+───────────────────────────────────────────────── */
+function showTab(tab) {
+  const pane = document.getElementById('notes-pane');
+  const btn  = document.getElementById('tab-notes');
+  if (tab !== 'notes') return;
+  const open = pane.classList.contains('active');
+  if (open) { pane.classList.remove('active'); btn.classList.remove('active'); }
+  else       { pane.classList.add('active');    btn.classList.add('active');
+    setTimeout(() => pane.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50); }
+}
+function syncLayout() {
+  if (window.innerWidth > 900) document.getElementById('notes-pane').classList.add('active');
+}
+syncLayout();
+window.addEventListener('resize', syncLayout);
+</script>
+{% endblock %}

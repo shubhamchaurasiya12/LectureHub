@@ -1,0 +1,748 @@
+{% extends "base.html" %}
+{% block title %}Dashboard – IITM Lecture Tracker{% endblock %}
+
+{% block extra_styles %}
+/* ── Header ──────────────────────────────────── */
+.dash-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.dash-title {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  color: var(--text);
+}
+.dash-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+/* ── Tabs ─────────────────────────────────────── */
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 24px;
+  overflow-x: auto;
+}
+.tab-btn {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 10px 16px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  white-space: nowrap;
+  transition: color .15s, border-color .15s;
+}
+.tab-btn:hover { color: var(--text-soft); }
+.tab-btn.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+.tab-count {
+  background: var(--surface2);
+  border-radius: 10px;
+  padding: 1px 6px;
+  font-size: 11px;
+  margin-left: 4px;
+  color: var(--muted);
+}
+
+/* ── Subject meta ─────────────────────────────── */
+.subject-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.subject-meta .last-sync {
+  font-size: 11px;
+  color: var(--muted);
+  font-family: var(--mono);
+}
+.filter-period {
+  font-size: 11px;
+  color: var(--muted);
+  background: var(--surface2);
+  padding: 2px 8px;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+
+/* ── Stats row ────────────────────────────────── */
+.stats-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.stat-chip {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.stat-chip strong { color: var(--text); }
+
+/* ── Table ────────────────────────────────────── */
+.table-wrap {
+  overflow-x: auto;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 700px;
+}
+thead { background: var(--surface2); }
+th {
+  padding: 11px 14px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  white-space: nowrap;
+}
+td {
+  padding: 12px 14px;
+  border-top: 1px solid var(--border);
+  vertical-align: top;
+}
+tr:hover td { background: var(--accent-dim); }
+tr.watched-row td { opacity: .55; }
+
+/* ── Date cell ────────────────────────────────── */
+.date-cell {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.date-cell .day {
+  color: var(--text);
+  font-weight: 500;
+  display: block;
+}
+
+/* ── Title cell ───────────────────────────────── */
+.cal-title {
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--text);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.cal-title:hover { color: var(--accent); }
+.cal-title .play-icon { font-size: 11px; color: var(--muted); }
+.cal-title:hover .play-icon { color: var(--accent); }
+
+/* ═══════════════════════════════════════════════
+   DESCRIPTION / NOTES CELL
+   Fixed height, markdown preview, fade bottom.
+═══════════════════════════════════════════════ */
+.desc-cell {
+  width: 280px;
+  min-width: 200px;
+  max-width: 280px;
+  vertical-align: top;
+}
+
+/* The display wrapper — FIXED height, never grows */
+.desc-display {
+  position: relative;
+  height: 84px;           /* fixed — 3 lines ≈ 84px at 1.4 line-height */
+  overflow: hidden;
+  border-radius: 5px;
+  border: 1px solid transparent;
+  padding: 4px 6px;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+  box-sizing: border-box;
+}
+.desc-display:hover {
+  border-color: var(--border);
+  background: var(--surface2);
+}
+.desc-display.empty::before {
+  content: 'Add note…';
+  color: var(--muted);
+  font-style: italic;
+  font-size: 13px;
+}
+
+/* Rendered markdown inside the fixed box */
+.markdown-preview {
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-soft);
+  /* strip all excessive spacing that would inflate the row */
+}
+.markdown-preview p       { margin: 0 0 4px; }
+.markdown-preview h1,
+.markdown-preview h2,
+.markdown-preview h3,
+.markdown-preview h4,
+.markdown-preview h5,
+.markdown-preview h6      { margin: 0 0 4px; font-size: 13px; font-weight: 600; line-height: 1.3; }
+.markdown-preview ul,
+.markdown-preview ol      { margin: 2px 0 4px; padding-left: 18px; }
+.markdown-preview li      { margin: 1px 0; }
+.markdown-preview code    { font-size: 11px; background: var(--surface2); border-radius: 3px; padding: 0 3px; }
+.markdown-preview pre     { margin: 2px 0; padding: 4px 8px; background: var(--surface2); border-radius: 4px; overflow: hidden; white-space: nowrap; }
+.markdown-preview blockquote { margin: 2px 0; padding-left: 8px; border-left: 2px solid var(--border); }
+.markdown-preview strong  { font-weight: 600; }
+.markdown-preview em      { font-style: italic; }
+/* hide any KaTeX / math output — too wide for the cell */
+.markdown-preview .katex,
+.markdown-preview .math-block { display: none; }
+
+/* Gradient fade so truncated content looks intentional */
+.desc-display::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 28px;
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent, var(--surface));
+  transition: background .15s;
+}
+.desc-display:hover::after {
+  background: linear-gradient(to bottom, transparent, var(--surface2));
+}
+
+/* Edit mode */
+.desc-edit { display: none; }
+.desc-edit textarea {
+  font-size: 13px;
+  min-height: 70px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  padding: 6px 8px;
+  width: 100%;
+  font-family: var(--mono);
+  box-sizing: border-box;
+  resize: vertical;
+  outline: none;
+  transition: border-color .15s;
+}
+.desc-edit textarea:focus { border-color: var(--accent); }
+.desc-edit .edit-actions { display: flex; gap: 6px; margin-top: 6px; }
+
+/* ═══════════════════════════════════════════════
+   LINK CELL
+═══════════════════════════════════════════════ */
+.link-cell { white-space: nowrap; vertical-align: top; }
+
+.link-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: opacity .15s;
+}
+.link-badge:hover { opacity: .82; }
+.link-meet  { background: var(--accent-dim);            color: var(--accent2); border: 1px solid var(--accent2); }
+.link-drive { background: rgba(52,199,89,.12);          color: var(--green);   border: 1px solid var(--green);   }
+.link-yt    { background: rgba(255,48,48,.08);          color: #e02020;        border: 1px solid #e02020;        }
+
+/* Small pencil edit button next to the YouTube badge */
+.link-edit-btn {
+  border: none;
+  background: transparent;
+  padding: 3px 4px;
+  cursor: pointer;
+  font-size: 11px;
+  opacity: .5;
+  color: var(--muted);
+  border-radius: 4px;
+  vertical-align: middle;
+  transition: opacity .15s, color .15s, background .15s;
+}
+.link-edit-btn:hover { opacity: 1; color: var(--accent); background: var(--surface2); }
+
+/* Inline YouTube input — visible by default when no link exists */
+.yt-input-wrap {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.yt-input-wrap input[type="url"] {
+  width: 180px;
+  min-width: 0;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 12px;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.yt-input-wrap input[type="url"]:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-dim);
+}
+.yt-save-btn {
+  padding: 5px 9px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #0B0B0E;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity .15s;
+}
+.yt-save-btn:hover { opacity: .85; }
+.yt-save-btn:disabled { opacity: .5; cursor: default; }
+.yt-cancel-btn {
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color .15s, color .15s;
+}
+.yt-cancel-btn:hover { border-color: var(--red); color: var(--red); }
+
+/* ── Watched toggle ───────────────────────────── */
+.watch-btn {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: none;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color .15s, background .15s, color .15s;
+  color: var(--muted);
+}
+.watch-btn.done { border-color: var(--green); background: rgba(52,199,89,.15); color: var(--green); }
+.watch-btn:hover { border-color: var(--accent); color: var(--accent); }
+.watch-btn.done:hover { border-color: var(--red); color: var(--red); background: rgba(255,59,48,.1); }
+
+/* ── Empty state ──────────────────────────────── */
+.empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
+.empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+.empty-state h3 { font-size: 16px; color: var(--text); margin-bottom: 6px; }
+
+/* ── Sync status ──────────────────────────────── */
+#sync-status { font-size: 12px; color: var(--muted); }
+
+/* ── Dash action buttons ──────────────────────── */
+.dash-actions .btn { background: var(--surface2); color: var(--text-soft); border: 1px solid var(--border); }
+.dash-actions .btn:hover { border-color: var(--accent); color: var(--accent); }
+.dash-actions .btn-ghost { background: transparent; }
+
+/* ── Mobile ───────────────────────────────────── */
+@media (max-width: 800px) {
+  .desc-cell { width: 200px; min-width: 160px; max-width: 200px; }
+  .yt-input-wrap input[type="url"] { width: 140px; }
+}
+{% endblock %}
+
+{% block content %}
+<div class="dash-header">
+  <div class="dash-title">My Lectures</div>
+  <div class="dash-actions">
+    <span id="sync-status"></span>
+    <button class="btn btn-ghost btn-sm" onclick="syncAll(this)">↻ Sync All</button>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  {% for subj in subjects %}
+    <button class="tab-btn {% if active_tab == subj.id|string %}active{% endif %}"
+            data-subject="{{ subj.id }}"
+            onclick="switchTab('{{ subj.id }}')">
+      {{ subj.name }}
+      <span class="tab-count">{{ events_by_subject[subj.id]|length }}</span>
+    </button>
+  {% endfor %}
+</div>
+
+<!-- PANELS -->
+{% for subj in subjects %}
+<div class="tab-panel" id="panel-{{ subj.id }}"
+     style="display: {% if active_tab == subj.id|string %}block{% else %}none{% endif %}">
+
+  <div class="subject-meta">
+    <div>
+      <span class="last-sync">
+        Last synced:
+        {% if subj.last_synced %}
+          {{ subj.last_synced.strftime('%d %b %Y, %H:%M UTC') }}
+        {% else %}
+          never
+        {% endif %}
+      </span>
+      {% if subj.filter_start or subj.filter_end %}
+        <span class="filter-period" style="margin-left:8px;">
+          📅
+          {% if subj.filter_start %}{{ subj.filter_start.strftime('%d %b %Y') }}{% else %}start{% endif %}
+          –
+          {% if subj.filter_end %}{{ subj.filter_end.strftime('%d %b %Y') }}{% else %}now{% endif %}
+        </span>
+      {% endif %}
+    </div>
+    <div style="display:flex; gap:8px;">
+      <form action="{{ url_for('main.delete_subject', subject_id=subj.id) }}" method="POST"
+            onsubmit="return confirm('Remove {{ subj.name }}? All events will be deleted.')">
+        <button class="btn btn-danger btn-sm" type="submit">Delete Subject</button>
+      </form>
+    </div>
+  </div>
+
+  {% set evs = events_by_subject[subj.id] %}
+  {% set watched_count = evs | selectattr('watched') | list | length %}
+
+  <div class="stats-row">
+    <div class="stat-chip">Total <strong>{{ evs|length }}</strong></div>
+    <div class="stat-chip">Watched <strong>{{ watched_count }}</strong></div>
+    <div class="stat-chip">Remaining <strong>{{ evs|length - watched_count }}</strong></div>
+  </div>
+
+  {% if evs %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Calendar Title</th>
+          <th>Your Notes</th>
+          <th>Link</th>
+          <th style="text-align:center">Watched</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ev in evs %}
+        <tr id="row-{{ ev.id }}" class="{% if ev.watched %}watched-row{% endif %}">
+
+          <!-- DATE -->
+          <td class="date-cell">
+            {% if ev.date %}
+              <span class="day">{{ ev.date.strftime('%a') }}</span>
+              {{ ev.date.strftime('%d %b %Y') }}<br>
+              {{ ev.date.strftime('%I:%M %p') }} IST
+            {% else %}
+              <span style="color:var(--border)">—</span>
+            {% endif %}
+          </td>
+
+          <!-- TITLE -->
+          <td>
+            <a class="cal-title" href="{{ url_for('main.event_detail', event_id=ev.id) }}">
+              <span class="play-icon">▶</span> {{ ev.calendar_title }}
+            </a>
+          </td>
+
+          <!-- ─── NOTES CELL ──────────────────── -->
+          <td class="desc-cell">
+            <!-- Display (fixed height, markdown rendered client-side) -->
+            <div class="desc-display {% if not ev.user_description %}empty{% endif %}"
+                 id="desc-display-{{ ev.id }}"
+                 onclick="editDesc({{ ev.id }})"
+                 title="Click to edit notes"
+                 data-md="{{ ev.user_description | e if ev.user_description else '' }}">
+              {% if ev.user_description %}
+                <div class="markdown-preview" id="md-preview-{{ ev.id }}"></div>
+              {% endif %}
+            </div>
+
+            <!-- Edit form (hidden until clicked) -->
+            <div class="desc-edit" id="desc-edit-{{ ev.id }}">
+              <textarea id="desc-ta-{{ ev.id }}"
+                        placeholder="Markdown notes…">{{ ev.user_description or '' }}</textarea>
+              <div class="edit-actions">
+                <button class="btn btn-primary btn-sm" onclick="saveDesc({{ ev.id }})">Save</button>
+                <button class="btn btn-ghost btn-sm"   onclick="cancelDesc({{ ev.id }})">Cancel</button>
+              </div>
+            </div>
+          </td>
+
+          <!-- ─── LINK CELL ───────────────────── -->
+          {% set show_meet  = ev.meet_link and (not ev.end_datetime or now < ev.end_datetime) %}
+          {% set show_drive = ev.drive_link %}
+          {% set show_yt    = ev.youtube_link %}
+
+          <td class="link-cell" id="link-cell-{{ ev.id }}">
+            {% if show_drive %}
+              <!-- Google Drive recording → open event detail page -->
+              <a class="link-badge link-drive"
+                 href="{{ url_for('main.event_detail', event_id=ev.id) }}">
+                🎬 Recording
+              </a>
+
+            {% elif show_meet %}
+              <!-- Live Meet -->
+              <a class="link-badge link-meet"
+                 href="{{ ev.meet_link }}" target="_blank" rel="noopener">
+                📹 Join Live
+              </a>
+
+            {% elif show_yt %}
+              <!-- YouTube badge — opens event detail page (embeds there) -->
+              <a class="link-badge link-yt"
+                 href="{{ url_for('main.event_detail', event_id=ev.id) }}"
+                 title="Watch recording">
+                ▶ YouTube
+              </a>
+              <!-- Edit pencil -->
+              <button type="button" class="link-edit-btn"
+                      onclick="showYtInput('{{ ev.id }}', true)"
+                      title="Edit YouTube link">✏</button>
+              <!-- Hidden edit input -->
+              <div class="yt-input-wrap" id="yt-wrap-{{ ev.id }}" style="display:none; margin-top:6px;">
+                <input type="url" id="yt-url-{{ ev.id }}"
+                       placeholder="Paste new YouTube URL…"
+                       value="{{ ev.youtube_link or '' }}">
+                <button type="button" class="yt-save-btn"   onclick="saveYt('{{ ev.id }}')">Save</button>
+                <button type="button" class="yt-cancel-btn" onclick="hideYtInput('{{ ev.id }}')">Cancel</button>
+              </div>
+
+            {% else %}
+              <!-- No link at all → show input inline, ready to paste -->
+              <div class="yt-input-wrap" id="yt-wrap-{{ ev.id }}">
+                <input type="url" id="yt-url-{{ ev.id }}"
+                       placeholder="Paste YouTube link…"
+                       autocomplete="off">
+                <button type="button" class="yt-save-btn" onclick="saveYt('{{ ev.id }}')">Save</button>
+              </div>
+            {% endif %}
+          </td>
+
+          <!-- WATCHED -->
+          <td style="text-align:center; vertical-align:middle;">
+            <button class="watch-btn {% if ev.watched %}done{% endif %}"
+                    id="watch-{{ ev.id }}"
+                    onclick="toggleWatch({{ ev.id }})"
+                    title="{% if ev.watched %}Mark as unwatched{% else %}Mark as watched{% endif %}">
+              {% if ev.watched %}✓{% else %}○{% endif %}
+            </button>
+          </td>
+
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% else %}
+  <div class="empty-state">
+    <div class="icon">📅</div>
+    <h3>This Calendar URL is not Public — request your TA/Instructor to make it Public</h3>
+  </div>
+  {% endif %}
+
+</div><!-- /.tab-panel -->
+{% endfor %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+/* =========================================================
+   MARKDOWN PREVIEWS IN DESC CELLS
+   marked.js is loaded lazily — render once it's ready.
+========================================================= */
+function loadScript(src) {
+  return new Promise((res) => {
+    const s = document.createElement('script');
+    s.src = src; s.onload = res;
+    s.onerror = () => { console.warn('Failed to load', src); res(); };
+    document.head.appendChild(s);
+  });
+}
+
+function renderAllPreviews() {
+  document.querySelectorAll('.desc-display[data-md]').forEach(el => {
+    const raw = el.getAttribute('data-md');
+    if (!raw) return;
+    const target = el.querySelector('.markdown-preview');
+    if (!target) return;
+    try { target.innerHTML = marked.parse(raw); }
+    catch (_) { target.textContent = raw; }
+  });
+}
+
+(async () => {
+  if (typeof marked === 'undefined') {
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js');
+  }
+  renderAllPreviews();
+})();
+
+/* =========================================================
+   TAB SWITCHING
+========================================================= */
+function switchTab(id) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  const panel = document.getElementById('panel-' + id);
+  const btn   = document.querySelector(`[data-subject="${id}"]`);
+  if (panel) panel.style.display = 'block';
+  if (btn)   btn.classList.add('active');
+  history.replaceState(null, '', '?tab=' + id);
+}
+
+/* =========================================================
+   NOTES EDITING
+========================================================= */
+function editDesc(id) {
+  document.getElementById('desc-display-' + id).style.display = 'none';
+  document.getElementById('desc-edit-' + id).style.display = 'block';
+  const ta = document.getElementById('desc-ta-' + id);
+  if (ta) ta.focus();
+}
+function cancelDesc(id) {
+  document.getElementById('desc-display-' + id).style.display = '';
+  document.getElementById('desc-edit-' + id).style.display = 'none';
+}
+async function saveDesc(id) {
+  const ta = document.getElementById('desc-ta-' + id);
+  if (!ta) return;
+  try {
+    const res = await fetch(`/event/${id}/description`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ description: ta.value })
+    });
+    if (!res.ok) throw new Error('Save failed');
+    location.reload();
+  } catch (err) {
+    alert(err.message || 'Could not save notes.');
+  }
+}
+
+/* =========================================================
+   YOUTUBE LINK
+========================================================= */
+function showYtInput(id, withCancel) {
+  const wrap = document.getElementById('yt-wrap-' + id);
+  if (!wrap) return;
+  wrap.style.display = 'flex';
+  wrap.style.marginTop = '6px';
+  const inp = document.getElementById('yt-url-' + id);
+  if (inp) { inp.focus(); inp.select(); }
+}
+function hideYtInput(id) {
+  const wrap = document.getElementById('yt-wrap-' + id);
+  if (wrap) wrap.style.display = 'none';
+}
+
+function isYtUrl(url) {
+  try {
+    const h = new URL(url).hostname.toLowerCase().replace(/^www\./, '');
+    return h === 'youtube.com' || h === 'm.youtube.com' || h === 'youtu.be';
+  } catch { return false; }
+}
+
+async function saveYt(id) {
+  const inp = document.getElementById('yt-url-' + id);
+  if (!inp) return;
+  const url = inp.value.trim();
+  if (!url) { inp.focus(); return; }
+  if (!isYtUrl(url)) { alert('Please enter a valid YouTube URL.'); inp.focus(); return; }
+
+  const btn = inp.closest('.yt-input-wrap').querySelector('.yt-save-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+
+  try {
+    const res  = await fetch(`/event/${id}/youtube`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+      body: JSON.stringify({ youtube_link: url })
+    });
+    const data = await res.json();
+    if (!res.ok || !data.success) throw new Error(data.error || 'Could not save link.');
+    location.reload();
+  } catch (err) {
+    alert(err.message);
+    if (btn) { btn.disabled = false; btn.textContent = 'Save'; }
+  }
+}
+
+/* Press Enter in any YouTube input to save */
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  const inp = e.target;
+  if (!inp.closest || !inp.closest('.yt-input-wrap')) return;
+  e.preventDefault();
+  const id = inp.id.replace('yt-url-', '');
+  saveYt(id);
+});
+
+/* =========================================================
+   WATCHED TOGGLE
+========================================================= */
+async function toggleWatch(id) {
+  const res  = await fetch(`/event/${id}/watched`, { method: 'POST' });
+  const data = await res.json();
+  const btn  = document.getElementById('watch-' + id);
+  const row  = document.getElementById('row-' + id);
+  if (!btn) return;
+  if (data.watched) {
+    btn.textContent = '✓'; btn.classList.add('done'); btn.title = 'Mark as unwatched';
+    row && row.classList.add('watched-row');
+  } else {
+    btn.textContent = '○'; btn.classList.remove('done'); btn.title = 'Mark as watched';
+    row && row.classList.remove('watched-row');
+  }
+}
+
+/* =========================================================
+   SYNC
+========================================================= */
+function setStatus(msg) {
+  const el = document.getElementById('sync-status');
+  if (el) el.textContent = msg;
+}
+async function syncAll(btn) {
+  const orig = btn.innerHTML;
+  btn.innerHTML = '<span class="spinner"></span> Syncing…';
+  btn.disabled  = true;
+  setStatus('Syncing all subjects…');
+  try {
+    const res  = await fetch('/sync_all', { method: 'POST' });
+    const data = await res.json();
+    const ok   = data.results.filter(r => r.ok).length;
+    setStatus(`Synced ${ok}/${data.results.length} subjects`);
+    setTimeout(() => { setStatus(''); location.reload(); }, 1200);
+  } catch {
+    setStatus('Sync failed');
+    btn.innerHTML = orig;
+    btn.disabled  = false;
+  }
+}
+</script>
+{% endblock %}
