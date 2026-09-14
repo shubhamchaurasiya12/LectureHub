@@ -1,101 +1,266 @@
 {% extends "base.html" %}
-{% block title %}Dashboard – IITM Lecture Tracker{% endblock %}
+{% block title %}Dashboard{% endblock %}
 
 {% block extra_styles %}
-/* ── Header ──────────────────────────────────── */
+/* ── Header ───────────────────────────────────── */
 .dash-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   margin-bottom: 24px;
-  flex-wrap: wrap;
-  gap: 12px;
 }
 .dash-title {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 700;
-  letter-spacing: -0.4px;
+  letter-spacing: -0.5px;
   color: var(--text);
+  line-height: 1.2;
 }
-.dash-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-
-/* ── Tabs ─────────────────────────────────────── */
-.tabs {
-  display: flex;
-  gap: 4px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 24px;
-  overflow-x: auto;
-}
-.tab-btn {
-  background: none;
-  border: none;
+.dash-subtitle {
+  font-size: 14px;
   color: var(--muted);
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 500;
-  padding: 10px 16px;
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
-  white-space: nowrap;
-  transition: color .15s, border-color .15s;
-}
-.tab-btn:hover { color: var(--text-soft); }
-.tab-btn.active {
-  color: var(--accent);
-  border-bottom-color: var(--accent);
-}
-.tab-count {
-  background: var(--surface2);
-  border-radius: 10px;
-  padding: 1px 6px;
-  font-size: 11px;
-  margin-left: 4px;
-  color: var(--muted);
+  margin-top: 4px;
+  font-weight: 400;
 }
 
-/* ── Subject meta ─────────────────────────────── */
-.subject-meta {
+
+/* ── Toolbar: tabs + sync button (always one row) ── */
+.dashboard-toolbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-  gap: 8px;
+  gap: 14px;
+  margin-bottom: 24px;
 }
-.subject-meta .last-sync {
-  font-size: 11px;
-  color: var(--muted);
-  font-family: var(--mono);
+
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
 }
-.filter-period {
-  font-size: 11px;
-  color: var(--muted);
-  background: var(--surface2);
-  padding: 2px 8px;
-  border-radius: 12px;
+
+#sync-status {
+  font-size: 12px;
+  color: var(--violet-ink);
+  font-weight: 500;
   white-space: nowrap;
 }
 
-/* ── Stats row ────────────────────────────────── */
-.stats-row {
+
+/* ── Square subject tabs ──────────────────────── */
+.tabs {
   display: flex;
-  gap: 12px;
-  margin-bottom: 20px;
+  gap: 10px;
+  padding: 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  min-width: 0;
+  flex: 1;
+}
+.tabs::-webkit-scrollbar { display: none; }
+
+.tab-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 86px;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  color: var(--text-soft);
+  font-family: inherit;
+  cursor: pointer;
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  box-shadow: var(--shadow-1);
+  transition: border-color .15s, box-shadow .15s, background .15s,
+              color .15s, transform .1s;
+}
+.tab-btn:hover {
+  border-color: var(--border-strong);
+  color: var(--text);
+  transform: translateY(-1px);
+}
+.tab-btn:active { transform: translateY(0) scale(.98); }
+
+.tab-name {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tab-count {
+  background: var(--surface2);
+  border-radius: 100px;
+  padding: 2px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.tab-btn.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent), 0 0 18px var(--accent-dim);
+  color: var(--text);
+}
+.tab-btn.active .tab-count {
+  background: var(--accent-dim);
+  color: var(--text);
+}
+
+
+/* ── Sync button: same size as tab-btn, green color variant ── */
+.sync-btn {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+  flex-shrink: 0;          /* never shrinks when tabs overflow */
+  margin-left: auto;       /* pushes it to the far right if space allows */
+}
+.sync-btn:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  color: var(--on-accent);
+  box-shadow: 0 0 0 1px var(--accent), 0 0 22px var(--accent-dim);
+  transform: translateY(-1px);
+}
+.sync-btn:active { transform: translateY(0) scale(.98); }
+.sync-btn:disabled {
+  opacity: 0.75;
+  cursor: default;
+  transform: none;
+  box-shadow: var(--shadow-1);
+}
+
+.sync-btn .tab-name,
+.sync-btn .tab-count {
+  color: var(--on-accent);
+}
+.sync-btn .tab-count {
+  background: rgba(16, 16, 16, 0.15);   /* subtle darkened pill on green */
+}
+
+.sync-icon {
+  font-size: 15px;
+  line-height: 1;
+  display: inline-block;
+  margin-right: 2px;
+  vertical-align: -1px;
+}
+.sync-icon.spinning {
+  animation: spin-sync 0.8s linear infinite;
+}
+@keyframes spin-sync {
+  to { transform: rotate(360deg); }
+}
+
+
+/* ── Subject info: single card ────────────────── */
+.subject-info-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow-1);
+  margin-bottom: 24px;
+  transition: background-color .25s ease, border-color .25s ease;
+
+  /* Desktop: 2-column grid — filter/progress left, delete button right */
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto 1fr;
+  column-gap: 32px;
+  row-gap: 20px;
+  align-items: start;
+}
+
+.info-filter {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.info-progress {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.info-actions {
+  grid-column: 2;
+  grid-row: 1 / 3;   /* spans both rows, centered vertically */
+  display: flex;
+  align-items: center;
+  min-height: 100%;
+}
+.info-actions form { margin: 0; }
+
+
+.info-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 6px;
+}
+
+.info-value {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.info-value.mono {
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.info-value.never {
+  color: var(--muted);
+  font-style: italic;
+  font-size: 12px;
+}
+
+.info-stats-row {
+  display: flex;
+  gap: 20px;
   flex-wrap: wrap;
 }
-.stat-chip {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 4px 12px;
-  font-size: 12px;
-  color: var(--muted);
+.info-stats-row > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 60px;
 }
-.stat-chip strong { color: var(--text); }
+.stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+  letter-spacing: -0.5px;
+}
+.stat-value.positive { color: var(--green); }
+.stat-value.neutral  { color: var(--text); }
+.stat-value.negative { color: var(--amber); }
 
-/* ── Table ────────────────────────────────────── */
+.stat-label {
+  font-size: 10px;
+  color: var(--muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+
+/* ── Table (desktop only) ─────────────────────── */
 .table-wrap {
   overflow-x: auto;
   border-radius: var(--radius);
@@ -109,7 +274,7 @@ table {
 }
 thead { background: var(--surface2); }
 th {
-  padding: 11px 14px;
+  padding: 12px 16px;
   text-align: left;
   font-size: 11px;
   font-weight: 600;
@@ -117,16 +282,16 @@ th {
   text-transform: uppercase;
   letter-spacing: .5px;
   white-space: nowrap;
+  border-bottom: 1px solid var(--border);
 }
 td {
-  padding: 12px 14px;
-  border-top: 1px solid var(--border);
+  padding: 14px 16px;
+  border-top: 1px solid var(--border-dim);
   vertical-align: top;
 }
-tr:hover td { background: var(--accent-dim); }
-tr.watched-row td { opacity: .55; }
+tr:hover td { background: var(--surface2); }
+tr.watched-row td { opacity: .6; }
 
-/* ── Date cell ────────────────────────────────── */
 .date-cell {
   font-family: var(--mono);
   font-size: 12px;
@@ -135,90 +300,90 @@ tr.watched-row td { opacity: .55; }
 }
 .date-cell .day {
   color: var(--text);
-  font-weight: 500;
+  font-weight: 600;
   display: block;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  margin-bottom: 2px;
 }
 
-/* ── Title cell ───────────────────────────────── */
 .cal-title {
   font-weight: 500;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text);
   text-decoration: none;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  transition: color .15s;
 }
-.cal-title:hover { color: var(--accent); }
-.cal-title .play-icon { font-size: 11px; color: var(--muted); }
-.cal-title:hover .play-icon { color: var(--accent); }
+.cal-title:hover { color: var(--violet-ink); }
+.cal-title .play-icon {
+  font-size: 10px;
+  color: var(--muted);
+  background: var(--surface2);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s, color .15s;
+}
+.cal-title:hover .play-icon {
+  color: #fff;
+  background: var(--violet);
+}
 
-/* ═══════════════════════════════════════════════
-   DESCRIPTION / NOTES CELL
-   Fixed height, markdown preview, fade bottom.
-═══════════════════════════════════════════════ */
+/* ═══ Notes (desktop table version) ═══ */
 .desc-cell {
   width: 280px;
   min-width: 200px;
   max-width: 280px;
   vertical-align: top;
 }
-
-/* The display wrapper — FIXED height, never grows */
 .desc-display {
   position: relative;
-  height: 84px;           /* fixed — 3 lines ≈ 84px at 1.4 line-height */
+  height: 84px;
   overflow: hidden;
-  border-radius: 5px;
-  border: 1px solid transparent;
-  padding: 4px 6px;
-  cursor: pointer;
-  transition: border-color .15s, background .15s;
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
   box-sizing: border-box;
 }
-.desc-display:hover {
-  border-color: var(--border);
-  background: var(--surface2);
-}
 .desc-display.empty::before {
-  content: 'Add note…';
+  content: 'No notes yet';
   color: var(--muted);
   font-style: italic;
   font-size: 13px;
 }
-
-/* Rendered markdown inside the fixed box */
 .markdown-preview {
   font-size: 13px;
-  line-height: 1.45;
+  line-height: 1.5;
   color: var(--text-soft);
-  /* strip all excessive spacing that would inflate the row */
 }
-.markdown-preview p       { margin: 0 0 4px; }
+.markdown-preview p       { margin: 0 0 6px; }
 .markdown-preview h1,
 .markdown-preview h2,
 .markdown-preview h3,
 .markdown-preview h4,
 .markdown-preview h5,
-.markdown-preview h6      { margin: 0 0 4px; font-size: 13px; font-weight: 600; line-height: 1.3; }
+.markdown-preview h6      { margin: 0 0 6px; font-size: 13px; font-weight: 600; line-height: 1.3; color: var(--text); }
 .markdown-preview ul,
-.markdown-preview ol      { margin: 2px 0 4px; padding-left: 18px; }
-.markdown-preview li      { margin: 1px 0; }
-.markdown-preview code    { font-size: 11px; background: var(--surface2); border-radius: 3px; padding: 0 3px; }
-.markdown-preview pre     { margin: 2px 0; padding: 4px 8px; background: var(--surface2); border-radius: 4px; overflow: hidden; white-space: nowrap; }
-.markdown-preview blockquote { margin: 2px 0; padding-left: 8px; border-left: 2px solid var(--border); }
-.markdown-preview strong  { font-weight: 600; }
+.markdown-preview ol      { margin: 2px 0 6px; padding-left: 18px; }
+.markdown-preview li      { margin: 2px 0; }
+.markdown-preview code    { font-size: 11px; background: var(--surface2); border-radius: 4px; padding: 2px 4px; font-family: var(--mono); }
+.markdown-preview pre     { margin: 4px 0; padding: 6px 10px; background: var(--surface2); border-radius: 6px; overflow: hidden; white-space: nowrap; }
+.markdown-preview blockquote { margin: 4px 0; padding-left: 10px; border-left: 2px solid var(--violet-line); color: var(--muted); }
+.markdown-preview strong  { font-weight: 600; color: var(--text); }
 .markdown-preview em      { font-style: italic; }
-/* hide any KaTeX / math output — too wide for the cell */
 .markdown-preview .katex,
 .markdown-preview .math-block { display: none; }
 
-/* Gradient fade so truncated content looks intentional */
 .desc-display::after {
   content: "";
   position: absolute;
   left: 0; right: 0; bottom: 0;
-  height: 28px;
+  height: 32px;
   pointer-events: none;
   background: linear-gradient(to bottom, transparent, var(--surface));
   transition: background .15s;
@@ -227,52 +392,28 @@ tr.watched-row td { opacity: .55; }
   background: linear-gradient(to bottom, transparent, var(--surface2));
 }
 
-/* Edit mode */
-.desc-edit { display: none; }
-.desc-edit textarea {
-  font-size: 13px;
-  min-height: 70px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  color: var(--text);
-  padding: 6px 8px;
-  width: 100%;
-  font-family: var(--mono);
-  box-sizing: border-box;
-  resize: vertical;
-  outline: none;
-  transition: border-color .15s;
-}
-.desc-edit textarea:focus { border-color: var(--accent); }
-.desc-edit .edit-actions { display: flex; gap: 6px; margin-top: 6px; }
-
-/* ═══════════════════════════════════════════════
-   LINK CELL
-═══════════════════════════════════════════════ */
-.link-cell { white-space: nowrap; vertical-align: top; }
-
+/* ═══ Link badges ═══ */
+.link-cell { white-space: nowrap; vertical-align: middle; }
 .link-badge {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 4px 10px;
-  border-radius: 20px;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 100px;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   text-decoration: none;
-  transition: opacity .15s;
+  transition: opacity .15s, transform .1s;
 }
-.link-badge:hover { opacity: .82; }
-.link-meet  { background: var(--accent-dim);            color: var(--accent2); border: 1px solid var(--accent2); }
-.link-drive { background: rgba(52,199,89,.12);          color: var(--green);   border: 1px solid var(--green);   }
-.link-yt    { background: rgba(255,48,48,.08);          color: #e02020;        border: 1px solid #e02020;        }
+.link-badge:hover { opacity: .85; transform: translateY(-1px); }
+.link-meet  { background: var(--violet-dim); color: var(--violet-ink); border: 1px solid var(--violet-line); }
+.link-drive { background: var(--green-light); color: var(--green); border: 1px solid var(--green-border); }
+.link-yt    { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
 
-/* Small pencil edit button next to the YouTube badge */
 .link-edit-btn {
   border: none;
   background: transparent;
-  padding: 3px 4px;
+  padding: 4px 6px;
   cursor: pointer;
   font-size: 11px;
   opacity: .5;
@@ -281,21 +422,20 @@ tr.watched-row td { opacity: .55; }
   vertical-align: middle;
   transition: opacity .15s, color .15s, background .15s;
 }
-.link-edit-btn:hover { opacity: 1; color: var(--accent); background: var(--surface2); }
+.link-edit-btn:hover { opacity: 1; color: var(--violet-ink); background: var(--violet-dim); }
 
-/* Inline YouTube input — visible by default when no link exists */
 .yt-input-wrap {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 5px;
+  gap: 6px;
 }
 .yt-input-wrap input[type="url"] {
   width: 180px;
   min-width: 0;
-  padding: 5px 8px;
+  padding: 6px 10px;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 100px;
   background: var(--bg);
   color: var(--text);
   font-size: 12px;
@@ -304,15 +444,15 @@ tr.watched-row td { opacity: .55; }
   transition: border-color .15s, box-shadow .15s;
 }
 .yt-input-wrap input[type="url"]:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px var(--accent-dim);
+  border-color: var(--violet);
+  box-shadow: var(--ring);
 }
 .yt-save-btn {
-  padding: 5px 9px;
+  padding: 6px 14px;
   border: 1px solid var(--accent);
   background: var(--accent);
-  color: #0B0B0E;
-  border-radius: 6px;
+  color: var(--on-accent);
+  border-radius: 100px;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -322,73 +462,295 @@ tr.watched-row td { opacity: .55; }
 .yt-save-btn:hover { opacity: .85; }
 .yt-save-btn:disabled { opacity: .5; cursor: default; }
 .yt-cancel-btn {
-  padding: 5px 8px;
+  padding: 6px 12px;
   border: 1px solid var(--border);
   background: transparent;
   color: var(--muted);
-  border-radius: 6px;
+  border-radius: 100px;
   font-size: 12px;
+  font-weight: 500;
   cursor: pointer;
   font-family: inherit;
   transition: border-color .15s, color .15s;
 }
 .yt-cancel-btn:hover { border-color: var(--red); color: var(--red); }
 
-/* ── Watched toggle ───────────────────────────── */
+/* ── Watched toggle (shared) ─────────────────── */
 .watch-btn {
-  width: 28px; height: 28px;
+  width: 32px; height: 32px;
   border-radius: 50%;
-  border: 2px solid var(--border);
+  border: 2px solid var(--border-strong);
   background: none;
   cursor: pointer;
   font-size: 14px;
   display: flex; align-items: center; justify-content: center;
-  transition: border-color .15s, background .15s, color .15s;
+  transition: border-color .15s, background .15s, color .15s, transform .1s;
   color: var(--muted);
 }
-.watch-btn.done { border-color: var(--green); background: rgba(52,199,89,.15); color: var(--green); }
-.watch-btn:hover { border-color: var(--accent); color: var(--accent); }
-.watch-btn.done:hover { border-color: var(--red); color: var(--red); background: rgba(255,59,48,.1); }
+.watch-btn:hover { border-color: var(--violet); color: var(--violet); transform: scale(1.05); }
+.watch-btn.done { border-color: var(--green); background: var(--green-light); color: var(--green); }
+.watch-btn.done:hover { border-color: var(--red); color: var(--red); background: var(--red-bg); transform: scale(1.05); }
 
 /* ── Empty state ──────────────────────────────── */
-.empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
-.empty-state .icon { font-size: 40px; margin-bottom: 12px; }
-.empty-state h3 { font-size: 16px; color: var(--text); margin-bottom: 6px; }
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+}
+.empty-state .icon { font-size: 40px; margin-bottom: 12px; opacity: 0.6; }
+.empty-state h3 { font-size: 16px; color: var(--text); margin-bottom: 6px; font-weight: 600; }
+.empty-state p { font-size: 13px; color: var(--muted); max-width: 400px; margin: 0 auto; line-height: 1.5; }
 
-/* ── Sync status ──────────────────────────────── */
-#sync-status { font-size: 12px; color: var(--muted); }
 
-/* ── Dash action buttons ──────────────────────── */
-.dash-actions .btn { background: var(--surface2); color: var(--text-soft); border: 1px solid var(--border); }
-.dash-actions .btn:hover { border-color: var(--accent); color: var(--accent); }
-.dash-actions .btn-ghost { background: transparent; }
+/* ═══════════════════════════════════════════════════════════
+   MOBILE CARD LIST (replaces table on ≤800px)
+═══════════════════════════════════════════════════════════ */
+.cards-list { display: none; }
 
-/* ── Mobile ───────────────────────────────────── */
+.event-card {
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow-1);
+  transition: background-color 0.25s ease, border-color 0.25s ease, opacity 0.2s ease, box-shadow 0.2s ease;
+}
+.event-card:last-child { margin-bottom: 0; }
+.event-card.watched-row { opacity: 0.55; }
+
+.event-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.event-card-date {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.4;
+  flex: 1;
+  min-width: 0;
+}
+.event-card-date .day {
+  display: block;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.event-card .watch-btn {
+  width: 44px;
+  height: 44px;
+  font-size: 17px;
+  flex-shrink: 0;
+}
+
+.event-card-title {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--text);
+  text-decoration: none;
+  margin-bottom: 12px;
+  line-height: 1.4;
+  letter-spacing: -0.2px;
+  transition: color 0.15s;
+}
+.event-card-title:hover,
+.event-card-title:active { color: var(--violet-ink); }
+.event-card-title .play-icon {
+  font-size: 11px;
+  color: var(--muted);
+  background: var(--surface2);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+  transition: background 0.15s, color 0.15s;
+}
+.event-card-title:hover .play-icon,
+.event-card-title:active .play-icon {
+  background: var(--violet);
+  color: #fff;
+}
+
+.event-card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.event-card-badges .link-badge {
+  padding: 8px 14px;
+  font-size: 13px;
+}
+.event-card-badges .link-edit-btn {
+  padding: 8px 10px;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.event-card-notes {
+  font-size: 12.5px;
+  color: var(--text-soft);
+  line-height: 1.5;
+  max-height: 60px;
+  overflow: hidden;
+  position: relative;
+  border-top: 1px solid var(--border-dim);
+  padding-top: 10px;
+  margin-top: 4px;
+}
+.event-card-notes.empty .empty-hint {
+  color: var(--muted);
+  font-style: italic;
+}
+.event-card-notes::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 24px;
+  background: linear-gradient(to bottom, transparent, var(--surface));
+  pointer-events: none;
+  transition: background 0.25s ease;
+}
+
+.event-card .yt-input-wrap {
+  margin-top: 10px;
+  width: 100%;
+  gap: 8px;
+}
+.event-card .yt-input-wrap input[type="url"] {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+  padding: 10px 14px;
+  font-size: 14px;
+}
+.event-card .yt-input-wrap .yt-save-btn,
+.event-card .yt-input-wrap .yt-cancel-btn {
+  padding: 10px 16px;
+  font-size: 13px;
+}
+
+
+/* ── Responsive ───────────────────────────────── */
 @media (max-width: 800px) {
-  .desc-cell { width: 200px; min-width: 160px; max-width: 200px; }
-  .yt-input-wrap input[type="url"] { width: 140px; }
+  .table-wrap { display: none !important; }
+  .cards-list { display: block; }
+  .dash-title { font-size: 20px; }
+
+  .dashboard-toolbar {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+  }
+  .tabs {
+    flex: 1 1 auto;
+    min-width: 0;
+    gap: 8px;
+  }
+  .toolbar-actions {
+    flex-shrink: 0;
+    gap: 8px;
+  }
+  #sync-status { display: none; }
+
+  .tab-btn { min-width: 70px; padding: 10px 12px; }
+  .tab-name { max-width: 84px; font-size: 12px; }
+
+  .sync-btn {
+    min-width: 96px;
+    height: 50px;
+    padding: 0 14px;
+    font-size: 12px;
+  }
+
+  /* Info card: filter + delete in one row, progress below */
+  .subject-info-card {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .info-filter {
+    flex: 1 1 0%;
+    min-width: 0;
+    order: 1;
+  }
+
+  .info-actions {
+    flex: 0 0 auto;
+    order: 2;
+    min-height: 0;
+    align-items: flex-start;
+  }
+
+  .info-progress {
+    flex: 0 0 100%;
+    order: 3;
+    padding-top: 14px;
+    border-top: 1px solid var(--border-dim);
+  }
+
+  .info-stats-row { gap: 10px; }
+  .stat-value { font-size: 18px; }
+}
+
+@media (max-width: 480px) {
+  .dashboard-toolbar { gap: 8px; }
+  .stat-value { font-size: 16px; }
 }
 {% endblock %}
 
 {% block content %}
 <div class="dash-header">
-  <div class="dash-title">My Lectures</div>
-  <div class="dash-actions">
-    <span id="sync-status"></span>
-    <button class="btn btn-ghost btn-sm" onclick="syncAll(this)">↻ Sync All</button>
-  </div>
+  <h1 class="dash-title">Lectures</h1>
+  <p class="dash-subtitle">Manage your synced classes, recordings, and notes.</p>
 </div>
 
-<!-- TABS -->
-<div class="tabs">
-  {% for subj in subjects %}
-    <button class="tab-btn {% if active_tab == subj.id|string %}active{% endif %}"
-            data-subject="{{ subj.id }}"
-            onclick="switchTab('{{ subj.id }}')">
-      {{ subj.name }}
-      <span class="tab-count">{{ events_by_subject[subj.id]|length }}</span>
-    </button>
-  {% endfor %}
+<!-- TOOLBAR: tabs + sync button (one row on all viewports) -->
+<div class="dashboard-toolbar">
+  <div class="tabs">
+    {% for subj in subjects %}
+      <button class="tab-btn {% if active_tab == subj.id|string %}active{% endif %}"
+              data-subject="{{ subj.id }}"
+              onclick="switchTab('{{ subj.id }}')"
+              title="{{ subj.name }}">
+        <span class="tab-name">{{ subj.name }}</span>
+        <span class="tab-count">{{ events_by_subject[subj.id]|length }}</span>
+      </button>
+    {% endfor %}
+  </div>
+
+  <!-- Sync button: same shape as a tab, green variant -->
+  <button
+    class="tab-btn"
+    id="tab-btn"
+    onclick="syncAll(this)"
+    title="Sync all subjects"
+    style="background-color: #68cf1e; color: #000;"
+  >
+    <span class="tab-name"><span class="sync-icon"></span> Sync</span>
+    <span class="tab-name">All</span>
+  </button>
 </div>
 
 <!-- PANELS -->
@@ -396,43 +758,57 @@ tr.watched-row td { opacity: .55; }
 <div class="tab-panel" id="panel-{{ subj.id }}"
      style="display: {% if active_tab == subj.id|string %}block{% else %}none{% endif %}">
 
-  <div class="subject-meta">
-    <div>
-      <span class="last-sync">
-        Last synced:
-        {% if subj.last_synced %}
-          {{ subj.last_synced.strftime('%d %b %Y, %H:%M UTC') }}
-        {% else %}
-          never
-        {% endif %}
-      </span>
+  {% set evs = events_by_subject[subj.id] %}
+  {% set watched_count = evs | selectattr('watched') | list | length %}
+  {% set remaining = evs|length - watched_count %}
+
+  <!-- SINGLE INFO CARD -->
+  <div class="subject-info-card">
+
+    <div class="info-filter">
+      <div class="info-label">Filter period</div>
       {% if subj.filter_start or subj.filter_end %}
-        <span class="filter-period" style="margin-left:8px;">
+        <div class="info-value">
           📅
           {% if subj.filter_start %}{{ subj.filter_start.strftime('%d %b %Y') }}{% else %}start{% endif %}
           –
           {% if subj.filter_end %}{{ subj.filter_end.strftime('%d %b %Y') }}{% else %}now{% endif %}
-        </span>
+        </div>
+      {% else %}
+        <div class="info-value never">All events</div>
       {% endif %}
     </div>
-    <div style="display:flex; gap:8px;">
+
+    <div class="info-progress">
+      <div class="info-label">Progress</div>
+      <div class="info-stats-row">
+        <div>
+          <span class="stat-value neutral">{{ evs|length }}</span>
+          <span class="stat-label">Total</span>
+        </div>
+        <div>
+          <span class="stat-value positive">{{ watched_count }}</span>
+          <span class="stat-label">Watched</span>
+        </div>
+        <div>
+          <span class="stat-value negative">{{ remaining }}</span>
+          <span class="stat-label">Remaining</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-actions">
       <form action="{{ url_for('main.delete_subject', subject_id=subj.id) }}" method="POST"
             onsubmit="return confirm('Remove {{ subj.name }}? All events will be deleted.')">
-        <button class="btn btn-danger btn-sm" type="submit">Delete Subject</button>
+        <button class="btn btn-danger" type="submit">Delete Subject</button>
       </form>
     </div>
-  </div>
 
-  {% set evs = events_by_subject[subj.id] %}
-  {% set watched_count = evs | selectattr('watched') | list | length %}
-
-  <div class="stats-row">
-    <div class="stat-chip">Total <strong>{{ evs|length }}</strong></div>
-    <div class="stat-chip">Watched <strong>{{ watched_count }}</strong></div>
-    <div class="stat-chip">Remaining <strong>{{ evs|length - watched_count }}</strong></div>
   </div>
 
   {% if evs %}
+
+  {# ══════ DESKTOP: table ══════ #}
   <div class="table-wrap">
     <table>
       <thead>
@@ -447,8 +823,6 @@ tr.watched-row td { opacity: .55; }
       <tbody>
         {% for ev in evs %}
         <tr id="row-{{ ev.id }}" class="{% if ev.watched %}watched-row{% endif %}">
-
-          <!-- DATE -->
           <td class="date-cell">
             {% if ev.date %}
               <span class="day">{{ ev.date.strftime('%a') }}</span>
@@ -458,90 +832,43 @@ tr.watched-row td { opacity: .55; }
               <span style="color:var(--border)">—</span>
             {% endif %}
           </td>
-
-          <!-- TITLE -->
           <td>
             <a class="cal-title" href="{{ url_for('main.event_detail', event_id=ev.id) }}">
               <span class="play-icon">▶</span> {{ ev.calendar_title }}
             </a>
           </td>
-
-          <!-- ─── NOTES CELL ──────────────────── -->
           <td class="desc-cell">
-            <!-- Display (fixed height, markdown rendered client-side) -->
             <div class="desc-display {% if not ev.user_description %}empty{% endif %}"
-                 id="desc-display-{{ ev.id }}"
-                 onclick="editDesc({{ ev.id }})"
-                 title="Click to edit notes"
+                 title="View full notes on the event page"
                  data-md="{{ ev.user_description | e if ev.user_description else '' }}">
               {% if ev.user_description %}
-                <div class="markdown-preview" id="md-preview-{{ ev.id }}"></div>
+                <div class="markdown-preview"></div>
               {% endif %}
             </div>
-
-            <!-- Edit form (hidden until clicked) -->
-            <div class="desc-edit" id="desc-edit-{{ ev.id }}">
-              <textarea id="desc-ta-{{ ev.id }}"
-                        placeholder="Markdown notes…">{{ ev.user_description or '' }}</textarea>
-              <div class="edit-actions">
-                <button class="btn btn-primary btn-sm" onclick="saveDesc({{ ev.id }})">Save</button>
-                <button class="btn btn-ghost btn-sm"   onclick="cancelDesc({{ ev.id }})">Cancel</button>
-              </div>
-            </div>
           </td>
-
-          <!-- ─── LINK CELL ───────────────────── -->
           {% set show_meet  = ev.meet_link and (not ev.end_datetime or now < ev.end_datetime) %}
           {% set show_drive = ev.drive_link %}
           {% set show_yt    = ev.youtube_link %}
-
           <td class="link-cell" id="link-cell-{{ ev.id }}">
             {% if show_drive %}
-              <!-- Google Drive recording → open event detail page -->
-              <a class="link-badge link-drive"
-                 href="{{ url_for('main.event_detail', event_id=ev.id) }}">
-                🎬 Recording
-              </a>
-
+              <a class="link-badge link-drive" href="{{ url_for('main.event_detail', event_id=ev.id) }}">🎬 Recording</a>
             {% elif show_meet %}
-              <!-- Live Meet -->
-              <a class="link-badge link-meet"
-                 href="{{ ev.meet_link }}" target="_blank" rel="noopener">
-                📹 Join Live
-              </a>
-
+              <a class="link-badge link-meet" href="{{ ev.meet_link }}" target="_blank" rel="noopener">📹 Join Live</a>
             {% elif show_yt %}
-              <!-- YouTube badge — opens event detail page (embeds there) -->
-              <a class="link-badge link-yt"
-                 href="{{ url_for('main.event_detail', event_id=ev.id) }}"
-                 title="Watch recording">
-                ▶ YouTube
-              </a>
-              <!-- Edit pencil -->
-              <button type="button" class="link-edit-btn"
-                      onclick="showYtInput('{{ ev.id }}', true)"
-                      title="Edit YouTube link">✏</button>
-              <!-- Hidden edit input -->
+              <a class="link-badge link-yt" href="{{ url_for('main.event_detail', event_id=ev.id) }}" title="Watch recording">▶ YouTube</a>
+              <button type="button" class="link-edit-btn" onclick="showYtInput('{{ ev.id }}', true)" title="Edit YouTube link">✏</button>
               <div class="yt-input-wrap" id="yt-wrap-{{ ev.id }}" style="display:none; margin-top:6px;">
-                <input type="url" id="yt-url-{{ ev.id }}"
-                       placeholder="Paste new YouTube URL…"
-                       value="{{ ev.youtube_link or '' }}">
-                <button type="button" class="yt-save-btn"   onclick="saveYt('{{ ev.id }}')">Save</button>
+                <input type="url" id="yt-url-{{ ev.id }}" placeholder="Paste new YouTube URL…" value="{{ ev.youtube_link or '' }}">
+                <button type="button" class="yt-save-btn" onclick="saveYt('{{ ev.id }}')">Save</button>
                 <button type="button" class="yt-cancel-btn" onclick="hideYtInput('{{ ev.id }}')">Cancel</button>
               </div>
-
             {% else %}
-              <!-- No link at all → show input inline, ready to paste -->
               <div class="yt-input-wrap" id="yt-wrap-{{ ev.id }}">
-                <input type="url" id="yt-url-{{ ev.id }}"
-                       placeholder="Paste YouTube link…"
-                       autocomplete="off">
+                <input type="url" id="yt-url-{{ ev.id }}" placeholder="Paste YouTube link…" autocomplete="off">
                 <button type="button" class="yt-save-btn" onclick="saveYt('{{ ev.id }}')">Save</button>
               </div>
             {% endif %}
           </td>
-
-          <!-- WATCHED -->
           <td style="text-align:center; vertical-align:middle;">
             <button class="watch-btn {% if ev.watched %}done{% endif %}"
                     id="watch-{{ ev.id }}"
@@ -550,21 +877,92 @@ tr.watched-row td { opacity: .55; }
               {% if ev.watched %}✓{% else %}○{% endif %}
             </button>
           </td>
-
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 
+  {# ══════ MOBILE: card list ══════ #}
+  <div class="cards-list">
+    {% for ev in evs %}
+      {% set show_meet  = ev.meet_link and (not ev.end_datetime or now < ev.end_datetime) %}
+      {% set show_drive = ev.drive_link %}
+      {% set show_yt    = ev.youtube_link %}
+
+      <article id="card-{{ ev.id }}" class="event-card {% if ev.watched %}watched-row{% endif %}">
+
+        <div class="event-card-header">
+          <div class="event-card-date">
+            {% if ev.date %}
+              <span class="day">{{ ev.date.strftime('%a, %d %b') }}</span>
+              {{ ev.date.strftime('%Y') }} · {{ ev.date.strftime('%I:%M %p') }} IST
+            {% else %}
+              <span style="color:var(--muted)">No date</span>
+            {% endif %}
+          </div>
+          <button class="watch-btn {% if ev.watched %}done{% endif %}"
+                  id="watch-card-{{ ev.id }}"
+                  onclick="toggleWatch({{ ev.id }})"
+                  title="{% if ev.watched %}Mark as unwatched{% else %}Mark as watched{% endif %}">
+            {% if ev.watched %}✓{% else %}○{% endif %}
+          </button>
+        </div>
+
+        <a class="event-card-title" href="{{ url_for('main.event_detail', event_id=ev.id) }}">
+          <span class="play-icon">▶</span>
+          <span>{{ ev.calendar_title }}</span>
+        </a>
+
+        {% if show_drive or show_meet or show_yt %}
+          <div class="event-card-badges">
+            {% if show_drive %}
+              <a class="link-badge link-drive" href="{{ url_for('main.event_detail', event_id=ev.id) }}">🎬 Recording</a>
+            {% elif show_meet %}
+              <a class="link-badge link-meet" href="{{ ev.meet_link }}" target="_blank" rel="noopener">📹 Join Live</a>
+            {% elif show_yt %}
+              <a class="link-badge link-yt" href="{{ url_for('main.event_detail', event_id=ev.id) }}" title="Watch recording">▶ YouTube</a>
+              <button type="button" class="link-edit-btn" onclick="showYtInput('{{ ev.id }}', true)" title="Edit YouTube link">✏</button>
+            {% endif %}
+          </div>
+        {% endif %}
+
+        {% if show_yt %}
+          <div class="yt-input-wrap" id="yt-wrap-card-{{ ev.id }}" style="display:none;">
+            <input type="url" id="yt-url-card-{{ ev.id }}" placeholder="Paste new YouTube URL…" value="{{ ev.youtube_link or '' }}">
+            <button type="button" class="yt-save-btn" onclick="saveYt('{{ ev.id }}')">Save</button>
+            <button type="button" class="yt-cancel-btn" onclick="hideYtInput('{{ ev.id }}')">Cancel</button>
+          </div>
+        {% elif not show_drive and not show_meet %}
+          <div class="yt-input-wrap" id="yt-wrap-card-{{ ev.id }}">
+            <input type="url" id="yt-url-card-{{ ev.id }}" placeholder="Paste YouTube link…" autocomplete="off">
+            <button type="button" class="yt-save-btn" onclick="saveYt('{{ ev.id }}')">Save</button>
+          </div>
+        {% endif %}
+
+        <div class="event-card-notes {% if not ev.user_description %}empty{% endif %}"
+             title="Open event to read/edit full notes"
+             data-md="{{ ev.user_description | e if ev.user_description else '' }}">
+          {% if ev.user_description %}
+            <div class="markdown-preview"></div>
+          {% else %}
+            <span class="empty-hint">No notes — open event to add</span>
+          {% endif %}
+        </div>
+
+      </article>
+    {% endfor %}
+  </div>
+
   {% else %}
   <div class="empty-state">
     <div class="icon">📅</div>
-    <h3>This Calendar URL is not Public — request your TA/Instructor to make it Public</h3>
+    <h3>No public events found</h3>
+    <p>This Calendar URL might not be public. Please request your TA or Instructor to make it public, then sync again.</p>
   </div>
   {% endif %}
 
-</div><!-- /.tab-panel -->
+</div>
 {% endfor %}
 
 {% endblock %}
@@ -572,8 +970,7 @@ tr.watched-row td { opacity: .55; }
 {% block scripts %}
 <script>
 /* =========================================================
-   MARKDOWN PREVIEWS IN DESC CELLS
-   marked.js is loaded lazily — render once it's ready.
+   MARKDOWN PREVIEWS (works in both table + cards)
 ========================================================= */
 function loadScript(src) {
   return new Promise((res) => {
@@ -585,7 +982,7 @@ function loadScript(src) {
 }
 
 function renderAllPreviews() {
-  document.querySelectorAll('.desc-display[data-md]').forEach(el => {
+  document.querySelectorAll('[data-md]').forEach(el => {
     const raw = el.getAttribute('data-md');
     if (!raw) return;
     const target = el.querySelector('.markdown-preview');
@@ -616,48 +1013,30 @@ function switchTab(id) {
 }
 
 /* =========================================================
-   NOTES EDITING
+   YOUTUBE LINK (handles both table + card versions)
 ========================================================= */
-function editDesc(id) {
-  document.getElementById('desc-display-' + id).style.display = 'none';
-  document.getElementById('desc-edit-' + id).style.display = 'block';
-  const ta = document.getElementById('desc-ta-' + id);
-  if (ta) ta.focus();
+function getYtWrap(id) {
+  return document.getElementById('yt-wrap-' + id)
+      || document.getElementById('yt-wrap-card-' + id);
 }
-function cancelDesc(id) {
-  document.getElementById('desc-display-' + id).style.display = '';
-  document.getElementById('desc-edit-' + id).style.display = 'none';
-}
-async function saveDesc(id) {
-  const ta = document.getElementById('desc-ta-' + id);
-  if (!ta) return;
-  try {
-    const res = await fetch(`/event/${id}/description`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ description: ta.value })
-    });
-    if (!res.ok) throw new Error('Save failed');
-    location.reload();
-  } catch (err) {
-    alert(err.message || 'Could not save notes.');
-  }
+function getYtInput(id) {
+  return document.getElementById('yt-url-' + id)
+      || document.getElementById('yt-url-card-' + id);
 }
 
-/* =========================================================
-   YOUTUBE LINK
-========================================================= */
 function showYtInput(id, withCancel) {
-  const wrap = document.getElementById('yt-wrap-' + id);
+  const wrap = getYtWrap(id);
   if (!wrap) return;
   wrap.style.display = 'flex';
-  wrap.style.marginTop = '6px';
-  const inp = document.getElementById('yt-url-' + id);
+  wrap.style.marginTop = '8px';
+  const inp = wrap.querySelector('input[type="url"]');
   if (inp) { inp.focus(); inp.select(); }
 }
 function hideYtInput(id) {
-  const wrap = document.getElementById('yt-wrap-' + id);
-  if (wrap) wrap.style.display = 'none';
+  ['yt-wrap-' + id, 'yt-wrap-card-' + id].forEach(wid => {
+    const w = document.getElementById(wid);
+    if (w) w.style.display = 'none';
+  });
 }
 
 function isYtUrl(url) {
@@ -668,7 +1047,7 @@ function isYtUrl(url) {
 }
 
 async function saveYt(id) {
-  const inp = document.getElementById('yt-url-' + id);
+  const inp = getYtInput(id);
   if (!inp) return;
   const url = inp.value.trim();
   if (!url) { inp.focus(); return; }
@@ -692,56 +1071,76 @@ async function saveYt(id) {
   }
 }
 
-/* Press Enter in any YouTube input to save */
 document.addEventListener('keydown', e => {
   if (e.key !== 'Enter') return;
   const inp = e.target;
   if (!inp.closest || !inp.closest('.yt-input-wrap')) return;
   e.preventDefault();
-  const id = inp.id.replace('yt-url-', '');
+  const id = inp.id.replace(/^yt-url(-card)?-/, '');
   saveYt(id);
 });
 
 /* =========================================================
-   WATCHED TOGGLE
+   WATCHED TOGGLE (updates both table row and card)
 ========================================================= */
 async function toggleWatch(id) {
   const res  = await fetch(`/event/${id}/watched`, { method: 'POST' });
   const data = await res.json();
+
+  // Table (desktop)
   const btn  = document.getElementById('watch-' + id);
   const row  = document.getElementById('row-' + id);
-  if (!btn) return;
-  if (data.watched) {
-    btn.textContent = '✓'; btn.classList.add('done'); btn.title = 'Mark as unwatched';
-    row && row.classList.add('watched-row');
-  } else {
-    btn.textContent = '○'; btn.classList.remove('done'); btn.title = 'Mark as watched';
-    row && row.classList.remove('watched-row');
+  if (btn) {
+    if (data.watched) {
+      btn.textContent = '✓'; btn.classList.add('done'); btn.title = 'Mark as unwatched';
+    } else {
+      btn.textContent = '○'; btn.classList.remove('done'); btn.title = 'Mark as watched';
+    }
   }
+  if (row) row.classList.toggle('watched-row', data.watched);
+
+  // Card (mobile)
+  const cardBtn = document.getElementById('watch-card-' + id);
+  const card    = document.getElementById('card-' + id);
+  if (cardBtn) {
+    if (data.watched) {
+      cardBtn.textContent = '✓'; cardBtn.classList.add('done'); cardBtn.title = 'Mark as unwatched';
+    } else {
+      cardBtn.textContent = '○'; cardBtn.classList.remove('done'); cardBtn.title = 'Mark as watched';
+    }
+  }
+  if (card) card.classList.toggle('watched-row', data.watched);
 }
 
+
 /* =========================================================
-   SYNC
+   SYNC ALL
 ========================================================= */
-function setStatus(msg) {
-  const el = document.getElementById('sync-status');
-  if (el) el.textContent = msg;
-}
 async function syncAll(btn) {
-  const orig = btn.innerHTML;
-  btn.innerHTML = '<span class="spinner"></span> Syncing…';
-  btn.disabled  = true;
-  setStatus('Syncing all subjects…');
+  const icon     = btn.querySelector('.sync-icon');
+  const nameEl   = btn.querySelector('.tab-name');
+  const countEl  = btn.querySelector('.tab-count');
+  const origName = nameEl.textContent;
+  const origCount = countEl.textContent;
+
+  btn.disabled = true;
+  icon.classList.add('spinning');
+  countEl.textContent = '…';
+
   try {
     const res  = await fetch('/sync_all', { method: 'POST' });
     const data = await res.json();
     const ok   = data.results.filter(r => r.ok).length;
-    setStatus(`Synced ${ok}/${data.results.length} subjects`);
-    setTimeout(() => { setStatus(''); location.reload(); }, 1200);
+    countEl.textContent = `${ok}/${data.results.length}`;
+    setTimeout(() => location.reload(), 900);
   } catch {
-    setStatus('Sync failed');
-    btn.innerHTML = orig;
-    btn.disabled  = false;
+    countEl.textContent = '✕';
+    icon.classList.remove('spinning');
+    setTimeout(() => {
+      nameEl.innerHTML = `<span class="sync-icon">↻</span> Sync`;
+      countEl.textContent = origCount;
+      btn.disabled = false;
+    }, 1200);
   }
 }
 </script>

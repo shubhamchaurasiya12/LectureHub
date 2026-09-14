@@ -19,7 +19,7 @@
 
 .subject-row {
   display: grid;
-  grid-template-columns: 1fr 2fr 1fr 1fr auto;
+  grid-template-columns: 1.2fr 2fr 1fr 1fr auto;
   gap: 12px;
   align-items: end;
   margin-bottom: 12px;
@@ -30,8 +30,7 @@
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 .subject-row:hover {
-  border-color: var(--accent-dim);
-  box-shadow: 0 0 0 1px var(--accent-dim);
+  border-color: var(--border-strong);
 }
 .subject-row.header-row {
   background: none;
@@ -46,30 +45,134 @@
   text-transform: uppercase;
   letter-spacing: .5px;
 }
-.subject-row input,
-.subject-row select {
+
+/* ── Custom Combobox (Subject Selector) ───── */
+.combobox {
+  position: relative;
+  width: 100%;
+}
+.combobox-input {
+  width: 100%;
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
+  padding: 9px 32px 9px 12px;
+  font-size: 13px;
+  color: var(--text);
+  font-family: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%239A9A9A' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  cursor: text;
+}
+.combobox-input:focus {
+  border-color: var(--violet);
+  box-shadow: var(--ring);
+  outline: none;
+}
+.combobox-input::placeholder {
+  color: var(--muted);
+  opacity: 0.7;
+}
+
+.combobox-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-2);
+  max-height: 260px;
+  overflow-y: auto;
+  z-index: 100;
+  padding: 6px;
+  scrollbar-width: thin;
+}
+.combobox-dropdown.open { display: block; }
+
+.combobox-group-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 8px 10px 6px;
+}
+
+.combobox-empty {
+  padding: 10px;
+  font-size: 12px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.combobox-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: 8px 10px;
   font-size: 13px;
   color: var(--text);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.1s;
+  gap: 8px;
+}
+.combobox-item:hover, .combobox-item.highlighted {
+  background: var(--surface2);
+}
+.combobox-item .item-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Glowing lime dot for subjects with saved calendar URLs */
+.link-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  flex-shrink: 0;
+}
+
+/* "+ Add absent subject" item */
+.combobox-custom {
+  color: var(--violet-ink);
+  font-weight: 500;
+  border-top: 1px dashed var(--border-strong);
+  margin-top: 6px;
+  padding-top: 10px;
+  border-radius: 0 0 6px 6px;
+}
+.combobox-custom:hover, .combobox-custom.highlighted {
+  background: var(--violet-dim);
+  color: var(--violet-hover);
+}
+
+/* ── Standard Inputs ─────────────────────── */
+.subject-row input[type="url"],
+.subject-row input[type="date"] {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 9px 12px;
+  font-size: 13px;
+  color: var(--text);
   width: 100%;
+  font-family: inherit;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
-.subject-row select {
-  cursor: pointer;
-  appearance: none;
-  -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23888' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  padding-right: 32px;
-}
-.subject-row input:focus,
-.subject-row select:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-dim);
+.subject-row input:focus {
+  border-color: var(--violet);
+  box-shadow: var(--ring);
   outline: none;
 }
 .subject-row input::placeholder {
@@ -77,16 +180,55 @@
   opacity: 0.7;
 }
 
+/* URL Input with Status Badge */
+.input-with-badge {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.input-with-badge input {
+  padding-right: 70px; /* room for badge */
+}
+.url-badge {
+  position: absolute;
+  right: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--green);
+  background: var(--green-light);
+  border: 1px solid var(--green-border);
+  padding: 2px 8px;
+  border-radius: 100px;
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  letter-spacing: 0.3px;
+}
+.url-badge.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Date picker dark mode fix */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: var(--date-icon-filter, invert(0.6));
+  cursor: pointer;
+}
+html[data-theme="dark"] {
+  --date-icon-filter: invert(0.8);
+}
+
+/* ── Actions & Utils ─────────────────────── */
 .remove-btn {
   background: none;
   border: 1px solid var(--border);
   color: var(--muted);
   border-radius: var(--radius-sm);
-  padding: 8px 10px;
+  padding: 0;
   cursor: pointer;
   font-size: 14px;
   transition: color 0.15s, border-color 0.15s, background 0.15s;
-  line-height: 1;
   height: 38px;
   width: 38px;
   display: flex;
@@ -95,8 +237,8 @@
 }
 .remove-btn:hover {
   color: var(--red);
-  border-color: var(--red);
-  background: rgba(255, 59, 48, 0.06);
+  border-color: var(--red-border);
+  background: var(--red-bg);
 }
 
 .hint {
@@ -109,36 +251,16 @@
   margin-bottom: 24px;
   line-height: 1.6;
 }
-.hint strong {
-  color: var(--text);
-}
+.hint strong { color: var(--text); }
 .hint code {
   font-family: var(--mono);
   font-size: 11px;
   background: var(--bg);
   padding: 2px 6px;
   border-radius: 4px;
-  color: var(--accent);
+  color: var(--violet-ink);
   word-break: break-all;
-}
-
-input[type="date"] {
-  padding: 8px 10px;
-  font-size: 13px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  color: var(--text);
-  appearance: none;
-  -webkit-appearance: none;
-}
-input[type="date"]::-webkit-calendar-picker-indicator {
-  filter: invert(0.8);
-  cursor: pointer;
-}
-input[type="date"]:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-dim);
+  border: 1px solid var(--border-dim);
 }
 
 .setup-actions {
@@ -148,56 +270,40 @@ input[type="date"]:focus {
   margin-top: 16px;
   flex-wrap: wrap;
 }
-.setup-actions .btn-ghost {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text-soft);
-}
-.setup-actions .btn-ghost:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-}
-.setup-actions .btn-primary {
-  background: var(--accent);
-  color: #0B0B0E;
-}
-.setup-actions .btn-primary:hover {
-  box-shadow: 0 0 20px var(--accent-glow);
-}
 
-.calendar-url-highlight {
-  animation: highlightBg 0.6s ease;
-}
 @keyframes highlightBg {
   0%, 100% { background: var(--bg); }
-  50% { background: var(--accent-dim); }
+  50% { background: var(--accent-dim); border-color: var(--accent); }
 }
+.highlight { animation: highlightBg 0.6s ease; }
 
+/* ── Mobile ───────────────────────────────── */
 @media (max-width: 700px) {
   .subject-row {
     grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    padding: 12px;
+    gap: 10px;
+    padding: 14px;
   }
-  .subject-row.header-row {
-    display: none;
+  .subject-row.header-row { display: none; }
+  .subject-row .combobox,
+  .subject-row .input-with-badge,
+  .subject-row input[type="date"] {
+    grid-column: span 2;
   }
   .subject-row .remove-btn {
     grid-column: span 2;
     width: 100%;
     height: 36px;
-  }
-  .subject-row input[type="date"] {
-    width: 100%;
+    margin-top: 4px;
   }
 }
 {% endblock %}
 
 {% block content %}
-<div style="max-width:860px">
+<div style="max-width:900px">
   <div class="setup-header">
     <h1>Set up your subjects</h1>
-    <p>Select your IITM courses from the dropdown. Calendar URLs will auto-fill if available. Set a date range to limit fetched events.</p>
+    <p>Pick a saved subject from the list, or add an absent one. Calendar URLs auto-fill when already available.</p>
   </div>
 
   <div class="hint">
@@ -218,11 +324,17 @@ input[type="date"]:focus {
     </div>
 
     <div id="subjects-container">
-      <div class="subject-row">
-        <select name="subject_name" class="subject-select" required>
-          <option value="">-- Loading subjects --</option>
-        </select>
-        <input type="url" name="calendar_url" placeholder="https://calendar.google.com/calendar/embed?src=..." />
+      <div class="subject-row" data-row-id="0">
+        <div class="combobox">
+          <input type="text" name="subject_name" class="combobox-input" placeholder="Select or type subject..." required autocomplete="off">
+          <div class="combobox-dropdown"></div>
+        </div>
+        
+        <div class="input-with-badge">
+          <input type="url" name="calendar_url" placeholder="https://calendar.google.com/..." />
+          <span class="url-badge">✓ Auto</span>
+        </div>
+        
         <input type="date" name="filter_start" value="2026-06-16" />
         <input type="date" name="filter_end" value="2026-09-30" />
         <button type="button" class="remove-btn" onclick="removeRow(this)" title="Remove">✕</button>
@@ -241,128 +353,291 @@ input[type="date"]:focus {
 
 {% block scripts %}
 <script>
-// Store subjects data globally for dynamic rows
-let allSubjects = [];
+// ── State ───────────────────────────────────────────────
+let SUBJECTS = [];          // sorted ascending list of names
+let SUBJECT_MAP = {};       // name -> calendar_url
+let rowCounter = 1;
 
-// Fetch subjects from API
+// ── Helpers ─────────────────────────────────────────────
+function esc(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// ── Fetch & Process ─────────────────────────────────────
 async function fetchSubjects() {
+  let apiSubjects = [];
   try {
     const res = await fetch('/api/dropdown-subjects');
-    const data = await res.json();
-    if (data.success) {
-      allSubjects = data.subjects;
-      populateAllDropdowns();
-    } else {
-      console.error('Failed to load subjects:', data.error);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && Array.isArray(data.subjects)) {
+        apiSubjects = data.subjects;
+      }
     }
   } catch (err) {
-    console.error('Error fetching subjects:', err);
+    console.warn('Could not fetch subjects from API.', err);
   }
+  processSubjects(apiSubjects);
 }
 
-// Build a <select> element with all subjects
-function createSubjectDropdown(selectedValue = '') {
-  const select = document.createElement('select');
-  select.name = 'subject_name';
-  select.className = 'subject-select';
-  select.required = true;
+function processSubjects(apiSubjects) {
+  SUBJECT_MAP = {};
+  const seen = new Set();
+  const list = [];
 
-  const defaultOpt = document.createElement('option');
-  defaultOpt.value = '';
-  defaultOpt.textContent = '-- Select Subject --';
-  defaultOpt.disabled = true;
-  select.appendChild(defaultOpt);
-
-  allSubjects.forEach(subj => {
-    const opt = document.createElement('option');
-    opt.value = subj.name;
-    opt.textContent = subj.name;
-    opt.dataset.calendarUrl = subj.calendar_url || '';
-    if (subj.name === selectedValue) opt.selected = true;
-    select.appendChild(opt);
+  (apiSubjects || []).forEach(s => {
+    const name = (s.name || '').trim();
+    if (!name) return;
+    const key = name.toLowerCase();
+    if (seen.has(key)) {
+      // keep first URL found if duplicates exist
+      if (!SUBJECT_MAP[name] && s.calendar_url) SUBJECT_MAP[name] = s.calendar_url;
+      return;
+    }
+    seen.add(key);
+    SUBJECT_MAP[name] = s.calendar_url || '';
+    list.push(name);
   });
 
-  // Auto-fill calendar URL on change
-  select.addEventListener('change', function() {
-    const selected = this.options[this.selectedIndex];
-    const url = selected.dataset.calendarUrl;
-    const row = this.closest('.subject-row');
-    const urlInput = row.querySelector('input[name="calendar_url"]');
-    if (url && urlInput && !urlInput.value) {
-      urlInput.value = url;
-      urlInput.classList.add('calendar-url-highlight');
-      setTimeout(() => urlInput.classList.remove('calendar-url-highlight'), 600);
+  // Sort ascending by name (A → Z)
+  list.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base', numeric: true }));
+  SUBJECTS = list;
+}
+
+// ── Combobox Logic ──────────────────────────────────────
+function initCombobox(row) {
+  const input = row.querySelector('.combobox-input');
+  const dropdown = row.querySelector('.combobox-dropdown');
+  const urlInput = row.querySelector('input[name="calendar_url"]');
+  const urlBadge = row.querySelector('.url-badge');
+
+  if (!input || !dropdown) return;
+
+  let activeIdx = -1;
+
+  function render(filter = '') {
+    const q = filter.toLowerCase().trim();
+    const matches = SUBJECTS.filter(n => !q || n.toLowerCase().includes(q));
+
+    let html = '';
+
+    if (matches.length) {
+      html += `<div class="combobox-group-label">Other</div>`;
+      matches.forEach(name => {
+        const hasUrl = !!SUBJECT_MAP[name];
+        html += `
+          <div class="combobox-item" data-value="${esc(name)}">
+            <span class="item-name">${esc(name)}</span>
+            ${hasUrl ? '<span class="link-dot" title="Calendar link available"></span>' : ''}
+          </div>
+        `;
+      });
+    } else {
+      html += `<div class="combobox-empty">${q ? 'No matching saved subjects' : 'No subjects saved yet'}</div>`;
+    }
+
+    // Permanent "+ Add absent subject" item at the bottom
+    const typed = filter.trim();
+    const exact = SUBJECTS.some(n => n.toLowerCase() === typed.toLowerCase());
+    if (typed && !exact) {
+      html += `
+        <div class="combobox-item combobox-custom" data-action="accept" data-value="${esc(typed)}">
+          + Add subject: “${esc(typed)}”
+        </div>
+      `;
+    } else {
+      html += `
+        <div class="combobox-item combobox-custom" data-action="type">
+          + Add subject
+        </div>
+      `;
+    }
+
+    dropdown.innerHTML = html;
+    activeIdx = -1;
+
+    dropdown.querySelectorAll('.combobox-item').forEach(el => {
+      el.addEventListener('mousedown', e => {
+        e.preventDefault(); // keep input focused
+        activateItem(el);
+      });
+    });
+  }
+
+  function activateItem(el) {
+    if (el.dataset.action === 'type') {
+      // Switch to free-typing mode for a new subject
+      input.value = '';
+      input.placeholder = 'Type new subject name…';
+      input.focus();
+      render('');
+      return;
+    }
+    selectItem(el.dataset.value);
+  }
+
+  function selectItem(value) {
+    input.value = value;
+    input.placeholder = 'Select or type subject...';
+    dropdown.classList.remove('open');
+    updateUrlStatus(value);
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
+  function updateUrlStatus(subjectName) {
+    const knownUrl = SUBJECT_MAP[subjectName];
+    if (knownUrl) {
+      if (!urlInput.value) {
+        urlInput.value = knownUrl;
+        urlInput.classList.add('highlight');
+        setTimeout(() => urlInput.classList.remove('highlight'), 600);
+      }
+      if (urlBadge) urlBadge.classList.add('visible');
+    } else {
+      if (urlBadge) urlBadge.classList.remove('visible');
+    }
+  }
+
+  function getItems() {
+    return dropdown.querySelectorAll('.combobox-item');
+  }
+
+  function updateActiveItem() {
+    const items = getItems();
+    items.forEach((el, idx) => {
+      el.classList.toggle('highlighted', idx === activeIdx);
+      if (idx === activeIdx) el.scrollIntoView({ block: 'nearest' });
+    });
+  }
+
+  function openDropdown() {
+    if (!dropdown.classList.contains('open')) {
+      render(input.value);
+      dropdown.classList.add('open');
+    }
+  }
+
+  // ── Events ─
+  input.addEventListener('focus', openDropdown);
+  input.addEventListener('click', openDropdown);
+
+  input.addEventListener('blur', () => {
+    setTimeout(() => {
+      if (!row.contains(document.activeElement)) {
+        dropdown.classList.remove('open');
+        updateUrlStatus(input.value);
+      }
+    }, 150);
+  });
+
+  input.addEventListener('input', () => {
+    render(input.value);
+    dropdown.classList.add('open');
+    if (urlBadge) urlBadge.classList.remove('visible');
+  });
+
+  input.addEventListener('keydown', e => {
+    const items = getItems();
+
+    if (!dropdown.classList.contains('open')) {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') openDropdown();
+      return;
+    }
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      activeIdx = Math.min(activeIdx + 1, items.length - 1);
+      updateActiveItem();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      activeIdx = Math.max(activeIdx - 1, 0);
+      updateActiveItem();
+    } else if (e.key === 'Enter') {
+      const typed = input.value.trim();
+      const exact = SUBJECTS.some(n => n.toLowerCase() === typed.toLowerCase());
+
+      if (activeIdx >= 0 && items[activeIdx]) {
+        e.preventDefault();
+        activateItem(items[activeIdx]);
+      } else if (typed && !exact) {
+        // Accept typed text as a new absent subject
+        e.preventDefault();
+        selectItem(typed);
+      } else if (typed && exact) {
+        e.preventDefault();
+        selectItem(SUBJECTS.find(n => n.toLowerCase() === typed.toLowerCase()));
+      }
+      // else: empty input → allow normal form submit
+    } else if (e.key === 'Escape') {
+      dropdown.classList.remove('open');
     }
   });
 
-  return select;
+  if (input.value) updateUrlStatus(input.value);
 }
 
-// Populate all existing dropdowns
-function populateAllDropdowns() {
-  document.querySelectorAll('.subject-select').forEach(sel => {
-    const currentVal = sel.value;
-    const newSelect = createSubjectDropdown(currentVal);
-    sel.parentNode.replaceChild(newSelect, sel);
+function initAllComboboxes() {
+  document.querySelectorAll('.subject-row').forEach(row => {
+    if (!row.dataset.comboboxInitialized) {
+      initCombobox(row);
+      row.dataset.comboboxInitialized = "true";
+    }
   });
 }
 
-// Add a new subject row
+// ── Row Management ──────────────────────────────────────
 function addRow() {
   const container = document.getElementById('subjects-container');
   const div = document.createElement('div');
   div.className = 'subject-row';
+  div.dataset.rowId = rowCounter++;
 
-  const select = createSubjectDropdown();
-
-  const urlInput = document.createElement('input');
-  urlInput.type = 'url';
-  urlInput.name = 'calendar_url';
-  urlInput.placeholder = 'https://calendar.google.com/...';
-
-  const startInput = document.createElement('input');
-  startInput.type = 'date';
-  startInput.name = 'filter_start';
-  startInput.value = '2026-06-16';
-
-  const endInput = document.createElement('input');
-  endInput.type = 'date';
-  endInput.name = 'filter_end';
-  endInput.value = '2026-09-30';
-
-  const removeBtn = document.createElement('button');
-  removeBtn.type = 'button';
-  removeBtn.className = 'remove-btn';
-  removeBtn.title = 'Remove';
-  removeBtn.textContent = '✕';
-  removeBtn.onclick = function() { removeRow(this); };
-
-  div.appendChild(select);
-  div.appendChild(urlInput);
-  div.appendChild(startInput);
-  div.appendChild(endInput);
-  div.appendChild(removeBtn);
+  div.innerHTML = `
+    <div class="combobox">
+      <input type="text" name="subject_name" class="combobox-input" placeholder="Select or type subject..." required autocomplete="off">
+      <div class="combobox-dropdown"></div>
+    </div>
+    
+    <div class="input-with-badge">
+      <input type="url" name="calendar_url" placeholder="https://calendar.google.com/..." />
+      <span class="url-badge">✓ Auto</span>
+    </div>
+    
+    <input type="date" name="filter_start" value="2026-06-16" />
+    <input type="date" name="filter_end" value="2026-09-30" />
+    <button type="button" class="remove-btn" onclick="removeRow(this)" title="Remove">✕</button>
+  `;
 
   container.appendChild(div);
-  select.focus();
+  initCombobox(div);
+  div.querySelector('.combobox-input').focus();
 }
 
-// Remove a row (keep at least one)
 function removeRow(btn) {
   const rows = document.querySelectorAll('#subjects-container .subject-row');
   if (rows.length > 1) {
     btn.closest('.subject-row').remove();
+  } else {
+    alert('You must have at least one subject.');
   }
 }
 
-// Form submit loading state
+// ── Form Submit ─────────────────────────────────────────
 document.getElementById('setup-form').addEventListener('submit', function() {
   const btn = document.getElementById('submit-btn');
   btn.innerHTML = '<span class="spinner"></span> Syncing...';
   btn.disabled = true;
 });
 
-// Load subjects on page load
-document.addEventListener('DOMContentLoaded', fetchSubjects);
+// ── Init ────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  processSubjects([]);      // empty state ready instantly
+  initAllComboboxes();      // listeners attached immediately
+  fetchSubjects();          // API data merged in background
+});
 </script>
 {% endblock %}

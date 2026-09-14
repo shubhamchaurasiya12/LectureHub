@@ -4,6 +4,8 @@ import base64
 import datetime as dt_module
 import requests
 import pytz
+from app.models import Subject, Event, RecordingArchive
+from app.extensions import db
 
 IST = pytz.timezone('Asia/Kolkata')
 
@@ -139,3 +141,40 @@ def drive_embed_url(url):
     if file_id:
         return f"https://drive.google.com/file/d/{file_id}/preview"
     return None
+
+def extract_recordings_to_archive(term_label='May 2026'):
+    """Copy every Drive link from event tables into recording_archive.
+    Idempotent: safe to run any number of times. Returns (added, skipped)."""
+    existing = {
+        (r.subject_name, r.drive_link)
+        for r in RecordingArchive.query.filter_by(term=term_label).all()
+    }
+
+    rows = (
+        db.session.query(Subject, Event)
+        .join(Event, Event.subject_id == Subject.id)
+        .filter(Event.drive_link.isnot(None), Event.drive_link != '')
+        .order_by(Subject.name.asc(), Event.date.asc())
+        .all()
+    )
+
+    added = 0
+    for subj, ev in rows:
+        link = (ev.drive_link or '').strip()
+        if not link or (subj.name, link) in existing:
+            continue
+        db.session.add(RecordingArchive(
+            subject_name=subj.name,
+            term=term_label,
+            drive_link=link,
+            meet_link=(ev.meet_link or '').strip() or None,
+            youtube_link=(ev.youtube_link or '').strip() or None,
+            event_date=ev.date,
+            title=(ev.calendar_title or '').strip() or None,
+            source_event_id=ev.id,
+        ))
+        existing.add((subj.name, link))
+        added += 1
+
+    db.session.commit()
+    return added, len(rows) - added

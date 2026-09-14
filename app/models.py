@@ -56,3 +56,29 @@ class DropdownSubject(db.Model):
     __table_args__ = (
         db.Index('idx_dropdown_subject_name', 'name'),
     )
+
+# Add this class after your existing models
+
+class RecordingArchive(db.Model):
+    """Permanent per-subject, per-term snapshot of recording links.
+    Extracted once from subject/event tables; deliberately has NO foreign
+    keys so it survives subject deletion, sync rewrites and term rotation."""
+    __tablename__ = 'recording_archive'
+
+    id = db.Column(db.Integer, primary_key=True)
+    subject_name = db.Column(db.Text, nullable=False, index=True)
+    term = db.Column(db.String(40), nullable=False, index=True)      # 'May 2026'
+    drive_link = db.Column(db.Text, nullable=False)
+    meet_link = db.Column(db.Text, nullable=True)
+    youtube_link = db.Column(db.Text, nullable=True)
+    event_date = db.Column(db.DateTime, nullable=True)               # keeps lecture order
+    title = db.Column(db.Text, nullable=True)                        # which lecture it was
+    source_event_id = db.Column(db.Integer, nullable=True)           # traceability only, no FK
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    __table_args__ = (
+        # re-running the extract never duplicates rows
+        db.UniqueConstraint('subject_name', 'term', 'drive_link',
+                            name='uq_archive_subject_term_link'),
+        db.Index('ix_archive_subject_term_date', 'subject_name', 'term', 'event_date'),
+    )

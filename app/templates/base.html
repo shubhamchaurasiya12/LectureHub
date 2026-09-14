@@ -4,41 +4,150 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light dark" />
+  <!-- Prevent browsers from caching pages (stops Back button showing dashboard after logout) -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>{% block title %}LF LECFLOW{% endblock %}</title>
+
+  <!-- Apply saved theme BEFORE first paint (prevents flash) -->
+  <script>
+    (function () {
+      var KEY = 'lecflow-theme';
+      var saved = null;
+      try { saved = localStorage.getItem(KEY); } catch (e) {}
+      var dark = saved
+        ? saved === 'dark'
+        : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    })();
+  </script>
+
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
     rel="stylesheet"
   />
+
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    /* ══ THEME TOKENS ═══════════════════════════════════════
+       Light  : matte white base, lime primary, violet secondary, ink details
+       Dark   : same personality on #101010 matte canvas (AMOLED-feel)
+    ═══════════════════════════════════════════════════════ */
     :root {
+      /* base — matte white */
       --bg:           #FFFFFF;
-      --surface:      #F9FAFB;
-      --surface2:     #F3F4F6;
-      --border:       #E5E7EB;
-      --border-dim:   #F0F0F0;
+      --surface:      #ffffff;
+      --surface2:     #F4F4F5;
+      --border:       #E8E8E4;
+      --border-strong:#D4D4D8;
+      --border-dim:   #F0F0EE;
 
-      --accent:       #F97316;
-      --accent-dim:   rgba(249, 115, 22, 0.08);
-      --accent-hover: #EA6C10;
+      /* brand — lime (primary fills) */
+      --accent:       #68cf1e;
+      --accent-hover: #85E147;
+      --accent-dim:   rgba(152, 239, 90, 0.14);
+      --on-accent:    #101010;   /* text on lime — 14.9:1 contrast */
 
-      --green:        #16A34A;
+      /* brand — violet (secondary / interactive) */
+      --violet:       #935AEF;
+      --violet-hover: #7F41E6;
+      --violet-dim:   rgba(147, 90, 239, 0.10);
+      --violet-line:  #DBC8FB;
+      --violet-ink:   #7C3AED;   /* violet as readable text */
+
+      /* semantic */
+      --green:        #15803D;
       --green-light:  #DCFCE7;
-      --green-border: #86EFAC;
+      --green-border: #BBF7D0;
       --green-desc:   #F0FDF4;
+      --green-ring:   rgba(34, 197, 94, 0.15);
 
-      --amber:        #D97706;
+      --amber:        #B45309;
+      --amber-bg:     #FFFBEB;
+      --amber-border: #FDE68A;
+
       --red:          #DC2626;
+      --red-bg:       #FEF2F2;
+      --red-border:   #FECACA;
 
-      --text:         #111827;
-      --text-soft:    #4B5563;
-      --muted:        #9CA3AF;
+      /* ink */
+      --text:         #101010;
+      --text-soft:    #4E4E4E;
+      --muted:        #9A9A9A;
 
-      --radius:       10px;
-      --radius-sm:    6px;
+      /* chrome */
+      --nav-glass:    rgba(255, 255, 255, 0.82);
+      --nav-border:   rgba(16, 16, 16, 0.08);
+      --shadow-nav:   0 2px 16px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.04);
+      --shadow-1:     0 1px 2px rgba(16, 16, 16, 0.05);
+      --shadow-2:     0 10px 30px rgba(16, 16, 16, 0.07);
+      --ring:         0 0 0 3px rgba(147, 90, 239, 0.22);
+      --note-placeholder: #86EFAC;
+      --brand-chip-bg: #101010;
+      --brand-chip-fg: #98EF5A;
+      --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+
+      --radius:       18px;
+      --radius-sm:    12px;
       --mono:         'JetBrains Mono', monospace;
       --nav-h:        54px;
+
+      color-scheme: light;
+    }
+
+    /* ── DARK VERSION of the same theme ─────────────────── */
+    html[data-theme="dark"] {
+      --bg:           #101010;
+      --surface:      #161616;
+      --surface2:     #1F1F1F;
+      --border:       rgba(255, 255, 255, 0.10);
+      --border-strong:rgba(255, 255, 255, 0.22);
+      --border-dim:   rgba(255, 255, 255, 0.06);
+
+      --accent:       #98EF5A;
+      --accent-hover: #85E147;
+      --accent-dim:   rgba(152, 239, 90, 0.14);
+      --on-accent:    #101010;
+
+      --violet:       #935AEF;
+      --violet-hover: #A678F0;
+      --violet-dim:   rgba(147, 90, 239, 0.16);
+      --violet-line:  rgba(147, 90, 239, 0.45);
+      --violet-ink:   #B794F6;
+
+      --green:        #4ADE80;
+      --green-light:  rgba(74, 222, 128, 0.16);
+      --green-border: rgba(74, 222, 128, 0.40);
+      --green-desc:   rgba(74, 222, 128, 0.08);
+      --green-ring:   rgba(74, 222, 128, 0.20);
+
+      --amber:        #FBBF24;
+      --amber-bg:     rgba(251, 191, 36, 0.10);
+      --amber-border: rgba(251, 191, 36, 0.35);
+
+      --red:          #F87171;
+      --red-bg:       rgba(248, 113, 113, 0.10);
+      --red-border:   rgba(248, 113, 113, 0.35);
+
+      --text:         #F4F4F5;
+      --text-soft:    #B9B9C0;
+      --muted:        #8E8E93;
+
+      --nav-glass:    rgba(16, 16, 16, 0.78);
+      --nav-border:   rgba(255, 255, 255, 0.10);
+      --shadow-nav:   0 2px 16px rgba(0, 0, 0, 0.55), 0 1px 3px rgba(0, 0, 0, 0.40);
+      --shadow-1:     0 1px 2px rgba(0, 0, 0, 0.40);
+      --shadow-2:     0 10px 30px rgba(0, 0, 0, 0.45);
+      --ring:         0 0 0 3px rgba(147, 90, 239, 0.35);
+      --note-placeholder: rgba(74, 222, 128, 0.55);
+      --brand-chip-bg: #98EF5A;
+      --brand-chip-fg: #101010;
+      --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23A1A1AA' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+
+      color-scheme: dark;
     }
 
     /* ── Base ───────────────────────────── */
@@ -51,7 +160,10 @@
       line-height: 1.65;
       -webkit-font-smoothing: antialiased;
       padding-top: calc(var(--nav-h) + 24px);
+      transition: background-color .25s ease, color .25s ease;
     }
+
+    ::selection { background: var(--accent); color: var(--on-accent); }
 
     /* ── Nav — floating glass pill ──────── */
     nav {
@@ -62,19 +174,18 @@
       width: calc(100% - 48px);
       max-width: 1100px;
       height: var(--nav-h);
-      background: rgba(255, 255, 255, 0.82);
+      background: var(--nav-glass);
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
-      border: 1px solid rgba(229, 231, 235, 0.85);
+      border: 1px solid var(--nav-border);
       border-radius: 100px;
-      box-shadow:
-        0 2px 16px rgba(0, 0, 0, 0.07),
-        0 1px 3px rgba(0, 0, 0, 0.04);
+      box-shadow: var(--shadow-nav);
       padding: 0 10px 0 18px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       z-index: 1000;
+      transition: background-color .25s ease, border-color .25s ease;
     }
 
     .nav-brand {
@@ -92,7 +203,7 @@
     .nav-brand-icon {
       width: 32px;
       height: 32px;
-      background: var(--accent);
+      background: var(--brand-chip-bg);
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -100,7 +211,7 @@
       font-family: var(--mono);
       font-size: 11px;
       font-weight: 700;
-      color: #fff;
+      color: var(--brand-chip-fg);
       letter-spacing: -0.5px;
       flex-shrink: 0;
     }
@@ -154,14 +265,41 @@
 
     .nav-links .nav-cta {
       background: var(--accent);
-      color: #fff;
+      color: var(--on-accent);
       font-weight: 600;
       padding: 7px 18px;
     }
     .nav-links .nav-cta:hover {
       background: var(--accent-hover);
-      color: #fff;
+      color: var(--on-accent);
+      box-shadow: 0 4px 14px var(--accent-dim);
     }
+
+    /* ── Theme toggle (in nav pill) ─────── */
+    .theme-toggle {
+      width: 34px;
+      height: 34px;
+      padding: 0 !important;
+      margin-right: 6px;
+      border-radius: 50% !important;
+      border: 1px solid var(--border) !important;
+      background: var(--surface) !important;
+      color: var(--text-soft);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: color .15s, border-color .15s, background-color .25s;
+    }
+    .theme-toggle:hover {
+      color: var(--text);
+      border-color: var(--border-strong) !important;
+      background: var(--surface2) !important;
+    }
+    .theme-toggle svg { width: 15px; height: 15px; display: block; }
+    html:not([data-theme="dark"]) .theme-toggle .icon-sun  { display: none; }
+    html[data-theme="dark"]       .theme-toggle .icon-moon { display: none; }
 
     /* ── Container ──────────────────────── */
     .container {
@@ -178,7 +316,7 @@
       align-items: center;
       gap: 10px;
       padding: 11px 16px;
-      border-radius: var(--radius);
+      border-radius: var(--radius-sm);
       margin-bottom: 8px;
       font-size: 13px;
       font-weight: 500;
@@ -199,15 +337,15 @@
     .flash-success::before { background: var(--green); }
 
     .flash-error {
-      background: #FEF2F2;
-      border: 1px solid #FECACA;
+      background: var(--red-bg);
+      border: 1px solid var(--red-border);
       color: var(--red);
     }
     .flash-error::before { background: var(--red); }
 
     .flash-warning {
-      background: #FFFBEB;
-      border: 1px solid #FDE68A;
+      background: var(--amber-bg);
+      border: 1px solid var(--amber-border);
       color: var(--amber);
     }
     .flash-warning::before { background: var(--amber); }
@@ -218,6 +356,8 @@
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 24px;
+      box-shadow: var(--shadow-1);
+      transition: background-color .25s ease, border-color .25s ease;
     }
     .card + .card { margin-top: 14px; }
 
@@ -233,41 +373,51 @@
       font-size: 13px;
       font-weight: 600;
       font-family: inherit;
-      transition: background .15s, transform .1s, box-shadow .15s;
+      transition: background .15s, transform .1s, box-shadow .15s, color .15s, border-color .15s;
       text-decoration: none;
       letter-spacing: 0.1px;
       white-space: nowrap;
     }
     .btn:active { transform: scale(.97); }
 
-    /* Orange primary */
+    /* Lime primary — ink text (matte, high contrast) */
     .btn-primary {
       background: var(--accent);
-      color: #fff;
+      color: var(--on-accent);
     }
     .btn-primary:hover {
       background: var(--accent-hover);
-      box-shadow: 0 4px 16px rgba(249, 115, 22, 0.28);
+      box-shadow: 0 4px 16px var(--accent-dim);
     }
 
     .btn-ghost {
-      background: #fff;
+      background: var(--surface);
       color: var(--text-soft);
       border: 1px solid var(--border);
     }
     .btn-ghost:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-      background: var(--accent-dim);
+      border-color: var(--violet-line);
+      color: var(--violet-ink);
+      background: var(--violet-dim);
+    }
+
+    /* Violet secondary CTA (use sparingly, bold labels only) */
+    .btn-violet {
+      background: var(--violet);
+      color: #FFFFFF;
+    }
+    .btn-violet:hover {
+      background: var(--violet-hover);
+      box-shadow: 0 4px 16px var(--violet-dim);
     }
 
     .btn-danger {
       background: transparent;
       color: var(--red);
-      border: 1px solid #FECACA;
+      border: 1px solid var(--red-border);
     }
     .btn-danger:hover {
-      background: #FEF2F2;
+      background: var(--red-bg);
       border-color: var(--red);
     }
 
@@ -282,7 +432,7 @@
       width: 28px;
       height: 28px;
       border-radius: 50%;
-      border: 2px solid #D1D5DB;
+      border: 2px solid var(--border-strong);
       background: transparent;
       cursor: pointer;
       display: inline-flex;
@@ -302,8 +452,7 @@
       color: var(--green);
     }
 
-    /* ── Description cell ───────────────── */
-    /* Very light green background, black text */
+    /* ── Description / notes cell ───────── */
     .desc-display {
       background: var(--green-desc);
       border: 1px solid var(--green-border);
@@ -313,14 +462,14 @@
       padding: 6px 10px;
       min-height: 32px;
       cursor: pointer;
-      transition: border-color .15s;
+      transition: border-color .15s, background-color .25s;
     }
     .desc-display:hover {
       border-color: var(--green);
     }
     .desc-display.empty::before {
       content: 'Add notes…';
-      color: #86EFAC;
+      color: var(--note-placeholder);
       font-style: italic;
     }
     .desc-edit textarea {
@@ -331,7 +480,7 @@
       font-size: 13px;
     }
     .desc-edit textarea:focus {
-      box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.12);
+      box-shadow: 0 0 0 3px var(--green-ring);
     }
 
     /* ── Forms ──────────────────────────── */
@@ -356,7 +505,7 @@
     select,
     textarea {
       width: 100%;
-      background: #fff;
+      background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       color: var(--text);
@@ -364,12 +513,12 @@
       font-size: 14px;
       font-family: inherit;
       outline: none;
-      transition: border-color .15s, box-shadow .15s;
+      transition: border-color .15s, box-shadow .15s, background-color .25s;
       appearance: none;
     }
     input:focus, select:focus, textarea:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-dim);
+      border-color: var(--violet);
+      box-shadow: var(--ring);
     }
     input::placeholder, textarea::placeholder {
       color: var(--muted);
@@ -377,7 +526,7 @@
     }
 
     select {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239CA3AF' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-image: var(--select-arrow);
       background-repeat: no-repeat;
       background-position: right 12px center;
       padding-right: 36px;
@@ -401,11 +550,18 @@
     /* ── Utility ────────────────────────── */
     .text-muted   { color: var(--muted); }
     .text-soft    { color: var(--text-soft); }
-    .text-accent  { color: var(--accent); }
+    .text-accent  { color: var(--violet-ink); }
     .text-green   { color: var(--green); }
     .text-red     { color: var(--red); }
     .text-mono    { font-family: var(--mono); }
     .divider      { border: none; border-top: 1px solid var(--border-dim); margin: 24px 0; }
+
+    /* ── Focus visibility (accessibility) ─ */
+    a:focus-visible,
+    button:focus-visible {
+      outline: none;
+      box-shadow: var(--ring);
+    }
 
     /* ── Responsive ─────────────────────── */
     @media (max-width: 640px) {
@@ -418,6 +574,7 @@
       .nav-brand-label .sub { display: none; }
       .nav-links a,
       .nav-links button { padding: 6px 10px; font-size: 12px; }
+      .theme-toggle { width: 30px; height: 30px; margin-right: 2px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -445,9 +602,30 @@
     </a>
 
     <div class="nav-links">
+      <!-- Theme toggle: light ⇄ dark -->
+      <button
+        type="button"
+        id="theme-toggle"
+        class="theme-toggle"
+        aria-label="Switch to dark mode"
+        title="Toggle theme"
+      >
+        <!-- moon (shown in light mode) -->
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+        <!-- sun (shown in dark mode) -->
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+        </svg>
+      </button>
+
       {% if current_user.is_authenticated %}
         <a href="{{ url_for('main.add_subject') }}">+ Subject</a>
-        <form action="{{ url_for('auth.logout') }}" method="get" style="display:inline">
+        <form action="{{ url_for('auth.logout') }}" method="POST" style="display:inline">
           <button type="submit">Sign out</button>
         </form>
       {% else %}
@@ -470,6 +648,43 @@
 
     {% block content %}{% endblock %}
   </div>
+
+  <script>
+    (function () {
+      var KEY  = 'lecflow-theme';
+      var root = document.documentElement;
+      var btn  = document.getElementById('theme-toggle');
+
+      function setTheme(theme, save) {
+        root.setAttribute('data-theme', theme);
+        if (save) {
+          try { localStorage.setItem(KEY, theme); } catch (e) {}
+        }
+        if (btn) {
+          btn.setAttribute('aria-label',
+            theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+        }
+      }
+
+      if (btn) {
+        setTheme(root.getAttribute('data-theme') || 'light', false);
+        btn.addEventListener('click', function () {
+          var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+          setTheme(next, true);
+        });
+      }
+
+      /* Follow OS preference only while the user has no saved choice */
+      var mq = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
+      if (mq && mq.addEventListener) {
+        mq.addEventListener('change', function (e) {
+          var saved = null;
+          try { saved = localStorage.getItem(KEY); } catch (err) {}
+          if (!saved) setTheme(e.matches ? 'dark' : 'light', false);
+        });
+      }
+    })();
+  </script>
 
   {% block scripts %}{% endblock %}
 </body>

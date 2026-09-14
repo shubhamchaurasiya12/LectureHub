@@ -5,9 +5,8 @@
 {% block extra_styles %}
 
 /* ── Page shell ─────────────────────────────── */
-.add-page {
-  max-width: 900px;
-}
+.add-page { max-width: 900px; }
+
 .back-link {
   display: inline-flex;
   align-items: center;
@@ -18,7 +17,7 @@
   margin-bottom: 24px;
   transition: color .15s;
 }
-.back-link:hover { color: var(--accent); }
+.back-link:hover { color: var(--violet-ink); }
 
 /* ── Two-column grid ────────────────────────── */
 .add-grid {
@@ -29,9 +28,7 @@
 }
 
 /* ── Left — how-to instructions ─────────────── */
-.howto-header {
-  margin-bottom: 20px;
-}
+.howto-header { margin-bottom: 20px; }
 .howto-header h1 {
   font-size: 22px;
   font-weight: 700;
@@ -69,9 +66,9 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: var(--accent-dim);
-  border: 2px solid rgba(249, 115, 22, .3);
-  color: var(--accent);
+  background: var(--violet-dim);
+  border: 2px solid var(--violet-line);
+  color: var(--violet-ink);
   font-size: 13px;
   font-weight: 700;
   display: flex;
@@ -79,13 +76,14 @@
   justify-content: center;
   position: relative;
   z-index: 1;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
 }
 
-/* Last step (paste) gets filled orange */
+/* Last step (paste) — filled lime */
 .step:last-child .step-num {
   background: var(--accent);
   border-color: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 .step-body {
@@ -108,16 +106,16 @@
   line-height: 1.55;
 }
 
-/* Inline tag pill (for "Important Links") */
+/* Inline tag pill */
 .tag-pill {
   display: inline-block;
   background: var(--surface2);
   border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 1px 7px;
+  border-radius: 100px;
+  padding: 2px 10px;
   font-size: 11px;
   font-weight: 600;
-  color: var(--text-soft);
+  color: var(--violet-ink);
   font-family: var(--mono);
   white-space: nowrap;
 }
@@ -141,7 +139,7 @@
 .url-example {
   font-family: var(--mono);
   font-size: 10.5px;
-  color: var(--accent);
+  color: var(--violet-ink);
   background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -162,13 +160,14 @@
 
 /* ── Right — form card ──────────────────────── */
 .form-card {
-  background: #fff;
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 26px;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, .05);
+  box-shadow: var(--shadow-2);
   position: sticky;
-  top: calc(14px + 54px + 14px);  /* below floating pill nav */
+  top: calc(14px + 54px + 14px);
+  transition: background-color 0.25s ease, border-color 0.25s ease;
 }
 .form-card-title {
   font-size: 15px;
@@ -202,11 +201,162 @@
   justify-content: center;
 }
 
-/* Date picker icon tint to match light theme */
+/* Date picker icon tint */
 input[type="date"]::-webkit-calendar-picker-indicator {
-  opacity: .45;
+  filter: var(--date-icon-filter, invert(0.6));
   cursor: pointer;
 }
+html[data-theme="dark"] { --date-icon-filter: invert(0.8); }
+
+
+/* ── Combobox (same as setup page) ──────────── */
+.combobox { position: relative; width: 100%; }
+.combobox-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 32px 10px 12px;
+  font-size: 13px;
+  color: var(--text);
+  font-family: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s, background-color 0.25s;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%239A9A9A' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  cursor: text;
+}
+.combobox-input:focus {
+  border-color: var(--violet);
+  box-shadow: var(--ring);
+  outline: none;
+}
+.combobox-input::placeholder { color: var(--muted); opacity: 0.7; }
+
+.combobox-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-2);
+  max-height: 260px;
+  overflow-y: auto;
+  z-index: 100;
+  padding: 6px;
+  scrollbar-width: thin;
+}
+.combobox-dropdown.open { display: block; }
+
+.combobox-group-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 8px 10px 6px;
+}
+.combobox-empty {
+  padding: 10px;
+  font-size: 12px;
+  color: var(--muted);
+  font-style: italic;
+}
+.combobox-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  font-size: 13px;
+  color: var(--text);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.1s;
+  gap: 8px;
+}
+.combobox-item:hover, .combobox-item.highlighted { background: var(--surface2); }
+.combobox-item .item-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.link-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  flex-shrink: 0;
+}
+.combobox-custom {
+  color: var(--violet-ink);
+  font-weight: 500;
+  border-top: 1px dashed var(--border-strong);
+  margin-top: 6px;
+  padding-top: 10px;
+  border-radius: 0 0 6px 6px;
+}
+.combobox-custom:hover, .combobox-custom.highlighted {
+  background: var(--violet-dim);
+  color: var(--violet-hover);
+}
+
+/* URL input with status badge */
+.input-with-badge {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.input-with-badge input {
+  width: 100%;
+  padding-right: 70px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 12px;
+  font-size: 13px;
+  color: var(--text);
+  font-family: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.input-with-badge input:focus {
+  border-color: var(--violet);
+  box-shadow: var(--ring);
+  outline: none;
+}
+.input-with-badge input::placeholder { color: var(--muted); opacity: 0.7; }
+
+.url-badge {
+  position: absolute;
+  right: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--green);
+  background: var(--green-light);
+  border: 1px solid var(--green-border);
+  padding: 2px 8px;
+  border-radius: 100px;
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  letter-spacing: 0.3px;
+}
+.url-badge.visible { opacity: 1; transform: scale(1); }
+
+@keyframes highlightBg {
+  0%, 100% { background: var(--bg); }
+  50% { background: var(--accent-dim); border-color: var(--accent); }
+}
+.highlight { animation: highlightBg 0.6s ease; }
+
 
 /* ── Responsive ─────────────────────────────── */
 @media (max-width: 720px) {
@@ -281,7 +431,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
           <div class="step-num">5</div>
           <div class="step-body">
             <div class="step-title">Paste it in the form →</div>
-            <div class="step-desc">Paste the link into the <strong>Calendar Link</strong> field on the right and hit <strong>Add Subject</strong>.</div>
+            <div class="step-desc">Paste the link into the <strong>Calendar Link</strong> field on the right and hit <strong>Add Subject</strong>. If another student already added this subject, the link will auto-fill.</div>
           </div>
         </div>
 
@@ -303,39 +453,46 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     <div>
       <div class="form-card">
         <div class="form-card-title">Subject details</div>
-        <div class="form-card-sub">Give it a short name and paste the calendar link. Date filters are optional — leave blank to sync everything.</div>
+        <div class="form-card-sub">Pick a saved subject or type a new one. Calendar URLs auto-fill when already available.</div>
 
         <form method="POST" id="add-form">
 
           <div class="form-group">
             <label>Subject Name</label>
-            <input
-              type="text"
-              name="subject_name"
-              placeholder="e.g. DSA, DBMS, Maths-2"
-              required
-              autofocus
-            />
+            <div class="combobox">
+              <input
+                type="text"
+                name="subject_name"
+                class="combobox-input"
+                placeholder="Select or type subject..."
+                required
+                autocomplete="off"
+              />
+              <div class="combobox-dropdown"></div>
+            </div>
           </div>
 
           <div class="form-group">
             <label>Calendar Link</label>
-            <input
-              type="url"
-              name="calendar_url"
-              placeholder="Paste the Google Calendar link here"
-              required
-            />
+            <div class="input-with-badge">
+              <input
+                type="url"
+                name="calendar_url"
+                placeholder="Paste the Google Calendar link here"
+                required
+              />
+              <span class="url-badge">✓ Auto</span>
+            </div>
           </div>
 
           <div class="date-row">
             <div class="form-group" style="margin-bottom:0">
-              <label>From date <span style="color:var(--border);font-weight:400">(optional)</span></label>
-              <input type="date" name="filter_start" />
+              <label>From date <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+              <input type="date" name="filter_start" value="2026-06-16" />
             </div>
             <div class="form-group" style="margin-bottom:0">
-              <label>Until date <span style="color:var(--border);font-weight:400">(optional)</span></label>
-              <input type="date" name="filter_end" />
+              <label>Until date <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+              <input type="date" name="filter_end" value="2026-09-30" />
             </div>
           </div>
 
@@ -356,10 +513,221 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 {% block scripts %}
 <script>
+// ── State ───────────────────────────────────────────────
+let SUBJECTS = [];
+let SUBJECT_MAP = {};
+
+// ── Helpers ─────────────────────────────────────────────
+function esc(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// ── Fetch ───────────────────────────────────────────────
+async function fetchSubjects() {
+  try {
+    const res = await fetch('/api/dropdown-subjects');
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && Array.isArray(data.subjects)) {
+        processSubjects(data.subjects);
+      }
+    }
+  } catch (err) {
+    console.warn('Could not fetch subjects from API.', err);
+  }
+}
+
+function processSubjects(apiSubjects) {
+  SUBJECT_MAP = {};
+  const seen = new Set();
+  const list = [];
+  (apiSubjects || []).forEach(s => {
+    const name = (s.name || '').trim();
+    if (!name) return;
+    const key = name.toLowerCase();
+    if (seen.has(key)) {
+      if (!SUBJECT_MAP[name] && s.calendar_url) SUBJECT_MAP[name] = s.calendar_url;
+      return;
+    }
+    seen.add(key);
+    SUBJECT_MAP[name] = s.calendar_url || '';
+    list.push(name);
+  });
+  list.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base', numeric: true }));
+  SUBJECTS = list;
+}
+
+// ── Combobox ────────────────────────────────────────────
+function initCombobox() {
+  const row = document.querySelector('.form-card');
+  const input = row.querySelector('.combobox-input');
+  const dropdown = row.querySelector('.combobox-dropdown');
+  const urlInput = row.querySelector('input[name="calendar_url"]');
+  const urlBadge = row.querySelector('.url-badge');
+
+  let activeIdx = -1;
+
+  function render(filter = '') {
+    const q = filter.toLowerCase().trim();
+    const matches = SUBJECTS.filter(n => !q || n.toLowerCase().includes(q));
+    let html = '';
+    if (matches.length) {
+      html += `<div class="combobox-group-label">Subjects</div>`;
+      matches.forEach(name => {
+        const hasUrl = !!SUBJECT_MAP[name];
+        html += `
+          <div class="combobox-item" data-value="${esc(name)}">
+            <span class="item-name">${esc(name)}</span>
+            ${hasUrl ? '<span class="link-dot" title="Calendar link available"></span>' : ''}
+          </div>
+        `;
+      });
+    } else {
+      html += `<div class="combobox-empty">${q ? 'No matching saved subjects' : 'No subjects saved yet'}</div>`;
+    }
+    const typed = filter.trim();
+    const exact = SUBJECTS.some(n => n.toLowerCase() === typed.toLowerCase());
+    if (typed && !exact) {
+      html += `
+        <div class="combobox-item combobox-custom" data-action="accept" data-value="${esc(typed)}">
+          + Add absent subject: "${esc(typed)}"
+        </div>
+      `;
+    } else {
+      html += `
+        <div class="combobox-item combobox-custom" data-action="type">
+          + Add absent subject…
+        </div>
+      `;
+    }
+    dropdown.innerHTML = html;
+    activeIdx = -1;
+    dropdown.querySelectorAll('.combobox-item').forEach(el => {
+      el.addEventListener('mousedown', e => {
+        e.preventDefault();
+        activateItem(el);
+      });
+    });
+  }
+
+  function activateItem(el) {
+    if (el.dataset.action === 'type') {
+      input.value = '';
+      input.placeholder = 'Type new subject name…';
+      input.focus();
+      render('');
+      return;
+    }
+    selectItem(el.dataset.value);
+  }
+
+  function selectItem(value) {
+    input.value = value;
+    input.placeholder = 'Select or type subject...';
+    dropdown.classList.remove('open');
+    updateUrlStatus(value);
+  }
+
+  function updateUrlStatus(subjectName) {
+    const knownUrl = SUBJECT_MAP[subjectName];
+    if (knownUrl) {
+      if (!urlInput.value) {
+        urlInput.value = knownUrl;
+        urlInput.classList.add('highlight');
+        setTimeout(() => urlInput.classList.remove('highlight'), 600);
+      }
+      if (urlBadge) urlBadge.classList.add('visible');
+    } else {
+      if (urlBadge) urlBadge.classList.remove('visible');
+    }
+  }
+
+  function getItems() {
+    return dropdown.querySelectorAll('.combobox-item');
+  }
+
+  function updateActiveItem() {
+    const items = getItems();
+    items.forEach((el, idx) => {
+      el.classList.toggle('highlighted', idx === activeIdx);
+      if (idx === activeIdx) el.scrollIntoView({ block: 'nearest' });
+    });
+  }
+
+  function openDropdown() {
+    if (!dropdown.classList.contains('open')) {
+      render(input.value);
+      dropdown.classList.add('open');
+    }
+  }
+
+  input.addEventListener('focus', openDropdown);
+  input.addEventListener('click', openDropdown);
+
+  input.addEventListener('blur', () => {
+    setTimeout(() => {
+      if (!row.contains(document.activeElement)) {
+        dropdown.classList.remove('open');
+        updateUrlStatus(input.value);
+      }
+    }, 150);
+  });
+
+  input.addEventListener('input', () => {
+    render(input.value);
+    dropdown.classList.add('open');
+    if (urlBadge) urlBadge.classList.remove('visible');
+  });
+
+  input.addEventListener('keydown', e => {
+    const items = getItems();
+    if (!dropdown.classList.contains('open')) {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') openDropdown();
+      return;
+    }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      activeIdx = Math.min(activeIdx + 1, items.length - 1);
+      updateActiveItem();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      activeIdx = Math.max(activeIdx - 1, 0);
+      updateActiveItem();
+    } else if (e.key === 'Enter') {
+      const typed = input.value.trim();
+      const exact = SUBJECTS.some(n => n.toLowerCase() === typed.toLowerCase());
+      if (activeIdx >= 0 && items[activeIdx]) {
+        e.preventDefault();
+        activateItem(items[activeIdx]);
+      } else if (typed && !exact) {
+        e.preventDefault();
+        selectItem(typed);
+      } else if (typed && exact) {
+        e.preventDefault();
+        selectItem(SUBJECTS.find(n => n.toLowerCase() === typed.toLowerCase()));
+      }
+    } else if (e.key === 'Escape') {
+      dropdown.classList.remove('open');
+    }
+  });
+}
+
+// ── Submit handler ──────────────────────────────────────
 document.getElementById('add-form').addEventListener('submit', function () {
   const btn = document.getElementById('add-btn');
   btn.innerHTML = '<span class="spinner"></span> Syncing…';
   btn.disabled = true;
+});
+
+// ── Init ────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  processSubjects([]);
+  initCombobox();
+  fetchSubjects();
 });
 </script>
 {% endblock %}

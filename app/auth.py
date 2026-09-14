@@ -95,6 +95,10 @@ def login():
     if current_user.is_authenticated:
         return redirect(url_for('main.dashboard'))
 
+    # Flash a message if they were redirected here from a protected page
+    if request.args.get('next') and request.method == 'GET':
+        flash('Please sign in to continue.', 'warning')
+
     if request.method == 'POST':
         email = request.form.get('email', '').strip().lower()
         password = request.form.get('password', '')
@@ -109,8 +113,9 @@ def login():
 
     return render_template('auth.html', mode='login')
 
-@auth_bp.route('/logout')
+@auth_bp.route('/logout', methods=['POST'])
 @login_required
 def logout():
     session.clear()
+    flash('Signed out successfully.', 'success')
     return redirect(url_for('auth.login'))

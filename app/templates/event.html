@@ -1,8 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ ev.calendar_title }} – IITM Lecture Tracker{% endblock %}
 
-{# embed_url is passed from Python — covers both Drive and YouTube. #}
-
 {% block extra_styles %}
 /* ── Header ───────────────────────────────────── */
 .event-header {
@@ -16,20 +14,22 @@
 .event-breadcrumb {
   font-size: 12px;
   color: var(--muted);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 .event-breadcrumb a {
   color: var(--muted);
   text-decoration: none;
   transition: color 0.15s;
 }
-.event-breadcrumb a:hover { color: var(--accent); }
+.event-breadcrumb a:hover { color: var(--violet-ink); }
+
 .event-title {
   font-size: clamp(18px, 4vw, 24px);
   font-weight: 700;
   letter-spacing: -0.4px;
   margin-bottom: 6px;
   color: var(--text);
+  line-height: 1.25;
 }
 .event-meta {
   font-size: 12px;
@@ -47,12 +47,14 @@
   flex-wrap: wrap;
   margin-top: 4px;
 }
+
+/* ── Watch toggle ─────────────────────────────── */
 .watch-toggle-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 7px 14px;
-  border-radius: 20px;
+  border-radius: 100px;
   border: 1px solid var(--border);
   background: var(--surface2);
   color: var(--text-soft);
@@ -63,28 +65,28 @@
   transition: border-color 0.15s, background 0.15s, color 0.15s;
 }
 .watch-toggle-btn.done {
-  border-color: var(--green);
-  background: rgba(52,199,89,.12);
+  border-color: var(--green-border);
+  background: var(--green-light);
   color: var(--green);
 }
-.watch-toggle-btn:hover { border-color: var(--accent); color: var(--accent); }
+.watch-toggle-btn:hover { border-color: var(--violet-line); color: var(--violet-ink); }
 .watch-toggle-btn.done:hover {
-  border-color: var(--red); color: var(--red);
-  background: rgba(255,59,48,.08);
+  border-color: var(--red-border); color: var(--red);
+  background: var(--red-bg);
 }
 
 /* ── Event Links ──────────────────────────────── */
 .event-links { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
 .link-badge {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 4px 12px; border-radius: 20px;
-  font-size: 12px; font-weight: 500;
-  text-decoration: none; transition: opacity 0.15s;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px; border-radius: 100px;
+  font-size: 12px; font-weight: 600;
+  text-decoration: none; transition: opacity 0.15s, transform 0.1s;
 }
-.link-badge:hover { opacity: 0.8; }
-.link-meet  { background: var(--accent-dim);   color: var(--accent2); border: 1px solid var(--accent2); }
-.link-drive { background: rgba(52,199,89,.12); color: var(--green);   border: 1px solid var(--green);   }
-.link-yt    { background: rgba(255,48,48,.08); color: #e02020;        border: 1px solid #e02020;        }
+.link-badge:hover { opacity: 0.85; transform: translateY(-1px); }
+.link-meet  { background: var(--violet-dim); color: var(--violet-ink); border: 1px solid var(--violet-line); }
+.link-drive { background: var(--green-light); color: var(--green); border: 1px solid var(--green-border); }
+.link-yt    { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
 
 /* ── Layout ───────────────────────────────────── */
 .event-layout { display: flex; gap: 20px; align-items: flex-start; }
@@ -116,9 +118,11 @@
   align-items: center; justify-content: center;
   gap: 10px; padding: 24px;
   text-align: center; color: var(--muted);
-  background: var(--bg); font-size: 13px;
+  background: var(--surface); font-size: 13px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
 }
-.video-empty .icon { font-size: 34px; margin-bottom: 4px; }
+.video-empty .icon { font-size: 34px; margin-bottom: 4px; opacity: 0.6; }
 .video-empty .btn  { margin-top: 10px; }
 
 /* ── Loading overlay ──────────────────────────── */
@@ -130,21 +134,12 @@
   transition: opacity 0.3s ease; pointer-events: none;
 }
 .video-loader.hidden { opacity: 0; }
-.spinner {
-  width: 32px; height: 32px;
-  border: 3px solid rgba(255,255,255,.12);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin 0.75s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
 .video-loader-text { font-size: 12px; color: rgba(255,255,255,.4); font-family: var(--mono); }
 
-```css
+
 /* ═══════════════════════════════════════════════
    Notes — rich markdown editor
 ═══════════════════════════════════════════════ */
-
 .notes-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -154,16 +149,15 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  transition: background-color 0.25s ease, border-color 0.25s ease;
 }
 
-/* Card header */
 .notes-card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 14px 16px 0;
 }
-
 .notes-card-header h3 {
   font-size: 12px;
   font-weight: 600;
@@ -173,7 +167,7 @@
   margin: 0;
 }
 
-/* Toolbar */
+/* ── Toolbar ────────────────────────────────── */
 .notes-toolbar {
   display: flex;
   align-items: center;
@@ -186,7 +180,6 @@
   flex-wrap: wrap;
   row-gap: 3px;
 }
-
 .tb-btn {
   display: inline-flex;
   align-items: center;
@@ -208,25 +201,21 @@
   line-height: 1;
   flex-shrink: 0;
 }
-
 .tb-btn:hover {
   background: var(--surface);
   border-color: var(--border);
   color: var(--text);
 }
-
 .tb-btn.tb-on {
-  background: var(--accent-dim);
-  border-color: var(--accent);
-  color: var(--accent);
+  background: var(--violet-dim);
+  border-color: var(--violet-line);
+  color: var(--violet-ink);
 }
-
 .tb-italic {
   font-style: italic;
   font-family: inherit;
   font-size: 12.5px;
 }
-
 .tb-sep {
   width: 1px;
   height: 14px;
@@ -235,12 +224,10 @@
   flex-shrink: 0;
   align-self: center;
 }
-
 .tb-spacer {
   flex: 1;
   min-width: 2px;
 }
-
 .tb-pdf {
   font-family: inherit;
   font-size: 11px;
@@ -251,28 +238,17 @@
   min-width: unset;
   gap: 3px;
 }
-
 .tb-pdf:hover {
-  color: var(--accent);
-  background: var(--accent-dim);
-  border-color: var(--accent);
+  color: var(--violet-ink);
+  background: var(--violet-dim);
+  border-color: var(--violet-line);
 }
-
-.tb-pdf svg {
-  flex-shrink: 0;
-}
+.tb-pdf svg { flex-shrink: 0; }
 
 
 /* ═══════════════════════════════════════════════
    Editor / Preview
 ═══════════════════════════════════════════════ */
-
-/*
-   IMPORTANT:
-   Keep the notes body at a fixed height.
-   Both textarea and preview fill this exact space.
-   This prevents Preview from expanding the card.
-*/
 .notes-body {
   padding: 8px 14px 2px;
   height: 300px;
@@ -280,76 +256,52 @@
   overflow: hidden;
 }
 
-/* Markdown editor */
 #notes-textarea {
   display: block;
   width: 100%;
   height: 100%;
   min-height: 0;
-
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-
   color: var(--text);
   padding: 12px;
-
   font-size: 13px;
   font-family: var(--mono);
   line-height: 1.65;
-
   resize: none;
   outline: none;
-
-  transition:
-    border-color .15s,
-    box-shadow .15s;
-
+  transition: border-color .15s, box-shadow .15s, background-color .25s;
   box-sizing: border-box;
   tab-size: 2;
-
-  /* Long notes scroll inside the editor */
   overflow-y: auto;
 }
-
 #notes-textarea:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-dim);
+  border-color: var(--violet);
+  box-shadow: var(--ring);
 }
-
 
 /* Markdown preview */
 .notes-preview {
   display: none;
-
   width: 100%;
   height: 100%;
   min-height: 0;
   max-height: none;
-
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-
   padding: 14px 16px;
-
   font-size: 14px;
   line-height: 1.7;
-
   color: var(--text);
-
   box-sizing: border-box;
   word-break: break-word;
-
-  /* Long preview scrolls instead of expanding */
   overflow-y: auto;
   overflow-x: hidden;
+  transition: background-color .25s ease;
 }
-
-.notes-preview.visible {
-  display: block;
-}
-
+.notes-preview.visible { display: block; }
 
 /* Preview content */
 .notes-preview h1,
@@ -360,55 +312,33 @@
   color: var(--text);
   margin: 1em 0 0.35em;
 }
-
-.notes-preview h1 {
-  font-size: 1.35em;
-}
-
+.notes-preview h1 { font-size: 1.35em; }
 .notes-preview h2 {
   font-size: 1.15em;
   border-bottom: 1px solid var(--border);
   padding-bottom: .2em;
 }
-
-.notes-preview h3 {
-  font-size: 1.0em;
-}
-
+.notes-preview h3 { font-size: 1.0em; }
 .notes-preview h1:first-child,
 .notes-preview h2:first-child,
-.notes-preview h3:first-child {
-  margin-top: 0;
-}
-
-.notes-preview p {
-  margin: 0 0 .75em;
-}
-
+.notes-preview h3:first-child { margin-top: 0; }
+.notes-preview p { margin: 0 0 .75em; }
 .notes-preview a {
-  color: var(--accent2);
+  color: var(--violet-ink);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
-
-.notes-preview strong {
-  font-weight: 700;
-}
-
-.notes-preview em {
-  font-style: italic;
-}
-
+.notes-preview strong { font-weight: 700; color: var(--text); }
+.notes-preview em { font-style: italic; }
 .notes-preview code {
   font-family: var(--mono);
   background: var(--surface2);
   border: 1px solid var(--border);
   padding: 1px 5px;
-  border-radius: 3px;
+  border-radius: 4px;
   font-size: .86em;
-  color: var(--accent2);
+  color: var(--violet-ink);
 }
-
 .notes-preview pre {
   background: var(--surface2);
   border: 1px solid var(--border);
@@ -418,7 +348,6 @@
   margin: .75em 0;
   position: relative;
 }
-
 .notes-preview pre code {
   background: none;
   border: none;
@@ -426,71 +355,55 @@
   color: inherit;
   font-size: 12.5px;
 }
-
 .notes-preview blockquote {
-  border-left: 3px solid var(--accent);
+  border-left: 3px solid var(--violet);
   margin: .75em 0;
   padding: 4px 14px;
   color: var(--muted);
   font-style: italic;
 }
-
 .notes-preview ul,
-.notes-preview ol {
-  padding-left: 22px;
-  margin: .5em 0;
-}
-
-.notes-preview li {
-  margin: .2em 0;
-}
-
+.notes-preview ol { padding-left: 22px; margin: .5em 0; }
+.notes-preview li { margin: .2em 0; }
 .notes-preview hr {
   border: none;
   border-top: 1px solid var(--border);
   margin: 1.1em 0;
 }
-
 .notes-preview table {
   border-collapse: collapse;
   width: 100%;
   margin: .75em 0;
   font-size: 13px;
 }
-
 .notes-preview th,
 .notes-preview td {
   border: 1px solid var(--border);
   padding: 5px 10px;
   text-align: left;
 }
-
 .notes-preview th {
   background: var(--surface2);
   font-weight: 600;
 }
-
 .notes-preview img {
   max-width: 100%;
   border-radius: var(--radius-sm);
 }
-
 .notes-preview .math-block {
   text-align: center;
   overflow-x: auto;
   margin: .85em 0;
   padding: 8px 0;
 }
-
 .notes-preview .math-error {
-  color: var(--red, #ff3b30);
+  color: var(--red);
   font-family: var(--mono);
   font-size: .88em;
-  background: rgba(255,59,48,.08);
+  background: var(--red-bg);
   padding: 2px 6px;
   border-radius: 3px;
 }
-
 .notes-preview-empty {
   color: var(--muted);
   font-style: italic;
@@ -503,7 +416,6 @@
 /* ═══════════════════════════════════════════════
    Footer
 ═══════════════════════════════════════════════ */
-
 .notes-footer {
   display: flex;
   align-items: center;
@@ -512,79 +424,58 @@
   flex-wrap: wrap;
   gap: 6px;
 }
-
 #notes-status {
   font-size: 11px;
   color: var(--muted);
 }
 
-.notes-footer .btn-primary {
-  background: var(--accent);
-  color: #0B0B0E;
-}
+/* Mobile-only watch button — hidden on desktop.
+   Two-class selector outranks .watch-toggle-btn's display:inline-flex. */
+.notes-footer .mobile-watch-btn { display: none; }
 
-.notes-footer .btn-primary:hover {
-  box-shadow: 0 0 18px var(--accent-glow);
-}
+/* Mobile tabs (hidden on desktop) */
+.mobile-tabs { display: none; }
 
 
 /* ═══════════════════════════════════════════════
-   Mobile
+   Mobile  (≤900px) — stacked app-like layout
 ═══════════════════════════════════════════════ */
-
 @media (max-width: 900px) {
+  /* Hide breadcrumb + desktop watch toggle; stack header */
+  .event-breadcrumb { display: none; }
+  .event-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .event-header-actions { display: none; }
+  .event-title { font-size: 20px; }
+  .event-meta { font-size: 11px; gap: 10px; }
 
+  /* Stack panes vertically */
   .event-layout {
     flex-direction: column;
     gap: 0;
   }
-
   .video-pane,
   .notes-pane {
     flex: 1 1 auto;
     width: 100%;
   }
 
-  .notes-pane {
-    display: none;
+  /* Single Notes tab under the video (tap to collapse/expand) */
+  .mobile-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    margin: 14px 0 12px;
   }
-
-  .notes-pane.active {
-    display: block;
-  }
-
-  .notes-card {
-    position: static;
-    border-radius: 0 0 var(--radius) var(--radius);
-    border-top: none;
-    overflow: hidden;
-  }
-
-  /*
-     Smaller fixed editor on mobile.
-     Preview and textarea remain exactly
-     the same height.
-  */
-  .notes-body {
-    height: 320px;
-    padding: 6px 10px 2px;
-    box-sizing: border-box;
-    overflow: hidden;
-  }
-
-  #notes-textarea,
-  .notes-preview {
-    width: 100%;
-    height: 100%;
-    min-height: 0;
-    max-height: none;
-  }
-
   .mobile-tab {
     flex: 1;
-    padding: 10px;
+    padding: 11px;
     font-size: 13px;
-    font-weight: 500;
+    font-weight: 600;
     text-align: center;
     cursor: pointer;
     color: var(--muted);
@@ -595,70 +486,72 @@
     transition: color .15s, border-color .15s;
     -webkit-tap-highlight-color: transparent;
   }
-
   .mobile-tab.active {
     color: var(--accent);
     border-bottom-color: var(--accent);
   }
 
-  .notes-toolbar {
-    flex-wrap: wrap;
+  /* Tab-controlled notes pane */
+  .notes-pane { display: none; }
+  .notes-pane.active { display: block; }
+
+  .notes-card {
+    position: static;
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .notes-body {
+    height: 320px;
+    padding: 6px 10px 2px;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+  #notes-textarea,
+  .notes-preview {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    max-height: none;
+  }
+  .notes-toolbar { flex-wrap: wrap; }
+
+  /* Footer becomes a vertical action stack: status → Save → Watch */
+  .notes-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 12px 14px 14px;
+  }
+  #notes-status {
+    order: -1;
+    text-align: center;
+  }
+  .notes-footer .btn-primary {
+    width: 100%;
+    justify-content: center;
+    padding: 12px;
+    font-size: 14px;
+  }
+  .notes-footer .mobile-watch-btn {
+    display: inline-flex;
+    width: 100%;
+    justify-content: center;
+    padding: 12px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 600;
   }
 }
-
-
-/* Mobile tabs */
-.mobile-tabs {
-  display: none;
-}
-
-@media (max-width: 900px) {
-  .mobile-tabs {
-    display: flex;
-  }
-}
-
 
 /* Small phones */
 @media (max-width: 600px) {
-
-  .event-header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .event-header-actions {
-    justify-content: flex-start;
-    width: 100%;
-  }
-
-  .watch-toggle-btn {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .event-meta {
-    font-size: 11px;
-    gap: 8px;
-  }
-
-  .video-pane {
-    width: 100%;
-  }
-
-  .notes-card-header {
-    padding: 12px 14px 0;
-  }
-
+  .event-meta { font-size: 10.5px; gap: 8px; }
+  .video-pane { width: 100%; }
+  .notes-card-header { padding: 12px 14px 0; }
   .notes-body {
     height: 300px;
     padding: 6px 10px 2px;
   }
-
-  .notes-footer {
-    padding: 6px 12px 12px;
-  }
-
   .tb-btn {
     min-width: 24px;
     height: 22px;
@@ -674,7 +567,7 @@
 
 <div class="event-header">
   <div style="flex:1; min-width:0;">
-    <div class="event-title">{{ ev.calendar_title }}</div>
+    <h1 class="event-title">{{ ev.calendar_title }}</h1>
     <div class="event-meta">
       {% if ev.date %}
         <span>📅 {{ ev.date.strftime('%a, %d %b %Y') }}</span>
@@ -694,10 +587,10 @@
     </div>
   </div>
   <div class="event-header-actions">
-    <button class="watch-toggle-btn {% if ev.watched %}done{% endif %}"
-            id="watch-toggle" onclick="toggleWatch()">
-      <span id="watch-icon">{% if ev.watched %}✓{% else %}○{% endif %}</span>
-      <span id="watch-label">{% if ev.watched %}Watched{% else %}Mark as watched{% endif %}</span>
+    <button class="watch-toggle-btn js-watch-btn {% if ev.watched %}done{% endif %}"
+            onclick="toggleWatch()">
+      <span class="js-watch-icon">{% if ev.watched %}✓{% else %}○{% endif %}</span>
+      <span class="js-watch-label">{% if ev.watched %}Watched{% else %}Mark as watched{% endif %}</span>
     </button>
   </div>
 </div>
@@ -739,13 +632,13 @@
     </div>
   </div>
 
-  <!-- Mobile tab bar -->
+  <!-- Mobile tab bar: single Notes tab (tap to collapse/expand) -->
   <div class="mobile-tabs" id="mobile-tabs">
-    <button class="mobile-tab" id="tab-notes" onclick="showTab('notes')">📝 Notes</button>
+    <button class="mobile-tab active" id="tab-notes" onclick="showTab()">Notes</button>
   </div>
 
   <!-- Notes Pane -->
-  <div class="notes-pane" id="notes-pane">
+  <div class="notes-pane active" id="notes-pane">
     <div class="notes-card">
 
       <div class="notes-card-header">
@@ -797,7 +690,12 @@
 
       <div class="notes-footer">
         <span id="notes-status"></span>
-        <button class="btn btn-primary btn-sm" onclick="saveNotes()">Save</button>
+        <button class="btn btn-primary btn-sm" onclick="saveNotes()">Save Notes</button>
+        <button class="watch-toggle-btn mobile-watch-btn js-watch-btn {% if ev.watched %}done{% endif %}"
+                onclick="toggleWatch()">
+          <span class="js-watch-icon">{% if ev.watched %}✓{% else %}○{% endif %}</span>
+          <span class="js-watch-label">{% if ev.watched %}Watched{% else %}Mark as watched{% endif %}</span>
+        </button>
       </div>
 
     </div>
@@ -827,8 +725,15 @@ function loadScript(src) {
     document.head.appendChild(s);
   });
 }
+
+function getHljsTheme() {
+  var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+  return dark
+    ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css'
+    : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
+}
 loadCSS('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css');
-loadCSS('https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css');
+loadCSS(getHljsTheme());
 
 let mdReady = false;
 (async () => {
@@ -923,19 +828,16 @@ document.getElementById('notes-textarea').addEventListener('input', () => {
 });
 
 /* ─────────────────────────────────────────────────
-   Watch toggle
+   Watch toggle (updates every instance: header + mobile footer)
 ───────────────────────────────────────────────── */
 async function toggleWatch() {
   const res  = await fetch(`/event/${EVENT_ID}/watched`, { method: 'POST' });
   const data = await res.json();
-  const btn  = document.getElementById('watch-toggle');
-  const icon = document.getElementById('watch-icon');
-  const lbl  = document.getElementById('watch-label');
-  if (data.watched) {
-    btn.classList.add('done'); icon.textContent = '✓'; lbl.textContent = 'Watched';
-  } else {
-    btn.classList.remove('done'); icon.textContent = '○'; lbl.textContent = 'Mark as watched';
-  }
+  const watched = !!data.watched;
+
+  document.querySelectorAll('.js-watch-btn').forEach(b => b.classList.toggle('done', watched));
+  document.querySelectorAll('.js-watch-icon').forEach(i => i.textContent = watched ? '✓' : '○');
+  document.querySelectorAll('.js-watch-label').forEach(l => l.textContent = watched ? 'Watched' : 'Mark as watched');
 }
 
 /* ─────────────────────────────────────────────────
@@ -1115,21 +1017,14 @@ function onVideoLoaded() {
 }
 
 /* ─────────────────────────────────────────────────
-   Mobile tabs
+   Mobile Notes tab: tap to collapse / expand editor
 ───────────────────────────────────────────────── */
-function showTab(tab) {
-  const pane = document.getElementById('notes-pane');
-  const btn  = document.getElementById('tab-notes');
-  if (tab !== 'notes') return;
-  const open = pane.classList.contains('active');
-  if (open) { pane.classList.remove('active'); btn.classList.remove('active'); }
-  else       { pane.classList.add('active');    btn.classList.add('active');
-    setTimeout(() => pane.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50); }
+function showTab() {
+  const notesPane = document.getElementById('notes-pane');
+  const tNotes    = document.getElementById('tab-notes');
+  const open = notesPane.classList.contains('active');
+  notesPane.classList.toggle('active', !open);
+  tNotes.classList.toggle('active', !open);
 }
-function syncLayout() {
-  if (window.innerWidth > 900) document.getElementById('notes-pane').classList.add('active');
-}
-syncLayout();
-window.addEventListener('resize', syncLayout);
 </script>
 {% endblock %}

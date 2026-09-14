@@ -36,7 +36,7 @@ def youtube_embed_url(raw_url: str) -> str:
     except Exception:
         return ''
 
-@main_bp.route('/')
+@main_bp.route('/login')
 def index():
     if current_user.is_authenticated:
         return redirect(url_for('main.dashboard'))
