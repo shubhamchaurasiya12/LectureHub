@@ -1,5 +1,4 @@
-# D:\iitm_scheduler\app\main.py
-from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify
+from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify, send_from_directory, current_app
 from datetime import datetime
 import pytz
 from app.extensions import db
@@ -35,6 +34,61 @@ def youtube_embed_url(raw_url: str) -> str:
         return f'https://www.youtube.com/embed/{vid}' if vid else ''
     except Exception:
         return ''
+
+
+@main_bp.route('/')
+def landing():
+    """Public landing page. Logged-in users go straight to dashboard."""
+    if current_user.is_authenticated:
+        return redirect(url_for('main.dashboard'))
+    return render_template('landing.html')
+
+
+@main_bp.route('/robots.txt')
+def robots():
+    """Allow crawlers, block private routes, point to sitemap."""
+    body = (
+        "User-agent: *\n"
+        "Allow: /\n"
+        "Disallow: /dashboard\n"
+        "Disallow: /event/\n"
+        "Disallow: /setup\n"
+        "Disallow: /add-subject\n"
+        "Disallow: /sync\n"
+        "Disallow: /sync_all\n"
+        "Disallow: /delete_subject\n"
+        "\n"
+        "Sitemap: https://lecflow.space/sitemap.xml\n"
+    )
+    return body, 200, {'Content-Type': 'text/plain; charset=utf-8'}
+
+
+@main_bp.route('/sitemap.xml')
+def sitemap():
+    """Simple sitemap for public pages."""
+    body = '''<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://lecflow.space/</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://lecflow.space/login</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://lecflow.space/register</loc>
+    <lastmod>2026-01-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+</urlset>'''
+    return body, 200, {'Content-Type': 'application/xml; charset=utf-8'}
+
 
 @main_bp.route('/login')
 def index():
