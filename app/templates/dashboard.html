@@ -742,14 +742,12 @@ tr.watched-row td { opacity: .6; }
 
   <!-- Sync button: same shape as a tab, green variant -->
   <button
-    class="tab-btn"
-    id="tab-btn"
+    class="tab-btn sync-btn"
     onclick="syncAll(this)"
     title="Sync all subjects"
-    style="background-color: #68cf1e; color: #000;"
   >
-    <span class="tab-name"><span class="sync-icon"></span> Sync</span>
-    <span class="tab-name">All</span>
+    <span class="tab-name"><span class="sync-icon">↻</span> Sync</span>
+    <span class="tab-count"></span>
   </button>
 </div>
 
@@ -1114,33 +1112,59 @@ async function toggleWatch(id) {
 
 
 /* =========================================================
-   SYNC ALL
+   SYNC ALL (with live status messages - 1.5s rotation)
 ========================================================= */
 async function syncAll(btn) {
   const icon     = btn.querySelector('.sync-icon');
   const nameEl   = btn.querySelector('.tab-name');
   const countEl  = btn.querySelector('.tab-count');
-  const origName = nameEl.textContent;
-  const origCount = countEl.textContent;
-
+  
+  // Collect all subject names from the tabs
+  const subjectTabs = document.querySelectorAll('.tabs .tab-btn .tab-name');
+  const subjects = Array.from(subjectTabs).map(el => el.textContent.trim()).filter(Boolean);
+  
   btn.disabled = true;
   icon.classList.add('spinning');
   countEl.textContent = '…';
+  
+  // Status message rotation
+  let msgIndex = 0;
+  const messages = [
+    'Connecting…',
+    'Fetching calendars…',
+    ...subjects.map(s => `Syncing ${s}…`),
+    'Processing events…',
+    'Updating links…',
+    'Finalizing…'
+  ];
+  
+  // Rotates every 1.5 seconds (1500ms)
+  const statusTimer = setInterval(() => {
+    countEl.textContent = messages[msgIndex % messages.length];
+    msgIndex++;
+  }, 1500);
 
   try {
     const res  = await fetch('/sync_all', { method: 'POST' });
     const data = await res.json();
+    
+    clearInterval(statusTimer);
+    
     const ok   = data.results.filter(r => r.ok).length;
     countEl.textContent = `${ok}/${data.results.length}`;
+    
     setTimeout(() => location.reload(), 900);
   } catch {
+    clearInterval(statusTimer);
     countEl.textContent = '✕';
     icon.classList.remove('spinning');
+    
+    // Reset button after 1.5 seconds on error
     setTimeout(() => {
       nameEl.innerHTML = `<span class="sync-icon">↻</span> Sync`;
-      countEl.textContent = origCount;
+      countEl.textContent = 'All';
       btn.disabled = false;
-    }, 1200);
+    }, 1500);
   }
 }
 </script>
