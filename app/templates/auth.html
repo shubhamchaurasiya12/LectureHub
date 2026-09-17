@@ -27,6 +27,26 @@
   margin-bottom: 28px;
 }
 
+/* ── Theme-aware auth logo (larger than nav) ── */
+.auth-logo-imgs {
+  margin-bottom: 14px;
+  display: inline-block;
+}
+.auth-logo-img {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  box-shadow: var(--shadow-2);
+  object-fit: cover;
+  transition: box-shadow 0.25s ease, transform 0.2s ease;
+}
+.auth-logo-img:hover {
+  transform: scale(1.03);
+}
+/* Theme-aware swap — same rules as base.html */
+html[data-theme="dark"] .auth-logo-img.logo-light { display: none; }
+html:not([data-theme="dark"]) .auth-logo-img.logo-dark { display: none; }
+
 .auth-logo h1 {
   font-size: 22px;
   font-weight: 700;
@@ -85,13 +105,28 @@
   font-size: 14px;
   font-weight: 600;
 }
+
+/* Mobile tweaks */
+@media (max-width: 480px) {
+  .auth-card { padding: 32px 24px; }
+  .auth-logo-img { width: 56px; height: 56px; border-radius: 14px; }
+}
 {% endblock %}
 
 {% block content %}
 <div class="auth-wrap">
   <div class="auth-card">
     <div class="auth-logo">
-      <div class="iitm-badge">IIT Madras · BS Data Science</div>
+      <!-- Theme-aware logo: larger display for the auth page hero -->
+      <div class="auth-logo-imgs">
+        <img class="auth-logo-img logo-light"
+             src="{{ url_for('static', filename='images/light.png') }}"
+             alt="LECFLOW logo" />
+        <img class="auth-logo-img logo-dark"
+             src="{{ url_for('static', filename='images/dark.png') }}"
+             alt="LECFLOW logo" />
+      </div>
+
       <h1>{% if mode == 'login' %}Welcome back{% else %}Create account{% endif %}</h1>
       <p>{% if mode == 'login' %}Sign in to your lecture tracker{% else %}Track your IITM live sessions{% endif %}</p>
     </div>

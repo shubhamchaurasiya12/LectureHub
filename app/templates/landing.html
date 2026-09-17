@@ -7,6 +7,8 @@
   <!-- PRIMARY SEO -->
   <title>LECFLOW – IITM BS Lecture Tracker: Live Sessions, Recordings & Notes</title>
   <meta name="description" content="Track IITM BS lectures from public course calendars: join live sessions, open recordings, and take Markdown notes with math support — free, in one clean dashboard." />
+  <meta name="keywords" content="IIT Madras BS, lecture tracker, course calendar, live sessions, recordings, student notes, IITM BS Data Science" />
+  <meta name="author" content="LECFLOW" />
   <meta name="robots" content="index, follow, max-image-preview:large" />
   <link rel="canonical" href="https://lecflow.space/" />
 
@@ -17,6 +19,9 @@
   <meta name="color-scheme" content="light dark" />
   <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)" />
   <meta name="theme-color" content="#101010" media="(prefers-color-scheme: dark)" />
+
+  <!-- FAVICON -->
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/light_title.png') }}" />
 
   <!-- OPEN GRAPH -->
   <meta property="og:type" content="website" />
@@ -73,7 +78,9 @@
           "Markdown notes with KaTeX math and PDF export",
           "Watched-progress tracking per subject",
           "Term-wise recording archive",
-          "Mobile-first design with dark mode"
+          "Mobile-first design with dark mode",
+          "Autosave notes every 1.2 seconds",
+          "Keyboard shortcuts for power users"
         ]
       },
       {
@@ -103,6 +110,21 @@
             "@type": "Question",
             "name": "Is LECFLOW affiliated with IIT Madras?",
             "acceptedAnswer": { "@type": "Answer", "text": "No. LECFLOW is an independent student-built tool and is not officially affiliated with or endorsed by IIT Madras." }
+          },
+          {
+            "@type": "Question",
+            "name": "How often does LECFLOW sync my calendars?",
+            "acceptedAnswer": { "@type": "Answer", "text": "You can sync manually anytime with one click. The app fetches the latest events from your course calendars on demand." }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I use LECFLOW on my phone?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Yes. LECFLOW is fully responsive with a mobile-first design. Take notes, watch recordings, and track progress on any device." }
+          },
+          {
+            "@type": "Question",
+            "name": "Is my data private?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Yes. Your notes are private to your account. LECFLOW never shares your data with third parties. All data is stored securely and encrypted." }
           }
         ]
       }
@@ -188,13 +210,12 @@
       display: flex; align-items: center; gap: 10px;
       font-weight: 800; font-size: 15px; letter-spacing: -.4px; text-decoration: none;
     }
-    .lp-brand-chip {
-      width: 32px; height: 32px; border-radius: 50%;
-      background: var(--text); color: var(--bg);
-      display: flex; align-items: center; justify-content: center;
-      font-family: var(--mono); font-size: 11px; font-weight: 700;
+    .brand-logo {
+      width: 32px; height: 32px; border-radius: 9px;
+      object-fit: cover; flex-shrink: 0;
     }
-    html[data-theme="dark"] .lp-brand-chip { background: var(--accent); color: var(--on-accent); }
+    html[data-theme="dark"] .logo-light { display: none; }
+    html:not([data-theme="dark"]) .logo-dark { display: none; }
     .lp-links { display: flex; align-items: center; gap: 4px; }
     .lp-links a {
       text-decoration: none; font-size: 13px; font-weight: 500; color: var(--text-soft);
@@ -247,6 +268,7 @@
     .btn-ghost { background: var(--surface); color: var(--text-soft); border: 1px solid var(--border); }
     .btn-ghost:hover { border-color: var(--violet-line); color: var(--violet-ink); }
     .hero-trust { font-size: 12.5px; color: var(--muted); }
+    .hero-trust strong { color: var(--text); font-weight: 600; }
 
     /* Hero product mock (pure CSS) */
     .hero-mock {
@@ -276,6 +298,34 @@
     .mock-progress { height: 6px; border-radius: 4px; background: var(--surface2); overflow: hidden; margin-top: 10px; }
     .mock-progress span { display: block; height: 100%; width: 38%; background: var(--accent); border-radius: 4px; }
 
+    /* ── Problem Section ── */
+    .problem-section {
+      max-width: 1100px; margin: 0 auto; padding: 64px 24px 0;
+    }
+    .problem-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center;
+    }
+    .problem-content h2 {
+      font-size: clamp(22px, 3.4vw, 32px); font-weight: 800; letter-spacing: -.6px;
+      margin-bottom: 16px; line-height: 1.2;
+    }
+    .problem-content p {
+      color: var(--text-soft); font-size: 15px; line-height: 1.7; margin-bottom: 20px;
+    }
+    .problem-list {
+      list-style: none; display: flex; flex-direction: column; gap: 12px;
+    }
+    .problem-list li {
+      display: flex; align-items: flex-start; gap: 12px;
+      font-size: 14px; color: var(--text-soft); line-height: 1.5;
+    }
+    .problem-list li::before {
+      content: '✗'; color: var(--red); font-weight: 700; flex-shrink: 0;
+    }
+    .solution-list li::before {
+      content: '✓'; color: var(--green); font-weight: 700; flex-shrink: 0;
+    }
+
     /* ── Sections ── */
     .section { max-width: 1100px; margin: 0 auto; padding: 64px 24px; }
     .section-head { text-align: center; max-width: 640px; margin: 0 auto 40px; }
@@ -295,7 +345,7 @@
       background: var(--accent-dim); margin-bottom: 14px;
     }
     .feature-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
-    .feature-card p { font-size: 13px; color: var(--text-soft); }
+    .feature-card p { font-size: 13px; color: var(--text-soft); line-height: 1.6; }
 
     .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; counter-reset: step; }
     .step-card {
@@ -312,6 +362,80 @@
     .step-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
     .step-card p { font-size: 13px; color: var(--text-soft); }
 
+    /* ── Stats Section ── */
+    .stats-section {
+      max-width: 1100px; margin: 0 auto; padding: 40px 24px;
+    }
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
+    }
+    .stat-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 24px 20px; text-align: center;
+      box-shadow: var(--shadow-1);
+    }
+    .stat-value {
+      font-size: 36px; font-weight: 800; letter-spacing: -1px;
+      background: linear-gradient(135deg, var(--accent), var(--violet));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; margin-bottom: 4px;
+    }
+    .stat-label {
+      font-size: 13px; color: var(--muted); font-weight: 500;
+    }
+
+    /* ── Built For Section ── */
+    .built-for-section {
+      background: var(--surface); border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border); padding: 64px 24px;
+    }
+    .built-for-inner {
+      max-width: 1100px; margin: 0 auto;
+    }
+    .built-for-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 40px;
+    }
+    .built-for-card {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow-1);
+    }
+    .built-for-card h3 {
+      font-size: 18px; font-weight: 700; margin-bottom: 12px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .built-for-card p {
+      font-size: 14px; color: var(--text-soft); line-height: 1.7; margin-bottom: 16px;
+    }
+    .built-for-list {
+      list-style: none; display: flex; flex-direction: column; gap: 8px;
+    }
+    .built-for-list li {
+      font-size: 13px; color: var(--text-soft); padding-left: 20px;
+      position: relative;
+    }
+    .built-for-list li::before {
+      content: '→'; position: absolute; left: 0; color: var(--accent); font-weight: 700;
+    }
+
+    /* ── Tech Section ── */
+    .tech-section {
+      max-width: 1100px; margin: 0 auto; padding: 64px 24px;
+    }
+    .tech-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-top: 40px;
+    }
+    .tech-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow-1);
+    }
+    .tech-card h3 {
+      font-size: 16px; font-weight: 700; margin-bottom: 12px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .tech-card p {
+      font-size: 13px; color: var(--text-soft); line-height: 1.7;
+    }
+
     .faq { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
     .faq details {
       background: var(--surface); border: 1px solid var(--border);
@@ -324,7 +448,7 @@
     .faq summary::-webkit-details-marker { display: none; }
     .faq summary::after { content: '+'; color: var(--muted); font-size: 18px; transition: transform .15s; }
     .faq details[open] summary::after { transform: rotate(45deg); }
-    .faq details p { margin-top: 10px; font-size: 13.5px; color: var(--text-soft); }
+    .faq details p { margin-top: 10px; font-size: 13.5px; color: var(--text-soft); line-height: 1.7; }
 
     .cta-band {
       max-width: 1100px; margin: 0 auto 70px; padding: 0 24px;
@@ -354,7 +478,15 @@
     @media (max-width: 900px) {
       .hero { grid-template-columns: 1fr; padding-top: 110px; gap: 36px; }
       .feature-grid, .steps { grid-template-columns: 1fr; }
+      .problem-grid { grid-template-columns: 1fr; gap: 32px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .built-for-grid { grid-template-columns: 1fr; }
+      .tech-grid { grid-template-columns: 1fr; }
       .lp-links a:not(.lp-cta) { display: none; }
+    }
+    @media (max-width: 640px) {
+      .stats-grid { grid-template-columns: 1fr; }
+      .stat-value { font-size: 28px; }
     }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
@@ -367,9 +499,12 @@
 
   <header class="lp-nav">
     <a class="lp-brand" href="/" aria-label="LECFLOW home">
-      <span class="lp-brand-chip">LH</span> LECFLOW
+      <img class="brand-logo logo-light" src="{{ url_for('static', filename='images/light.png') }}" alt="LECFLOW logo" />
+      <img class="brand-logo logo-dark" src="{{ url_for('static', filename='images/dark.png') }}" alt="LECFLOW logo" />
+      LECFLOW
     </a>
     <nav class="lp-links" aria-label="Main">
+      <a href="#problem">Why LECFLOW</a>
       <a href="#features">Features</a>
       <a href="#how">How it works</a>
       <a href="#faq">FAQ</a>
@@ -388,12 +523,17 @@
       <div>
         <span class="hero-eyebrow">✦ Built for IIT Madras BS students</span>
         <h1>Every lecture, recording & note — <span class="hl">in one place.</span></h1>
-        <p>LECFLOW syncs your public course calendars, surfaces live Meet links and Drive recordings the moment they appear, and gives you a Markdown notes editor with math support — right beside the video.</p>
+        <p>
+          LECFLOW brings your TA/Instructor's lectures, recordings, and notes into one organized workspace.
+          Track what you've watched, take structured notes while learning, and keep everything
+          connected to the right lecture. Stop jumping between calendars, recordings, and scattered
+          notes. Just open LecFlow and keep learning.
+        </p>
         <div class="hero-actions">
           <a class="btn btn-primary" href="{{ url_for('auth.register') }}">Get started free</a>
           <a class="btn btn-ghost" href="{{ url_for('auth.login') }}">Sign in</a>
         </div>
-        <p class="hero-trust">Free forever · No credit card · Works on phone & laptop</p>
+        <p class="hero-trust"><strong>Free </strong> · No credit card · Works on phone & laptop · <strong>100% Secure</strong></p>
       </div>
 
       <div class="hero-mock" aria-hidden="true">
@@ -411,19 +551,150 @@
       </div>
     </section>
 
+    <!-- ═══ THE PROBLEM ═══ -->
+    <section class="problem-section" id="problem">
+      <div class="problem-grid">
+
+        <div class="problem-content">
+          <h2>The IITM BS student struggle</h2>
+
+          <p>
+            Your lectures, recordings, calendars, and notes are spread across different places.
+            Finding the right lecture and keeping track of what you've completed shouldn't be
+            part of studying.
+          </p>
+
+          <ul class="problem-list">
+            <li>Course schedules and lecture links are scattered across calendars</li>
+            <li>Recording links are mixed in with hundreds of calendar events</li>
+            <li>It's difficult to know which lectures you've watched and which are pending</li>
+            <li>Notes end up scattered across different apps and notebooks</li>
+            <li>Switching between the LMS, calendar, recordings, and notes breaks your study flow</li>
+          </ul>
+        </div>
+
+        <div class="problem-content">
+          <h2>The LECFLOW solution</h2>
+
+          <p>
+            LecFlow brings your courses, lectures, recordings, notes, and progress into one
+            focused workspace — so you can spend less time managing your degree and more time
+            actually learning.
+          </p>
+
+          <ul class="problem-list solution-list">
+            <li>See your subjects and lectures in one organized place</li>
+            <li>Keep lecture schedules and recordings connected to each session</li>
+            <li>Track watched and unwatched lectures at a glance</li>
+            <li>Take structured Markdown notes while watching the lecture</li>
+            <li>Keep your notes and learning progress connected to your lectures</li>
+          </ul>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ═══ STATS ═══ -->
+    <section class="stats-section">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value">∞</div>
+          <div class="stat-label">Subjects supported</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">100+</div>
+          <div class="stat-label">Active Students</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">0₹</div>
+          <div class="stat-label">Cost</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">100%</div>
+          <div class="stat-label">Private & secure</div>
+        </div>
+      </div>
+    </section>
+
     <!-- ═══ FEATURES ═══ -->
     <section class="section" id="features">
       <div class="section-head">
         <h2>Everything your term needs</h2>
-        <p>Stop juggling calendar links, Drive folders and scattered notes.</p>
+        <p>Stop juggling calendar links, Drive folders and scattered notes. LECFLOW handles the busywork so you can focus on learning.</p>
       </div>
       <div class="feature-grid">
-        <article class="feature-card"><div class="feature-icon">📅</div><h3>Auto calendar sync</h3><p>Paste the public course calendar once — every lecture, date and time stays synced per term.</p></article>
-        <article class="feature-card"><div class="feature-icon">📹</div><h3>Live & recordings</h3><p>Join live Meet sessions in one tap, or open Drive/YouTube recordings attached to each lecture.</p></article>
-        <article class="feature-card"><div class="feature-icon">📝</div><h3>Markdown notes + math</h3><p>Write beside the video with KaTeX math, code highlighting, autosave and one-click PDF export.</p></article>
-        <article class="feature-card"><div class="feature-icon">✅</div><h3>Progress tracking</h3><p>Mark lectures watched and see total / watched / remaining per subject at a glance.</p></article>
-        <article class="feature-card"><div class="feature-icon">🗂️</div><h3>Term-wise archive</h3><p>Recording links are archived per subject per term, so past lectures never get lost.</p></article>
-        <article class="feature-card"><div class="feature-icon">🌗</div><h3>Mobile-first + dark mode</h3><p>A clean AMOLED-friendly dark theme and a card layout built for phones.</p></article>
+        <article class="feature-card">
+          <div class="feature-icon">📅</div>
+          <h3>Auto calendar sync</h3>
+          <p>Paste the public course calendar once. Every lecture, date, and time stays synced per term. No manual updates, no missed classes.</p>
+        </article>
+        <article class="feature-card">
+          <div class="feature-icon">📹</div>
+          <h3>Live sessions & recordings</h3>
+          <p>Join live Meet sessions in one tap. Access Drive and YouTube recordings attached after the live sessions. Never hunt for links again.</p>
+        </article>
+        <article class="feature-card">
+          <div class="feature-icon">📝</div>
+          <h3>Markdown notes + math</h3>
+          <p>Write beside the video/live meet with full Markdown support, KaTeX math rendering, code highlighting, autosave, and one-click PDF export.</p>
+        </article>
+        <article class="feature-card">
+          <div class="feature-icon">✅</div>
+          <h3>Progress tracking</h3>
+          <p>Mark lectures watched and see total / watched / remaining per subject at a glance. Know exactly where you stand in every course.</p>
+        </article>
+        <article class="feature-card">
+          <div class="feature-icon">🗂️</div>
+          <h3>Term-wise archive</h3>
+          <p>Previous Year recorded TA/Instructor sessions are archived per subject per term. Past lectures never get lost.</p>
+        </article>
+        <article class="feature-card">
+          <div class="feature-icon">🌗</div>
+          <h3>Mobile-first + dark mode</h3>
+          <p>Clean UI built for phones and desktops. Take notes and watch recordings on any device.</p>
+        </article>
+        <article class="feature-card">
+          <div class="feature-icon">💾</div>
+          <h3>Autosave every 1.2s</h3>
+          <p>Your notes are saved automatically as you type. No more lost work from browser crashes or forgotten saves.</p>
+        </article>
+        <article class="feature-card">
+          <div class="feature-icon">🔒</div>
+          <h3>Private by design</h3>
+          <p>Your notes are private to your account. LECFLOW never shares your data. All data is stored securely and encrypted at rest.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ═══ BUILT FOR IITM BS ═══ -->
+    <section class="built-for-section">
+      <div class="built-for-inner">
+        <div class="section-head">
+          <h2>Built specifically for IITM BS students</h2>
+          <p>Every feature designed around the unique challenges of online learning at IIT Madras.</p>
+        </div>
+        <div class="built-for-grid">
+          <div class="built-for-card">
+            <h3>🎯 Designed for your workflow</h3>
+            <p>LECFLOW understands how IITM BS courses work — public calendars, Drive recordings, live Meet sessions, and the need to track progress across multiple subjects.</p>
+            <ul class="built-for-list">
+              <li>Syncs public Google Calendars</li>
+              <li>Handles Drive and YouTube recording links</li>
+              <li>Tracks progress per subject</li>
+              <li>Archives recordings term-wise</li>
+            </ul>
+          </div>
+          <div class="built-for-card">
+            <h3>🚀 Zero friction setup</h3>
+            <p>Get started in under 2 minutes. No complex configuration. Just paste your calendar links and start tracking.</p>
+            <ul class="built-for-list">
+              <li>Sign up with your student email</li>
+              <li>Paste calendar URLs from course pages</li>
+              <li>Sync happens automatically</li>
+              <li>Works immediately — no waiting</li>
+            </ul>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -431,12 +702,24 @@
     <section class="section" id="how">
       <div class="section-head">
         <h2>Set up in under two minutes</h2>
-        <p>Three steps between you and an organised term.</p>
+        <p>Three simple steps between you and an organised term. No technical knowledge required.</p>
       </div>
       <div class="steps">
-        <article class="step-card"><div class="step-num">1</div><h3>Create your account</h3><p>Register with your student email. No credit card, no institute approval needed.</p></article>
-        <article class="step-card"><div class="step-num">2</div><h3>Paste the calendar link</h3><p>Pick your subject from the list and paste the public Google Calendar link from the course page.</p></article>
-        <article class="step-card"><div class="step-num">3</div><h3>Track everything</h3><p>Live links, recordings and your notes appear per lecture — synced automatically every term.</p></article>
+        <article class="step-card">
+          <div class="step-num">1</div>
+          <h3>Create your account</h3>
+          <p>Register with your student email. No credit card, no institute approval needed. Takes 30 seconds.</p>
+        </article>
+        <article class="step-card">
+          <div class="step-num">2</div>
+          <h3>Paste the calendar link</h3>
+          <p>Pick your subject from the list and paste the public Google Calendar link from the course page. One click to sync.</p>
+        </article>
+        <article class="step-card">
+          <div class="step-num">3</div>
+          <h3>Track everything</h3>
+          <p>Live classes links, recordings and your notes appear per lecture — synced automatically. Click "Sync All" anytime for instant updates.</p>
+        </article>
       </div>
     </section>
 
@@ -444,13 +727,49 @@
     <section class="section" id="faq">
       <div class="section-head">
         <h2>Frequently asked questions</h2>
+        <p>Everything you need to know about LECFLOW.</p>
       </div>
       <div class="faq">
-        <details><summary>What is LECFLOW?</summary><p>LECFLOW (LectureHub) is a free lecture tracker for IIT Madras BS students. It syncs your public course calendars and brings live session links, recordings, and personal notes into one dashboard.</p></details>
-        <details><summary>Do I need to make my personal calendar public?</summary><p>No. LECFLOW only reads the public course calendar link published by IITM for each subject. Your personal Google Calendar is never accessed.</p></details>
-        <details><summary>Does LECFLOW store the lecture videos?</summary><p>No. Videos stay on the institute's Google Drive or YouTube. LECFLOW stores the links per lecture so you can find them instantly, even in later terms.</p></details>
-        <details><summary>Can I take notes while attending a live session?</summary><p>Yes. The notes editor sits next to the video with Markdown formatting, KaTeX math, code highlighting, autosave, and one-click PDF export.</p></details>
-        <details><summary>Is LECFLOW affiliated with IIT Madras?</summary><p>No. LECFLOW is an independent student-built tool and is not officially affiliated with or endorsed by IIT Madras.</p></details>
+        <details>
+          <summary>What is LECFLOW?</summary>
+          <p>LECFLOW is a free TA/Instructor lecture organiser and notes taking app for IIT Madras BS students. It syncs your public course calendars and brings live session links, recordings, and personal notes into one dashboard. It's designed to eliminate the friction of managing an online degree.</p>
+        </details>
+        <details>
+          <summary>Do I need to make my personal calendar public?</summary>
+          <p>No. LECFLOW only reads the public course calendar link published by IITM for each subject. Your personal Google Calendar is never accessed. You maintain full control over your privacy.</p>
+        </details>
+        <details>
+          <summary>Does LECFLOW store the lecture videos?</summary>
+          <p>No. Videos stay on the institute's Google Drive or YouTube. LECFLOW stores the links per lecture so you can find them instantly, even in later terms. This means your recordings are always available from their original source.</p>
+        </details>
+        <details>
+          <summary>Can I take notes while attending a live session?</summary>
+          <p>Yes. The notes editor sits next to the video with full Markdown formatting, KaTeX math rendering, code highlighting with syntax highlighting, autosave every 1.2 seconds, and one-click PDF export. You can write notes in real-time without leaving the page.</p>
+        </details>
+        <details>
+          <summary>Is LECFLOW affiliated with IIT Madras?</summary>
+          <p>No. LECFLOW is an independent student-built tool and is not officially affiliated with or endorsed by IIT Madras. It's built by students, for students, to solve real problems we face in the BS program.</p>
+        </details>
+        <details>
+          <summary>How often does LECFLOW sync my calendars?</summary>
+          <p>You can sync manually anytime with one click on the "Sync All" button. The app fetches the latest events from your course calendars on demand. There's no automatic background sync to keep things simple and predictable.</p>
+        </details>
+        <details>
+          <summary>Can I use LECFLOW on my phone?</summary>
+          <p>Yes. LECFLOW is fully responsive with a mobile-first design. The interface adapts to your screen size, making it easy to take notes, watch recordings, and track progress on any device — phone, tablet, or desktop.</p>
+        </details>
+        <details>
+          <summary>Is my data private?</summary>
+          <p>Yes. Your notes are private to your account. LECFLOW never shares your data with third parties. All data is stored securely and encrypted. You own your notes — export them anytime as PDF.</p>
+        </details>
+        <details>
+          <summary>What happens when a term ends?</summary>
+          <p>LECFLOW includes a term management system that archives recording links per subject per term. When a term ends, you can archive it and start fresh for the next term without losing access to past recordings.</p>
+        </details>
+        <details>
+          <summary>Is LECFLOW really free?</summary>
+          <p>Yes, completely free, no hidden costs, no credit card required. LECFLOW is built to help IITM BS students succeed. The only cost is your time setting it up.</p>
+        </details>
       </div>
     </section>
 
@@ -458,7 +777,7 @@
     <div class="cta-band">
       <div class="cta-inner">
         <h2>Ready for an organised term?</h2>
-        <p>Join now and let LECFLOW keep track of every lecture, recording and note.</p>
+        <p>Join LECFLOW today and let it keep track of every lecture, recording, and note. Set up in 2 minutes, stay organised all term.</p>
         <a class="btn btn-primary" href="{{ url_for('auth.register') }}">Create free account</a>
       </div>
     </div>

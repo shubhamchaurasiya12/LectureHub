@@ -44,52 +44,6 @@ def landing():
     return render_template('landing.html')
 
 
-@main_bp.route('/robots.txt')
-def robots():
-    """Allow crawlers, block private routes, point to sitemap."""
-    body = (
-        "User-agent: *\n"
-        "Allow: /\n"
-        "Disallow: /dashboard\n"
-        "Disallow: /event/\n"
-        "Disallow: /setup\n"
-        "Disallow: /add-subject\n"
-        "Disallow: /sync\n"
-        "Disallow: /sync_all\n"
-        "Disallow: /delete_subject\n"
-        "\n"
-        "Sitemap: https://lecflow.space/sitemap.xml\n"
-    )
-    return body, 200, {'Content-Type': 'text/plain; charset=utf-8'}
-
-
-@main_bp.route('/sitemap.xml')
-def sitemap():
-    """Simple sitemap for public pages."""
-    body = '''<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://lecflow.space/</loc>
-    <lastmod>2026-01-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-  </url>
-  <url>
-    <loc>https://lecflow.space/login</loc>
-    <lastmod>2026-01-14</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://lecflow.space/register</loc>
-    <lastmod>2026-01-14</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-</urlset>'''
-    return body, 200, {'Content-Type': 'application/xml; charset=utf-8'}
-
-
 @main_bp.route('/login')
 def index():
     if current_user.is_authenticated:
@@ -306,3 +260,72 @@ def delete_subject(subject_id):
     db.session.commit()
     flash(f'Subject "{name}" removed.', 'success')
     return redirect(url_for('main.dashboard'))
+
+@main_bp.route('/robots.txt')
+def robots():
+    """Allow crawlers, block private routes, point to sitemap."""
+    body = (
+        "# LECFLOW robots.txt\n"
+        "User-agent: *\n"
+        "Allow: /\n"
+        "Disallow: /dashboard\n"
+        "Disallow: /setup\n"
+        "Disallow: /add_subject\n"
+        "Disallow: /event/\n"
+        "Disallow: /subject/\n"
+        "Disallow: /sync\n"
+        "Disallow: /sync_all\n"
+        "Disallow: /delete_subject\n"
+        "\n"
+        "# AI assistants welcome on public pages.\n"
+        "Sitemap: https://lecflow.space/sitemap.xml\n"
+    )
+    return body, 200, {'Content-Type': 'text/plain; charset=utf-8'}
+
+
+@main_bp.route('/sitemap.xml')
+def sitemap():
+    """Simple sitemap for public pages."""
+    from datetime import datetime
+    today = datetime.now().date().isoformat()
+    urls = [
+        ('https://lecflow.space/',          '1.0', 'weekly'),
+        ('https://lecflow.space/register',  '0.8', 'monthly'),
+        ('https://lecflow.space/login',     '0.5', 'monthly'),
+    ]
+    items = ''.join(
+        f'<url><loc>{loc}</loc><lastmod>{today}</lastmod>'
+        f'<changefreq>{freq}</changefreq><priority>{prio}</priority></url>'
+        for loc, prio, freq in urls
+    )
+    xml = ('<?xml version="1.0" encoding="UTF-8"?>'
+           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+           + items + '</urlset>')
+    return xml, 200, {'Content-Type': 'application/xml; charset=utf-8'}
+
+@main_bp.route('/llms.txt')
+def llms_txt():
+    """llms.txt — emerging standard for AI assistants to understand the site."""
+    body = """# LECFLOW
+
+> LECFLOW (LectureHub) is a free TA and Instructorlecture tracker for IIT Madras BS Online Degree
+> students. It syncs public course calendars, surfaces live Google Meet links and
+> Drive/YouTube recordings per lecture, and provides a Markdown notes editor with
+> KaTeX math, autosave and PDF export, plus watched-progress tracking and a
+> term-wise recording archive.
+
+## Key facts
+- Free: no credit card required
+- Audience: IITM BS Online Degree students (Data Science, Electronics, etc.)
+- Public calendars sync automatically; private calendars supported via a manual schedule planner
+- Notes are private per user; recordings stay on the institute's Drive/YouTube
+- Not affiliated with IIT Madras; independent student-built tool
+
+## Links
+- [Get started](https://lecflow.space/register): Create a free account
+- [Sign in](https://lecflow.space/login)
+- [Features](https://lecflow.space/#features)
+- [How it works](https://lecflow.space/#how)
+- [FAQ](https://lecflow.space/#faq)
+"""
+    return body, 200, {'Content-Type': 'text/plain; charset=utf-8'}
